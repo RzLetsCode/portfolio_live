@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Matrix Transformations: Solid Shapes</title>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+      };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent-primary: #58a6ff;
+            --accent-success: #3fb950;
+            --accent-danger: #f85149;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border: #30363d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1 { color: var(--accent-primary); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        h2 { color: var(--accent-success); margin-top: 0; }
+        h3 { color: var(--accent-primary); font-size: 1.1rem; margin-top: 0;}
+
+        .lesson-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        .viz-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .viz-grid { grid-template-columns: 1fr; }
+        }
+
+        .math-box {
+            background-color: #0d1117;
+            border-radius: 8px;
+            padding: 12px 16px;
+            border-left: 4px solid var(--accent-primary);
+            margin: 12px 0;
+        }
+
+        .plot-box {
+            width: 100%;
+            height: 420px;
+            background-color: #0d1117;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .badge-blue { background: rgba(88, 166, 255, 0.2); color: #58a6ff; }
+        .badge-green { background: rgba(63, 185, 80, 0.2); color: #3fb950; }
+        .badge-red { background: rgba(248, 81, 73, 0.2); color: #f85149; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>3D Matrix Geometry: Understanding Solid Shapes</h1>
+        <p>A 10th-grade intuitive guide to visualizing Matrix Transformations as 3D Parallelepipeds (slanted boxes).</p>
+    </header>
+
+    <div class="lesson-card">
+        <h2>Concept: The Unit Cube $\to$ Slanted Box (Parallelepiped)</h2>
+        <p>Imagine holding a perfect <strong>$1 \times 1 \times 1$ Rubik's cube</strong> at the origin $(0,0,0)$. When you apply a matrix $A$, it stretches, shears, and rotates that cube into a 3D slanted box called a <strong>Parallelepiped</strong>.</p>
+        <div class="math-box">
+            $$\text{Matrix } A = \begin{pmatrix} 1 & 2 & 0 \\ 0 & 3 & 1 \\ 2 & 0 & 1 \end{pmatrix}$$
+        </div>
+        <p>The columns of $A$ tell you exactly where the three edges of the cube move in 3D space!</p>
+    </div>
+
+    <div class="lesson-card">
+        <h2>1. Matrix Transpose ($A^T$): Mirrored Reflection Across the Diagonal</h2>
+        <div class="viz-grid">
+            <div>
+                <p><span class="badge badge-blue">Blue Shape:</span> Original Transformation $A$</p>
+                <p><span class="badge badge-green">Green Shape:</span> Transpose $A^T$</p>
+                <div class="math-box">
+                    $$A^T = \begin{pmatrix} 1 & 0 & 2 \\ 2 & 3 & 0 \\ 0 & 1 & 1 \end{pmatrix}$$
+                </div>
+                <h3>Key Takeaways for Students:</h3>
+                <ul>
+                    <li><strong>Shape Type:</strong> Slanted 3D Box (Parallelepiped).</li>
+                    <li><strong>Volume:</strong> Exactly <strong>7 cubic units</strong> for both $A$ and $A^T$ ($\det(A) = \det(A^T) = 7$).</li>
+                    <li><strong>What changed?</strong> $A^T$ swaps rows and columns, which physically flips the tilt of the 3D box across the $X=Y=Z$ main diagonal line!</li>
+                </ul>
+            </div>
+            <div id="plotTranspose" class="plot-box"></div>
+        </div>
+    </div>
+
+    <div class="lesson-card">
+        <h2>2. Matrix Inverse ($A^{-1}$): The Shrinking "Undo" Button</h2>
+        <div class="viz-grid">
+            <div>
+                <p><span class="badge badge-blue">Blue Shape:</span> Original Transformation $A$ (Volume = 7)</p>
+                <p><span class="badge badge-red">Red Shape:</span> Inverse $A^{-1}$ (Volume = 1/7)</p>
+                <div class="math-box">
+                    $$A^{-1} = \begin{pmatrix} \frac{3}{7} & -\frac{2}{7} & \frac{2}{7} \\[4pt] \frac{2}{7} & \frac{1}{7} & -\frac{1}{7} \\[4pt] -\frac{6}{7} & \frac{4}{7} & \frac{3}{7} \end{pmatrix}$$
+                </div>
+                <h3>Key Takeaways for Students:</h3>
+                <ul>
+                    <li><strong>What does it do?</strong> $A^{-1}$ completely reverses the action of $A$.</li>
+                    <li><strong>Volume Relationship:</strong> Since $A$ expanded the $1\times 1\times 1$ cube 7 times bigger, $A^{-1}$ creates a mini-box with a volume of exactly <strong>$\frac{1}{7}$ cubic units</strong>.</li>
+                    <li><strong>Combined Effect:</strong> Applying $A$ then $A^{-1}$ brings the mini-box back to the original $1\times 1\times 1$ unit cube!</li>
+                </ul>
+            </div>
+            <div id="plotInverse" class="plot-box"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 8 vertices of a standard unit cube
+    const unitCube = [
+        [0,0,0], [1,0,0], [1,1,0], [0,1,0], // Bottom face
+        [0,0,1], [1,0,1], [1,1,1], [0,1,1]  // Top face
+    ];
+
+    // Matrices
+    const A = [[1, 2, 0], [0, 3, 1], [2, 0, 1]];
+    const AT = [[1, 0, 2], [2, 3, 0], [0, 1, 1]];
+    const AInv = [[3/7, -2/7, 2/7], [2/7, 1/7, -1/7], [-6/7, 4/7, 3/7]];
+
+    // Transform 3D point using Matrix Multiplication
+    function transformPoints(matrix, points) {
+        return points.map(p => [
+            matrix[0][0]*p[0] + matrix[0][1]*p[1] + matrix[0][2]*p[2],
+            matrix[1][0]*p[0] + matrix[1][1]*p[1] + matrix[2][2]*p[2] ? matrix[1][0]*p[0] + matrix[1][1]*p[1] + matrix[1][2]*p[2] : 0,
+            matrix[2][0]*p[0] + matrix[2][1]*p[1] + matrix[2][2]*p[2]
+        ]);
+    }
+
+    // Correct Matrix multiplication for [3x3] * [3x1]
+    function applyM(M, pts) {
+        return pts.map(p => [
+            M[0][0]*p[0] + M[0][1]*p[1] + M[0][2]*p[2],
+            M[1][0]*p[0] + M[1][1]*p[1] + M[1][2]*p[2],
+            M[2][0]*p[0] + M[2][1]*p[1] + M[2][2]*p[2]
+        ]);
+    }
+
+    const ptsA = applyM(A, unitCube);
+    const ptsAT = applyM(AT, unitCube);
+    const ptsAInv = applyM(AInv, unitCube);
+
+    // Triangulation indices to draw solid 3D box faces (12 triangles for 6 faces)
+    const i_mesh = [0, 0, 4, 4, 0, 0, 1, 1, 2, 2, 3, 3];
+    const j_mesh = [1, 2, 5, 6, 1, 4, 2, 5, 3, 6, 0, 4];
+    const k_mesh = [2, 3, 6, 7, 5, 1, 6, 2, 7, 3, 4, 7];
+
+    // Helper to generate Plotly 3D Solid Mesh + Wireframe lines
+    function createSolid3DBox(pts, name, color, opacity=0.35) {
+        const x = pts.map(p => p[0]);
+        const y = pts.map(p => p[1]);
+        const z = pts.map(p => p[2]);
+
+        // Mesh3D for solid faces
+        const mesh = {
+            type: 'mesh3d',
+            x: x, y: y, z: z,
+            i: i_mesh, j: j_mesh, k: k_mesh,
+            name: name + ' (Solid Volume)',
+            color: color,
+            opacity: opacity,
+            flatshading: true
+        };
+
+        // Wireframe lines along 12 edges of the 3D box
+        const edgePairs = [
+            [0,1],[1,2],[2,3],[3,0], // Bottom square
+            [4,5],[5,6],[6,7],[7,4], // Top square
+            [0,4],[1,5],[2,6],[3,7]  // Vertical pillars
+        ];
+
+        let lineX = [], lineY = [], lineZ = [];
+        edgePairs.forEach(pair => {
+            lineX.push(pts[pair[0]][0], pts[pair[1]][0], null);
+            lineY.push(pts[pair[0]][1], pts[pair[1]][1], null);
+            lineZ.push(pts[pair[0]][2], pts[pair[1]][2], null);
+        });
+
+        const lines = {
+            type: 'scatter3d',
+            mode: 'lines',
+            x: lineX, y: lineY, z: lineZ,
+            name: name + ' (Edges)',
+            line: { color: color, width: 4 },
+            showlegend: false
+        };
+
+        return [mesh, lines];
+    }
+
+    const commonLayout = {
+        paper_bgcolor: '#0d1117',
+        plot_bgcolor: '#0d1117',
+        margin: { l: 0, r: 0, b: 0, t: 0 },
+        showlegend: true,
+        legend: { font: { color: '#8b949e' }, x: 0, y: 1 },
+        scene: {
+            xaxis: { title: 'X', color: '#8b949e', gridcolor: '#30363d' },
+            yaxis: { title: 'Y', color: '#8b949e', gridcolor: '#30363d' },
+            zaxis: { title: 'Z', color: '#8b949e', gridcolor: '#30363d' },
+            bgcolor: '#0d1117',
+            camera: { eye: { x: 1.8, y: 1.8, z: 1.2 } }
+        }
+    };
+
+    // Plot 1: Transpose
+    const tracesA = createSolid3DBox(ptsA, 'Matrix A', '#58a6ff', 0.3);
+    const tracesAT = createSolid3DBox(ptsAT, 'Transpose Aᵀ', '#3fb950', 0.4);
+    Plotly.newPlot('plotTranspose', [...tracesA, ...tracesAT], commonLayout, {responsive: true, displayModeBar: false});
+
+    // Plot 2: Inverse
+    const tracesAInv = createSolid3DBox(ptsAInv, 'Inverse A⁻¹', '#f85149', 0.7);
+    Plotly.newPlot('plotInverse', [...tracesA, ...tracesAInv], commonLayout, {responsive: true, displayModeBar: false});
+</script>
+
+</body>
+</html>

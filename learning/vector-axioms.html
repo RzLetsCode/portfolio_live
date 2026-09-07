@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Vector Space Operations | code2career_ai</title>
+    <style>
+        :root {
+            --bg-deep: #0a0e17;
+            --panel-bg: #111827;
+            --border-glow: #1f2937;
+            --accent-blue: #38bdf8;
+            --accent-purple: #a855f7;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --vec-a: #4caf50;
+            --vec-b: #ef4444;
+            --vec-res: #fbbf24;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p { color: var(--text-secondary); font-size: 1.05rem; }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card.addition .card-title { color: var(--accent-blue); }
+        .card.scaling .card-title { color: var(--accent-purple); }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            min-height: 45px;
+        }
+
+        .canvas-container {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background-color: #070b12;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            position: relative;
+            overflow: hidden;
+        }
+
+        svg { width: 100%; height: 100%; }
+
+        /* Controls */
+        .controls {
+            width: 100%;
+            margin-top: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #1f2937;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .control-group:last-child { margin-bottom: 0; }
+
+        label { font-size: 0.85rem; color: var(--text-secondary); font-family: monospace; }
+
+        input[type="range"] {
+            width: 60%;
+            accent-color: var(--accent-blue);
+            background: #1f2937;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .card.scaling input[type="range"] { accent-color: var(--accent-purple); }
+
+        .svg-text { font-family: 'Courier New', Courier, monospace; font-size: 13px; fill: #ffffff; }
+        .math-bold { font-weight: bold; }
+        .axis-label { font-size: 13px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>code2career_ai • Interactive 3D Vector Lab</h1>
+        <p>Visualizing foundational linear transformations projected inside an ℝ³ Vector Space</p>
+    </header>
+
+    <div class="dashboard">
+
+        <div class="card addition">
+            <div class="card-title">1. 3D Vector Addition (Combining Paths)</div>
+            <div class="card-desc">Combining coordinate components across three axes. Vector A extends along the plane, Vector B steps upward out of it, mapping the resultant path.</div>
+            
+            <div class="canvas-container">
+                <svg viewBox="0 0 500 375" id="additionSvg">
+                    <defs>
+                        <marker id="arr-a" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-a)" />
+                        </marker>
+                        <marker id="arr-b" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-b)" />
+                        </marker>
+                        <marker id="arr-add-res" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-res)" />
+                        </marker>
+                    </defs>
+
+                    <text x="20" y="30" class="svg-text math-bold" fill="var(--accent-blue)">ℝ³ PATH COMBINATION:</text>
+                    <text id="add-readout" x="20" y="50" class="svg-text" fill="var(--text-secondary)">
+                        <tspan id="txt-val-a" x="20" dy="0">A = [120, 0, 60]</tspan>
+                        <tspan id="txt-val-b" x="20" dy="18">B = [40, 100, -20]</tspan>
+                        <tspan id="txt-val-res" x="20" dy="18" fill="var(--vec-res)" font-weight="bold">A + B = [160, 100, 40]</tspan>
+                    </text>
+
+                    <g transform="translate(140, 250)">
+                        <line x1="0" y1="0" x2="-80" y2="80" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                        <text x="-105" y="95" class="svg-text axis-label" fill="#ff79c6">Z (Depth)</text>
+                        
+                        <line x1="0" y1="0" x2="280" y2="0" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                        <text x="295" y="5" class="svg-text axis-label" fill="#8be9fd">X (Width)</text>
+                        
+                        <line x1="0" y1="0" x2="0" y2="-170" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                        <text x="-5" y="-180" class="svg-text axis-label" fill="#50fa7b">Y (Height)</text>
+
+                        <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+                        <text x="-60" y="15" class="svg-text math-bold" fill="#ffffff">(0,0,0)</text>
+
+                        <line id="3d-vec-a" x1="0" y1="0" x2="0" y2="0" stroke="var(--vec-a)" stroke-width="3" marker-end="url(#arr-a)"/>
+                        <line id="3d-vec-b" x1="0" y1="0" x2="0" y2="0" stroke="var(--vec-b)" stroke-width="3" marker-end="url(#arr-b)"/>
+                        <line id="3d-vec-res" x1="0" y1="0" x2="0" y2="0" stroke="var(--vec-res)" stroke-width="2.5" stroke-dasharray="5" marker-end="url(#arr-add-res)"/>
+
+                        <text id="lbl-3d-a" x="0" y="0" class="svg-text math-bold" fill="var(--vec-a)">A</text>
+                        <text id="lbl-3d-b" x="0" y="0" class="svg-text math-bold" fill="var(--vec-b)">B</text>
+                        <text id="lbl-3d-res" x="0" y="0" class="svg-text math-bold" fill="var(--vec-res)">A + B</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Modify Vector A (X-Axis component)</label>
+                    <input type="range" id="param-3d-ax" min="40" max="200" step="5" value="120">
+                </div>
+                <div class="control-group">
+                    <label>Modify Vector B (Y-Axis Height out of plane)</label>
+                    <input type="range" id="param-3d-by" min="40" max="160" step="5" value="100">
+                </div>
+            </div>
+        </div>
+
+        <div class="card scaling">
+            <div class="card-title">2. 3D Scalar Multiplication (Scaling & Reversing)</div>
+            <div class="card-desc">Modulating coordinate matrices cleanly in 3D dimensions. Flipping the scalar below 0 completely projects the trajectory into the inverse quadrant.</div>
+            
+            <div class="canvas-container">
+                <svg viewBox="0 0 500 375" id="scalingSvg">
+                    <defs>
+                        <marker id="arr-scale-base" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="rgba(255,255,255,0.3)" />
+                        </marker>
+                        <marker id="arr-scale-res" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-res)" />
+                        </marker>
+                    </defs>
+
+                    <text x="20" y="30" class="svg-text math-bold" fill="var(--accent-purple)">ℝ³ SCALAR TRANSFORMATION:</text>
+                    <text id="scale-3d-readout" x="20" y="50" class="svg-text" fill="var(--text-secondary)">c = 1.00x</text>
+
+                    <g transform="translate(220, 200)">
+                        <line x1="-150" y1="0" x2="200" y2="0" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                        <line x1="0" y1="-140" x2="0" y2="140" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                        <line x1="-100" y1="100" x2="100" y2="-100" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                        
+                        <text x="205" y="5" class="svg-text axis-label" fill="#8be9fd">+X</text>
+                        <text x="-5" y="-145" class="svg-text axis-label" fill="#50fa7b">+Y</text>
+                        <text x="-120" y="115" class="svg-text axis-label" fill="#ff79c6">+Z</text>
+
+                        <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+                        <text x="10" y="20" class="svg-text math-bold" fill="#ffffff">(0,0,0)</text>
+
+                        <line id="scale-3d-base" x1="0" y1="0" x2="0" y2="0" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="3" marker-end="url(#arr-scale-base)"/>
+                        
+                        <line id="scale-3d-res" x1="0" y1="0" x2="0" y2="0" stroke="var(--vec-res)" stroke-width="3.5" marker-end="url(#arr-scale-res)"/>
+                        <text id="lbl-scale-3d-v" x="0" y="0" class="svg-text math-bold" fill="var(--vec-res)">c · V</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Adjust Scalar Multiplier value (c)</label>
+                    <input type="range" id="param-3d-c" min="-1.8" max="1.8" step="0.1" value="1.0">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 3D Projection Equation Matrix Helper ---
+        function project3D(x, y, z) {
+            const isoX = x - (z * 0.5);
+            const isoY = -y + (z * 0.5); 
+            return { x: isoX, y: isoY };
+        }
+
+        // --- PANEL 1 LOGIC: 3D VECTOR ADDITION CONTROL ---
+        const param3dAx = document.getElementById('param-3d-ax');
+        const param3dBy = document.getElementById('param-3d-by');
+        
+        const line3dA = document.getElementById('3d-vec-a');
+        const line3dB = document.getElementById('3d-vec-b');
+        const line3dRes = document.getElementById('3d-vec-res');
+
+        const lbl3dA = document.getElementById('lbl-3d-a');
+        const lbl3dB = document.getElementById('lbl-3d-b');
+        const lbl3dRes = document.getElementById('lbl-3d-res');
+
+        const txtValA = document.getElementById('txt-val-a');
+        const txtValB = document.getElementById('txt-val-b');
+        const txtValRes = document.getElementById('txt-val-res');
+
+        function update3DAddition() {
+            const ax_val = parseFloat(param3dAx.value);
+            const by_val = parseFloat(param3dBy.value);
+
+            const ax = ax_val;
+            const ay = 0;
+            const az = 60; 
+
+            const bx = 40;
+            const by = by_val;
+            const bz = -20;
+
+            const resX = ax + bx;
+            const resY = ay + by;
+            const resZ = az + bz;
+
+            const ptA = project3D(ax, ay, az);
+            const ptRes = project3D(resX, resY, resZ);
+
+            line3dA.setAttribute('x2', ptA.x);
+            line3dA.setAttribute('y2', ptA.y);
+
+            line3dB.setAttribute('x1', ptA.x);
+            line3dB.setAttribute('y1', ptA.y);
+            line3dB.setAttribute('x2', ptRes.x);
+            line3dB.setAttribute('y2', ptRes.y);
+
+            line3dRes.setAttribute('x2', ptRes.x);
+            line3dRes.setAttribute('y2', ptRes.y);
+
+            lbl3dA.setAttribute('x', ptA.x / 2 - 10);
+            lbl3dA.setAttribute('y', ptA.y / 2 + 18);
+
+            lbl3dB.setAttribute('x', ptA.x + (ptRes.x - ptA.x)/2 + 15);
+            lbl3dB.setAttribute('y', ptA.y + (ptRes.y - ptA.y)/2);
+
+            lbl3dRes.setAttribute('x', ptRes.x / 2 - 20);
+            lbl3dRes.setAttribute('y', ptRes.y / 2 - 15);
+
+            // Output data safely separated into lines
+            txtValA.textContent = `A = [${ax}, ${ay}, ${az}]`;
+            txtValB.textContent = `B = [${bx}, ${by}, ${bz}]`;
+            txtValRes.textContent = `A + B = [${resX}, ${resY}, ${resZ}]`;
+        }
+
+        param3dAx.addEventListener('input', update3DAddition);
+        param3dBy.addEventListener('input', update3DAddition);
+        update3DAddition();
+
+
+        // --- PANEL 2 LOGIC: 3D SCALAR MULTIPLICATION CONTROL ---
+        const param3dC = document.getElementById('param-3d-c');
+        const lineScaleBase = document.getElementById('scale-3d-base');
+        const lineScaleRes = document.getElementById('scale-3d-res');
+        const lblScale3dV = document.getElementById('lbl-scale-3d-v');
+        const scaleReadout = document.getElementById('scale-3d-readout');
+
+        const vx = 90;
+        const vy = 80;
+        const vz = -30;
+
+        function update3DScaling() {
+            const c = parseFloat(param3dC.value);
+
+            const targetX = vx * c;
+            const targetY = vy * c;
+            const targetZ = vz * c;
+
+            const ptBase = project3D(vx, vy, vz);
+            const ptScaled = project3D(targetX, targetY, targetZ);
+
+            lineScaleBase.setAttribute('x2', ptBase.x);
+            lineScaleBase.setAttribute('y2', ptBase.y);
+
+            lineScaleRes.setAttribute('x2', ptScaled.x);
+            lineScaleRes.setAttribute('y2', ptScaled.y);
+
+            lblScale3dV.setAttribute('x', ptScaled.x + 10);
+            lblScale3dV.setAttribute('y', ptScaled.y - 10);
+
+            let alertCaption = c < 0 ? "(Direction Inverted)" : "(Scaling Magnitude)";
+            scaleReadout.textContent = `c = ${c.toFixed(2)}x ➔ [${targetX.toFixed(0)}, ${targetY.toFixed(0)}, ${targetZ.toFixed(0)}] ${alertCaption}`;
+        }
+
+        param3dC.addEventListener('input', update3DScaling);
+        update3DScaling();
+    </script>
+</body>
+</html>

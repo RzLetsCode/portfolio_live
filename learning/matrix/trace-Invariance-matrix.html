@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Trace Invariance & Mathematical Proof</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f1f5f9;
+            --accent: #22c55e;
+            --basis1: #3b82f6;
+            --basis2: #ef4444;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        h1 { margin-bottom: 6px; color: var(--text); }
+        .subtitle { color: #94a3b8; font-size: 1.05rem; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--basis1);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            font-size: 1.4rem;
+        }
+
+        /* Proof Styling */
+        .assumption-box {
+            background: #0f172a;
+            border-left: 4px solid var(--basis1);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 16px;
+        }
+
+        .proof-box {
+            background: #0f172a;
+            border: 1px solid #1e3a8a;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        /* Matrix Steps Grid */
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .step-card {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .step-card.highlight {
+            border-color: var(--accent);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: white;
+            background: var(--accent);
+            margin-top: 8px;
+        }
+
+        /* Interactive Canvas */
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #020617;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: grab;
+        }
+
+        canvas:active { cursor: grabbing; }
+
+        .canvas-instruction {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 4px 8px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Basis Independence & Trace Invariance</h1>
+        <div class="subtitle">Mathematical Derivation & 3D Interactive Demonstration</div>
+    </header>
+
+    <div class="card">
+        <h2>1. Mathematical Proof & Assumptions</h2>
+
+        <div class="assumption-box">
+            <strong>Key Assumptions:</strong>
+            <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                <li><strong>Linearity:</strong> The transformation \( T: \mathbb{R}^n \to \mathbb{R}^n \) is linear.</li>
+                <li><strong>Invertibility of Basis Change:</strong> Matrix \( P \), which translates vectors from the new basis back to the standard basis, is square and invertible (\( \det(P) \neq 0 \)).</li>
+                <li><strong>Finite Dimensions:</strong> Operating within finite-dimensional vector spaces (e.g., 2D or 3D).</li>
+            </ul>
+        </div>
+
+        <h3>Algebraic Derivation</h3>
+        <p>When changing your basis using a transition matrix \( P \), the relationship between matrix \( A \) (old basis) and matrix \( B \) (new basis) is given by the <strong>Similarity Transformation</strong>:</p>
+
+        \[ B = P^{-1}AP \]
+
+        <p>To prove that \( \text{Tr}(A) = \text{Tr}(B) \), we use the <strong>Cyclic Property of the Trace</strong>, which states that for any two compatible matrices \( X \) and \( Y \):</p>
+
+        \[ \text{Tr}(XY) = \text{Tr}(YX) \]
+
+        <div class="proof-box">
+            <p>Substitute \( X = P^{-1}A \) and \( Y = P \):</p>
+            \[ \text{Tr}(B) = \text{Tr}(P^{-1}AP) \]
+
+            <p>Apply the cyclic property by shifting \( P \) to the front:</p>
+            \[ \text{Tr}(B) = \text{Tr}\big(P \cdot (P^{-1}A)\big) \]
+
+            <p>Using matrix associativity:</p>
+            \[ \text{Tr}(B) = \text{Tr}\big((P P^{-1}) A\big) \]
+
+            <p>Since \( P P^{-1} = I \) (the identity matrix):</p>
+            \[ \text{Tr}(B) = \text{Tr}(I \cdot A) = \text{Tr}(A) \]
+
+            \[ \mathbf{\text{Tr}(B) = \text{Tr}(A)} \quad \blacksquare \]
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>2. Step-by-Step Calculation Example</h2>
+        <p>Here is the exact numeric breakdown of the 3D transformation visualized below:</p>
+
+        <div class="step-grid">
+            <div class="step-card">
+                <h3>Step A: Matrix \( A \)</h3>
+                <p>Transformation in Standard Basis:</p>
+                \[ A = \begin{pmatrix} 3.0 & 1.0 & 0.0 \\ 0.0 & 2.0 & 1.0 \\ 0.0 & 0.0 & 1.5 \end{pmatrix} \]
+                <div class="badge">Tr(A) = 3.0 + 2.0 + 1.5 = 6.5</div>
+            </div>
+
+            <div class="step-card">
+                <h3>Step B: Basis Matrix \( P \)</h3>
+                <p>Skewed Basis & Inverse \( P^{-1} \):</p>
+                \[ P \approx \begin{pmatrix} 1.2 & 0.3 & -0.2 \\ 0.1 & 1.1 & 0.4 \\ 0.2 & -0.1 & 0.9 \end{pmatrix} \]
+                \[ P^{-1} \approx \begin{pmatrix} 0.846 & -0.205 & 0.288 \\ -0.008 & 0.920 & -0.411 \\ -0.189 & 0.148 & 1.060 \end{pmatrix} \]
+            </div>
+
+            <div class="step-card">
+                <h3>Step C: Compute \( B = P^{-1}AP \)</h3>
+                <p>First compute \( AP \):</p>
+                \[ AP = \begin{pmatrix} 3.7 & 2.0 & -0.2 \\ 0.2 & 2.1 & 1.7 \\ 0.3 & -0.15 & 1.35 \end{pmatrix} \]
+                <p>Then compute \( P^{-1}(AP) \):</p>
+                \[ B = \begin{pmatrix} 3.17 & 1.22 & -0.13 \\ 0.03 & 1.97 & 1.01 \\ -0.35 & -0.22 & 1.36 \end{pmatrix} \]
+            </div>
+
+            <div class="step-card highlight">
+                <h3>Step D: Calculate \( \text{Tr}(B) \)</h3>
+                <p>Summing the diagonal elements of \( B \):</p>
+                \[ \text{Tr}(B) = B_{11} + B_{22} + B_{33} \]
+                \[ \text{Tr}(B) = 3.17 + 1.97 + 1.36 \]
+                <div class="badge">Tr(B) = 6.5</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>3. 3D Geometric Visualization</h2>
+        <p>The <span style="color: var(--basis1);">Blue Mesh</span> represents matrix \( A \). The <span style="color: var(--basis2);">Red Mesh</span> represents matrix \( B \). Even though the grid coordinates change completely, the total diagonal sum remains strictly invariant.</p>
+        
+        <div id="canvas-container">
+            <div class="canvas-instruction">💡 Click & Drag to rotate 3D view</div>
+            <canvas id="canvas3d"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Canvas Setup
+    const canvas = document.getElementById('canvas3d');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    function resize() {
+        width = canvas.width = canvas.parentElement.clientWidth;
+        height = canvas.height = canvas.parentElement.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 3D View Angles
+    let angleX = 0.5, angleY = 0.6;
+    let isDragging = false, lastMouseX = 0, lastMouseY = 0;
+
+    canvas.addEventListener('mousedown', e => {
+        isDragging = true;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        angleY += (e.clientX - lastMouseX) * 0.008;
+        angleX += (e.clientY - lastMouseY) * 0.008;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    // Matrix Data
+    const A = [
+        [3.0, 1.0, 0.0],
+        [0.0, 2.0, 1.0],
+        [0.0, 0.0, 1.5]
+    ];
+
+    const P = [
+        [1.2, 0.3, -0.2],
+        [0.1, 1.1,  0.4],
+        [0.2, -0.1, 0.9]
+    ];
+
+    // Projection
+    function project(x, y, z) {
+        let x1 = x * Math.cos(angleY) + z * Math.sin(angleY);
+        let z1 = -x * Math.sin(angleY) + z * Math.cos(angleY);
+        let y2 = y * Math.cos(angleX) - z1 * Math.sin(angleX);
+        const scale = 45;
+        return {
+            x: width / 2 + x1 * scale,
+            y: height / 2 - y2 * scale
+        };
+    }
+
+    function drawLine(p1, p2, color, width = 1, dash = []) {
+        const proj1 = project(...p1);
+        const proj2 = project(...p2);
+        ctx.beginPath();
+        ctx.setLineDash(dash);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.moveTo(proj1.x, proj1.y);
+        ctx.lineTo(proj2.x, proj2.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // Loop
+    let time = 0;
+    function render() {
+        time += 0.02;
+        ctx.clearRect(0, 0, width, height);
+
+        // Axes
+        drawLine([0,0,0], [3,0,0], '#475569', 1);
+        drawLine([0,0,0], [0,3,0], '#475569', 1);
+        drawLine([0,0,0], [0,0,3], '#475569', 1);
+
+        let t = (Math.sin(time) + 1) / 2;
+
+        const cube = [
+            [0,0,0], [1,0,0], [1,1,0], [0,1,0],
+            [0,0,1], [1,0,1], [1,1,1], [0,1,1]
+        ];
+
+        const transformedCube = cube.map(([x,y,z]) => {
+            let xt = x + (A[0][0]*x + A[0][1]*y + A[0][2]*z - x) * t;
+            let yt = y + (A[1][0]*x + A[1][1]*y + A[1][2]*z - y) * t;
+            let zt = z + (A[2][0]*x + A[2][1]*y + A[2][2]*z - z) * t;
+            return [xt, yt, zt];
+        });
+
+        const edges = [
+            [0,1],[1,2],[2,3],[3,0],
+            [4,5],[5,6],[6,7],[7,4],
+            [0,4],[1,5],[2,6],[3,7]
+        ];
+
+        // Draw Standard Mesh (Blue)
+        edges.forEach(([i, j]) => {
+            drawLine(transformedCube[i], transformedCube[j], '#3b82f6', 2);
+        });
+
+        // Draw Skewed Mesh (Red)
+        const skewedCube = transformedCube.map(([x,y,z]) => [
+            P[0][0]*x + P[0][1]*y + P[0][2]*z,
+            P[1][0]*x + P[1][1]*y + P[1][2]*z,
+            P[2][0]*x + P[2][1]*y + P[2][2]*z
+        ]);
+
+        edges.forEach(([i, j]) => {
+            drawLine(skewedCube[i], skewedCube[j], '#ef4444', 1.5, [4, 4]);
+        });
+
+        requestAnimationFrame(render);
+    }
+
+    render();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Inverse Under Change of Basis</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f1f5f9;
+            --accent: #22c55e;
+            --primary: #3b82f6;
+            --secondary: #ec4899;
+            --border: #334155;
+            --input-bg: #0f172a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 24px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 16px;
+        }
+
+        h1 { margin-bottom: 6px; color: var(--text); }
+        .subtitle { color: #94a3b8; font-size: 1.05rem; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            font-size: 1.4rem;
+        }
+
+        /* Proof Styling */
+        .proof-box {
+            background: #0f172a;
+            border-left: 4px solid var(--secondary);
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+
+        /* Interactive Grid Layout */
+        .sandbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .matrix-card {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .matrix-card h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+        }
+
+        .matrix-input-grid {
+            display: inline-grid;
+            grid-template-columns: repeat(2, 60px);
+            gap: 8px;
+            margin: 12px 0;
+            padding: 8px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            border-left: 3px solid var(--text);
+            border-right: 3px solid var(--text);
+        }
+
+        .matrix-input-grid input {
+            width: 100%;
+            height: 40px;
+            text-align: center;
+            font-size: 1rem;
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .matrix-input-grid.readonly input {
+            background-color: #1e293b;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: white;
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Matrix Inverse Under Change of Basis</h1>
+        <div class="subtitle">How a transformation and its inverse change under a new coordinate system</div>
+    </header>
+
+    <div class="card">
+        <h2>1. The Mathematical Principle</h2>
+        <p>If a matrix \( A \) represents a linear transformation in the standard basis, changing to a new basis via matrix \( P \) transforms \( A \) into matrix \( B \):</p>
+
+        \[ B = P^{-1}AP \]
+
+        <p>What happens to the inverse matrix \( A^{-1} \)? Does it also undergo a similarity transformation? <strong>Yes!</strong></p>
+
+        <div class="proof-box">
+            <h3>Derivation for \( B^{-1} \):</h3>
+            <p>Taking the inverse of both sides of \( B = P^{-1}AP \):</p>
+            \[ B^{-1} = (P^{-1} A P)^{-1} \]
+            <p>Applying the reverse order rule for matrix inverses, \( (XYZ)^{-1} = Z^{-1} Y^{-1} X^{-1} \):</p>
+            \[ B^{-1} = P^{-1} A^{-1} (P^{-1})^{-1} \]
+            <p>Since \( (P^{-1})^{-1} = P \), we get:</p>
+            \[ \mathbf{B^{-1} = P^{-1} A^{-1} P} \quad \blacksquare \]
+        </div>
+
+        <p><strong>Key Insight:</strong> Just as \( B \) is the matrix \( A \) expressed in the new basis, \( B^{-1} \) is simply the inverse matrix \( A^{-1} \) expressed in that <em>same</em> new basis using the same transition matrix \( P \)!</p>
+    </div>
+
+    <div class="card">
+        <h2>2. Interactive Calculation Sandbox</h2>
+        <p>Change the values of Original Matrix \( A \) or Transition Matrix \( P \). Watch how \( A^{-1} \), \( B \), and \( B^{-1} \) compute in real time.</p>
+
+        <div class="sandbox-grid">
+            <div class="matrix-card">
+                <h3 style="color: var(--primary);">Original Matrix (\( A \))</h3>
+                <div class="matrix-input-grid">
+                    <input type="number" id="a11" value="4" oninput="calculate()">
+                    <input type="number" id="a12" value="1" oninput="calculate()">
+                    <input type="number" id="a21" value="2" oninput="calculate()">
+                    <input type="number" id="a22" value="3" oninput="calculate()">
+                </div>
+                <div id="errA" class="error-msg"></div>
+            </div>
+
+            <div class="matrix-card">
+                <h3 style="color: var(--accent);">Original Inverse (\( A^{-1} \))</h3>
+                <div class="matrix-input-grid readonly">
+                    <input type="text" id="ainv11" readonly>
+                    <input type="text" id="ainv12" readonly>
+                    <input type="text" id="ainv21" readonly>
+                    <input type="text" id="ainv22" readonly>
+                </div>
+                <div class="badge">Direct Inverse of A</div>
+            </div>
+
+            <div class="matrix-card">
+                <h3 style="color: var(--secondary);">Basis Matrix (\( P \))</h3>
+                <div class="matrix-input-grid">
+                    <input type="number" id="p11" value="2" oninput="calculate()">
+                    <input type="number" id="p12" value="1" oninput="calculate()">
+                    <input type="number" id="p21" value="1" oninput="calculate()">
+                    <input type="number" id="p22" value="1" oninput="calculate()">
+                </div>
+                <div id="errP" class="error-msg"></div>
+            </div>
+
+            <div class="matrix-card">
+                <h3 style="color: var(--primary);">New Matrix (\( B = P^{-1}AP \))</h3>
+                <div class="matrix-input-grid readonly">
+                    <input type="text" id="b11" readonly>
+                    <input type="text" id="b12" readonly>
+                    <input type="text" id="b21" readonly>
+                    <input type="text" id="b22" readonly>
+                </div>
+                <div class="badge" style="background: var(--primary);">A in New Basis</div>
+            </div>
+
+            <div class="matrix-card">
+                <h3 style="color: var(--secondary);">New Inverse (\( B^{-1} = P^{-1}A^{-1}P \))</h3>
+                <div class="matrix-input-grid readonly">
+                    <input type="text" id="binv11" readonly>
+                    <input type="text" id="binv12" readonly>
+                    <input type="text" id="binv21" readonly>
+                    <input type="text" id="binv22" readonly>
+                </div>
+                <div class="badge" style="background: var(--secondary);">A⁻¹ in New Basis</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 2x2 Matrix Inversion Helper: [[a,b],[c,d]]^-1 = (1/det) * [[d,-b],[-c,a]]
+    function invert2x2(m) {
+        let det = m[0][0] * m[1][1] - m[0][1] * m[1][2];
+        if (Math.abs(det) < 1e-6) return null;
+        let invdet = 1 / det;
+        return [
+            [ m[1][1] * invdet, -m[0][1] * invdet],
+            [-m[1][0] * invdet,  m[0][0] * invdet]
+        ];
+    }
+
+    // 2x2 Matrix Multiplication Helper: M1 * M2
+    function multiply2x2(m1, m2) {
+        return [
+            [
+                m1[0][0] * m2[0][0] + m1[0][1] * m2[1][0],
+                m1[0][0] * m2[0][1] + m1[0][1] * m2[1][1]
+            ],
+            [
+                m1[1][0] * m2[0][0] + m1[1][1] * m2[1][0],
+                m1[1][0] * m2[0][1] + m1[1][1] * m2[1][1]
+            ]
+        ];
+    }
+
+    function getInputs(prefix) {
+        return [
+            [
+                parseFloat(document.getElementById(prefix + '11').value) || 0,
+                parseFloat(document.getElementById(prefix + '12').value) || 0
+            ],
+            [
+                parseFloat(document.getElementById(prefix + '21').value) || 0,
+                parseFloat(document.getElementById(prefix + '22').value) || 0
+            ]
+        ];
+    }
+
+    function setOutputs(prefix, matrix) {
+        if (!matrix) {
+            document.getElementById(prefix + '11').value = "Err";
+            document.getElementById(prefix + '12').value = "Err";
+            document.getElementById(prefix + '21').value = "Err";
+            document.getElementById(prefix + '22').value = "Err";
+            return;
+        }
+        document.getElementById(prefix + '11').value = matrix[0][0].toFixed(2);
+        document.getElementById(prefix + '12').value = matrix[0][1].toFixed(2);
+        document.getElementById(prefix + '21').value = matrix[1][0].toFixed(2);
+        document.getElementById(prefix + '22').value = matrix[1][1].toFixed(2);
+    }
+
+    function calculate() {
+        document.getElementById('errA').innerText = "";
+        document.getElementById('errP').innerText = "";
+
+        let A = getInputs('a');
+        let P = getInputs('p');
+
+        // Compute A inverse
+        let A_inv = invert2x2(A);
+        if (!A_inv) {
+            document.getElementById('errA').innerText = "Matrix A is Singular!";
+            setOutputs('ainv', null);
+            setOutputs('b', null);
+            setOutputs('binv', null);
+            return;
+        }
+        setOutputs('ainv', A_inv);
+
+        // Compute P inverse
+        let P_inv = invert2x2(P);
+        if (!P_inv) {
+            document.getElementById('errP').innerText = "Matrix P is Singular!";
+            setOutputs('b', null);
+            setOutputs('binv', null);
+            return;
+        }
+
+        // Compute B = P^-1 * A * P
+        let B = multiply2x2(P_inv, multiply2x2(A, P));
+        setOutputs('b', B);
+
+        // Compute B_inv = P^-1 * A_inv * P
+        let B_inv = multiply2x2(P_inv, multiply2x2(A_inv, P));
+        setOutputs('binv', B_inv);
+    }
+
+    // Initial calculation on page load
+    window.onload = calculate;
+</script>
+
+</body>
+</html>

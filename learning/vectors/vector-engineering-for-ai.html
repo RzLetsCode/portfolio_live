@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector Foundations for AI & ML - Clean Animated Master Deck</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;800&family=Azeret+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: #0f172a;
+      --tile-bg: #111827;
+      --border-color: #1e293b;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-purple: #c084fc;
+      --accent-yellow: #facc15;
+      --accent-red: #f87171;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body { 
+      background-color: var(--bg-dark); 
+      color: var(--text-main); 
+      font-family: 'Urbanist', sans-serif; 
+      padding: 30px 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .slide-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .slide-container {
+      width: 100%;
+      min-height: 680px;
+      background-color: var(--card-bg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 40px;
+      position: relative;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    .slide-container::before {
+      content: ''; position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+      background: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                  radial-gradient(circle at 85% 85%, rgba(192, 132, 252, 0.08) 0%, transparent 40%);
+      z-index: 0; pointer-events: none;
+    }
+
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      z-index: 1;
+    }
+
+    .q-tag {
+      background: var(--border-color);
+      color: var(--accent-blue);
+      font-family: 'Azeret Mono', monospace;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .slide-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-family: 'Azeret Mono', monospace;
+    }
+
+    h1, h2, h3 { font-family: 'Urbanist', sans-serif; font-weight: 700; color: #fff; z-index: 1; }
+    h1 { font-size: 58px; text-align: center; margin-bottom: 16px; line-height: 1.15; }
+    h1 span { color: var(--accent-blue); }
+    
+    .slide-title { 
+      font-size: 32px; 
+      margin-bottom: 24px; 
+      border-left: 6px solid var(--accent-blue); 
+      padding-left: 18px; 
+      letter-spacing: -0.5px;
+      z-index: 1;
+    }
+    
+    .subtitle { font-size: 20px; color: var(--text-muted); text-align: center; max-width: 850px; margin: 0 auto; line-height: 1.5; }
+    p, li { font-size: 17px; line-height: 1.6; color: #cbd5e1; }
+    strong { color: var(--accent-blue); }
+
+    .content-area, .slide-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; width: 100%; z-index: 1; }
+    .two-column, .slide-body { display: grid; grid-template-columns: 1fr 1fr; gap: 35px; align-items: start; }
+    
+    .tiled-content { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%; }
+    .tile, .text-panel { 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .tile {
+      background: var(--tile-bg); 
+      border-radius: 16px; 
+      padding: 26px; 
+      border: 1px solid var(--border-color); 
+    }
+    .tile h3 { font-size: 22px; color: var(--accent-blue); margin-bottom: 14px; }
+
+    .math-box, .concept-box, .solution-box { 
+      background: #030712; 
+      padding: 16px 20px; 
+      border-radius: 10px; 
+      border: 1px solid #334155; 
+      margin: 14px 0; 
+      display: flex; 
+      flex-direction: column;
+      font-size: 1.05rem;
+    }
+
+    .math-box {
+      justify-content: center;
+      align-items: center;
+    }
+
+    .concept-box ul {
+      margin-left: 20px;
+      margin-top: 8px;
+    }
+
+    .anim-panel { 
+      background: #030712; 
+      border-radius: 16px; 
+      border: 2px solid var(--border-color); 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+      width: 100%;
+    }
+
+    canvas { 
+      background: #070a13; 
+      border-radius: 10px; 
+      border: 1px solid #334155; 
+      max-width: 100%;
+      height: auto;
+    }
+
+    .btn-play, .btn-anim { 
+      background: var(--accent-blue); 
+      color: var(--bg-dark); 
+      border: none; 
+      padding: 10px 24px; 
+      border-radius: 8px; 
+      font-weight: 700; 
+      cursor: pointer; 
+      margin-top: 14px; 
+      font-family: 'Azeret Mono', monospace; 
+      text-transform: uppercase;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+    .btn-play:hover, .btn-anim:hover { background: #fff; transform: translateY(-2px); }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+    th { color: var(--accent-blue); padding: 14px 16px; text-align: left; font-size: 17px; border-bottom: 2px solid var(--border-color); }
+    td { padding: 14px 16px; background: var(--tile-bg); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); font-size: 15px; }
+    td:first-child { border-left: 1px solid var(--border-color); border-radius: 10px 0 0 10px; font-weight: 700; }
+    td:last-child { border-right: 1px solid var(--border-color); border-radius: 0 10px 10px 0; }
+
+    .section-title-center { text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: auto 0; }
+    .section-title-center hr { border: none; height: 4px; background: var(--accent-blue); width: 90px; margin-bottom: 20px; }
+
+    .teaching-note {
+      background: rgba(250, 204, 21, 0.08);
+      border-left: 4px solid var(--accent-yellow);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-top: 14px;
+      font-size: 14px;
+      color: #fef08a;
+    }
+
+    .controls-panel {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="slide-deck">
+
+    <div class="slide-container">
+        <div class="section-title-center">
+            <h1>Vector <span>Foundations</span><br>for AI &amp; ML</h1>
+            <hr>
+            <p class="subtitle">An Interactive Master Deck: Distance Metrics, Semantic Embeddings, Query Projections, Categorical Encodings, and Computer Vision Preprocessing.</p>
+        </div>
+    </div>
+
+    <div class="slide-container">
+        <h2 class="slide-title">1. Manhattan vs. Euclidean Distance</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile">
+                    <h3>Euclidean Distance ($L_2$)</h3>
+                    <p>Measures straight-line <strong>"as the crow flies"</strong> distance. Ideal when movement across axes is smooth and continuous.</p>
+                    <div class="math-box">
+                        $$d_{L2}(\mathbf{x}, \mathbf{p}) = \sqrt{(x_1 - p_1)^2 + (x_2 - p_2)^2}$$
+                    </div>
+                    <p><strong>Primary Use Cases:</strong> Low-dimensional spatial tracking, standard clustering (K-Means), and physical coordinate mapping.</p>
+                </div>
+                <div class="tile">
+                    <h3>Manhattan Distance ($L_1$)</h3>
+                    <p>Measures <strong>"city grid / taxi"</strong> distance along axis-parallel paths: $|\Delta x| + |\Delta y|$.</p>
+                    <div class="math-box">
+                        $$d_{L1}(\mathbf{x}, \mathbf{p}) = |x_1 - p_1| + |x_2 - p_2|$$
+                    </div>
+                    <p><strong>Primary Use Cases:</strong> High-dimensional feature spaces, independent feature dimensions (e.g., Age vs. Income), and outlier-robust modeling.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container">
+        <h2 class="slide-title">2. K-Nearest Neighbors: L1 vs L2 Visualized</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <h3>Why Use Manhattan Distance in AI?</h3>
+                    <ul style="margin-top: 12px; display: flex; flex-direction: column; gap: 14px; list-style: none;">
+                        <li><i class="fa-solid fa-crow" style="color:var(--accent-blue); margin-right:8px;"></i><strong>As the Crow Flies ($L_2$):</strong> Direct straight-line diagonal path.</li>
+                        <li><i class="fa-solid fa-taxi" style="color:var(--accent-yellow); margin-right:8px;"></i><strong>City Grid / Taxi ($L_1$):</strong> Restricts movement along city blocks ($\Delta x + \Delta y$).</li>
+                        <li><i class="fa-solid fa-shield-halved" style="color:var(--accent-green); margin-right:8px;"></i><strong>High-D Robustness:</strong> In high dimensions, $L_1$ prevents distance collapse.</li>
+                    </ul>
+                    <div class="teaching-note">
+                        <strong>Classification Decision:</strong> Patient $X(3,5)$ is closer to $P_2(4,6)$ under both metrics ($L_2 = 1.41$, $L_1 = 2$) than $P_1(1,2)$ ($L_2 = 3.61$, $L_1 = 5$), categorizing $X$ as High-Risk.
+                    </div>
+                </div>
+                <div class="anim-panel">
+                    <canvas id="canvasDist" width="460" height="360"></canvas>
+                    <div style="display: flex; gap: 12px; width: 100%; justify-content: center;">
+                        <button class="btn-play" onclick="animateCrowFlight()">🦅 Animate Crow ($L_2$)</button>
+                        <button class="btn-play" onclick="animateTaxiDrive()" style="background:#fff">🚕 Animate Taxi ($L_1$)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container">
+        <h2 class="slide-title">3. Decoding Word Embeddings: $[f_1, f_2, f_3]$</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="tile">
+                    <h3>Semantic Trait Dimensions</h3>
+                    <p>In Large Language Models, continuous vectors store explicit semantic scores:</p>
+                    <ul style="margin-top: 14px; margin-left: 20px; display: flex; flex-direction: column; gap: 10px;">
+                        <li><strong>$f_1$ (Masculinity):</strong> $1.0 =$ Male, $0.0 =$ Neutral / Female.</li>
+                        <li><strong>$f_2$ (Royalty / Power):</strong> $1.0 =$ Monarch, $0.0 =$ Commoner.</li>
+                        <li><strong>$f_3$ (Femininity):</strong> $1.0 =$ Female, $0.0 =$ Neutral / Male.</li>
+                    </ul>
+                </div>
+                <div class="tile">
+                    <h3>Semantic Vector Arithmetic</h3>
+                    <p><strong>Formula:</strong> $\text{King} - \text{Man} + \text{Woman} = \text{Queen}$</p>
+                    <div class="math-box" style="align-items: flex-start; font-family: 'Azeret Mono', monospace; font-size: 15px; gap: 6px;">
+                        <p style="color: #94a3b8;">King: [0.9, 0.8, 0.1]</p>
+                        <p style="color: var(--accent-red);">- Man: [0.8, 0.1, 0.1] &implies; [0.1, 0.7, 0.0]</p>
+                        <p style="color: var(--accent-green);">+ Woman: [0.1, 0.1, 0.9] &implies; [0.2, 0.8, 0.9]</p>
+                        <hr style="width: 100%; border: 1px solid #334155; margin: 4px 0;">
+                        <p style="color: var(--accent-blue);">Result: [0.2, 0.8, 0.9]</p>
+                    </div>
+                    <p style="font-size: 14px;">Subtracting "Man" strips masculinity traits, while adding "Woman" injects femininity, synthesizing the exact embedding for <strong>Queen</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container">
+        <h2 class="slide-title">4. Semantic Vector Trajectory in Action</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <h3>Trajectory Analysis</h3>
+                    <ol style="margin-left: 20px; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                        <li><strong>Base Vector:</strong> We begin at the coordinate for <strong>King</strong> $[0.9, 0.8, 0.1]$.</li>
+                        <li><strong>Subtract Concept:</strong> Subtracting <strong>Man</strong> removes masculinity, shifting the vector along the horizontal axis to $[0.1, 0.7, 0.0]$.</li>
+                        <li><strong>Add Concept:</strong> Adding <strong>Woman</strong> injects femininity, driving the trajectory upward along the vertical axis to $[0.2, 0.8, 0.9]$.</li>
+                    </ol>
+                    <div class="teaching-note">
+                        <strong>LLM Takeaway:</strong> High-dimensional embeddings capture real-world analogies purely through spatial translations and geometric operations.
+                    </div>
+                </div>
+                <div class="anim-panel">
+                    <canvas id="canvasWords" width="460" height="360"></canvas>
+                    <button class="btn-play" onclick="animateWords()">▶ Play Semantic Trajectory</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container">
+        <h2 class="slide-title">5. Vector Search &amp; RAG: Query Projection</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <h3>Isolating Intent via Projection</h3>
+                    <p>When searching a Vector DB (Pinecone, Weaviate):</p>
+                    <ul style="margin: 12px 0 12px 20px; display: flex; flex-direction: column; gap: 8px;">
+                        <li><strong>Query Vector $\mathbf{q} = (3, 4)$:</strong> User intent containing both Technical ($3$) and Gossip ($4$) traits.</li>
+                        <li><strong>Document Axis $\mathbf{d} = (1, 0)$:</strong> Document chunk containing Pure Technical Content.</li>
+                    </ul>
+                    <div class="math-box" style="gap: 6px;">
+                        $$\text{Scalar Projection} = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{d}\|} = \frac{(3)(1) + (4)(0)}{1} = 3.0$$
+                        <p style="color: var(--accent-purple); font-size: 14px; font-family: 'Azeret Mono', monospace;">Vector Projection $\mathbf{p} = (3, 0)$</p>
+                    </div>
+                    <p style="font-size: 14px;">The perpendicular drop isolates the exact overlap magnitude ($3.0$) along the technical document line, ignoring unrelated intent components ($(0, 4)$).</p>
+                </div>
+                <div class="anim-panel">
+                    <canvas id="canvasProj" width="460" height="360"></canvas>
+                    <button class="btn-play" onclick="animateProj()">▶ Animate Perpendicular Drop</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container">
+        <h2 class="slide-title">6. One-Hot Encoding vs. Dense Embeddings</h2>
+        <div class="content-area">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature Representation</th>
+                        <th>One-Hot Encoding</th>
+                        <th>Dense Embeddings (AI)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Structure</strong></td>
+                        <td>Sparse Binary Arrays $[1, 0, 0, 0]$</td>
+                        <td>Continuous Floats $[0.82, -0.15, 0.40]$</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Angular Property</strong></td>
+                        <td><strong>Fixed 90° Orthogonal ($\mathbf{a} \cdot \mathbf{b} = 0$)</strong></td>
+                        <td>Variable Semantic Angle ($\theta < 15^\circ$)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Relationship Capture</strong></td>
+                        <td>Assumes ALL categories are completely unrelated.</td>
+                        <td>Captures semantic match: "Laptop" $\approx$ "Computer".</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Efficiency</strong></td>
+                        <td>High memory footprint (sparse zeroes).</td>
+                        <td>Compact, highly dense information storage.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="slide-container">
+        <h2 class="slide-title">7. The "Orthogonality Trap" Visualized</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <h3>Why One-Hot Fails AI Models</h3>
+                    <p>One-hot encoding places <strong>Laptop</strong> $[1,0]$ and <strong>Computer</strong> $[0,1]$ on perpendicular axes separated by $90^\circ$.</p>
+                    <div class="math-box" style="gap: 8px; font-size: 15px;">
+                        <p style="color: var(--accent-red);">Laptop · Computer = 0  (Assumes Zero Overlap!)</p>
+                        <p style="color: var(--accent-red);">Laptop · Banana = 0    (Same score as Computer!)</p>
+                    </div>
+                    <p><strong>Dense Embeddings Solution:</strong> Neural networks learn dense feature representations where related concepts point in nearly identical directions ($\theta < 15^\circ$), allowing the AI model to capture true semantic similarity.</p>
+                </div>
+                <div class="anim-panel">
+                    <canvas id="canvasEnc" width="460" height="340"></canvas>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-play" onclick="animateEnc('onehot')">Show One-Hot (90°)</button>
+                        <button class="btn-play" onclick="animateEnc('dense')" style="background:#fff">Show Dense (Semantic)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-container">
+      <div class="slide-header">
+        <div>
+          <span class="q-tag">Question 11</span>
+          <h2 class="slide-title" style="margin-bottom:0;">Computer Vision: Contrast Scaling &amp; Brightness Shift</h2>
+        </div>
+        <div class="slide-subtitle">Linear Transformations &amp; Clipping</div>
+      </div>
+      <div class="slide-body">
+        <div class="text-panel">
+          <p><strong>The Scenario:</strong> An image patch is stored as vector $\mathbf{x} = [50, 100, 150, 200]$ representing grayscale pixel values ($0 = \text{Black}, 255 = \text{White}$).</p>
+          
+          <div class="concept-box">
+            <strong style="color: var(--accent-blue);">How Image Preprocessing Works:</strong>
+            <ul>
+              <li><strong>Contrast ($1.5 \cdot \mathbf{x}$):</strong> Multiplies vectors to widen the gap between light and dark areas.</li>
+              <li><strong>Brightness ($+ \mathbf{b}$):</strong> Adds a constant offset $[20, 20, 20, 20]$ to shift all pixels brighter.</li>
+            </ul>
+          </div>
+
+          <div class="solution-box">
+            <strong style="color: var(--accent-green);">Mathematical Step-by-Step:</strong>
+            <p style="margin-top: 6px;">$$\text{Contrast Scale: } 1.5 \times [50, 100, 150, 200] = [75, 150, 225, 300]$$</p>
+            <p>$$\text{Brightness Shift: } [75, 150, 225, 300] + [20, 20, 20, 20] = [95, 170, 245, \mathbf{320}]$$</p>
+            <p style="color: var(--accent-red); margin-top: 6px; font-size: 15px;"><strong>Hardware Limit (Clipping):</strong> Displays max out at 255. Pixel 4 ($320$) is clipped down to <strong>255 (Pure White)</strong>.</p>
+          </div>
+
+          <div class="teaching-note">
+            <strong>ML Intuition:</strong> This exact operation models a single dense neuron layer: $\mathbf{y} = \text{ReLU}(w\cdot\mathbf{x} + \mathbf{b})$.
+          </div>
+        </div>
+
+        <div class="anim-panel">
+          <canvas id="canvas11" width="460" height="380"></canvas>
+          <div class="controls-panel">
+            <button class="btn-anim" onclick="animateQ11()">▶ Run Step-by-Step Transformation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+<script>
+    /* ==========================================================================
+       NON-OVERLAPPING CANVAS RENDER ENGINE & HELPER UTILITIES
+       ========================================================================== */
+
+    function drawArrow(ctx, x1, y1, x2, y2, color, label, subtext = "", alignDir = "top") {
+        ctx.strokeStyle = color; 
+        ctx.lineWidth = 3.5; 
+        ctx.lineCap = 'round';
+        
+        ctx.beginPath(); 
+        ctx.moveTo(x1, y1); 
+        ctx.lineTo(x2, y2); 
+        ctx.stroke();
+        
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - 12 * Math.cos(angle - Math.PI / 6), y2 - 12 * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - 12 * Math.cos(angle + Math.PI / 6), y2 - 12 * Math.sin(angle + Math.PI / 6));
+        ctx.closePath(); 
+        ctx.fillStyle = color; 
+        ctx.fill();
+
+        if (label) {
+            ctx.font = 'bold 12px "Azeret Mono", monospace';
+            const fullText = label + (subtext ? " " + subtext : "");
+            const textMetrics = ctx.measureText(fullText);
+            const padding = 6;
+            const textWidth = textMetrics.width + padding * 2;
+            const textHeight = 22;
+
+            let tx = x2 + 10;
+            let ty = y2 - 10;
+
+            if (alignDir === "bottom") ty = y2 + 25;
+            if (alignDir === "left") tx = x2 - textWidth - 10;
+
+            if (tx + textWidth > ctx.canvas.width - 10) tx = ctx.canvas.width - textWidth - 10;
+            if (tx < 10) tx = 10;
+            if (ty - textHeight < 10) ty = textHeight + 10;
+            if (ty > ctx.canvas.height - 10) ty = ctx.canvas.height - 10;
+
+            ctx.fillStyle = 'rgba(3, 7, 18, 0.92)';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.fillRect(tx, ty - textHeight + 4, textWidth, textHeight);
+            ctx.strokeRect(tx, ty - textHeight + 4, textWidth, textHeight);
+
+            ctx.fillStyle = color;
+            ctx.fillText(fullText, tx + padding, ty);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // ANIMATION 1: CROW VS TAXI DISTANCE (SLIDE 2)
+    // -------------------------------------------------------------------------
+    let distAnimId = null;
+
+    function animateCrowFlight() {
+        if (distAnimId) cancelAnimationFrame(distAnimId);
+        const c = document.getElementById('canvasDist'); 
+        const ctx = c.getContext('2d');
+        let prog = 0;
+
+        const P1 = { x: 80, y: 290, label: "P1 Healthy (1,2)" };
+        const P2 = { x: 380, y: 70, label: "P2 High-Risk (4,6)" };
+        const X  = { x: 280, y: 130, label: "Patient X (3,5)" };
+
+        function frame() {
+            ctx.clearRect(0, 0, c.width, c.height);
+            drawGrid(ctx, c);
+            drawPoint(ctx, P1, '#4ade80');
+            drawPoint(ctx, P2, '#f87171');
+            drawPoint(ctx, X, '#38bdf8');
+
+            drawLine(ctx, X, P1, '#38bdf8', 'd(X,P1) = 3.61');
+
+            let curX = X.x + (P2.x - X.x) * prog;
+            let curY = X.y + (P2.y - X.y) * prog;
+
+            ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 3.5;
+            ctx.beginPath(); ctx.moveTo(X.x, X.y); ctx.lineTo(curX, curY); ctx.stroke();
+
+            ctx.fillStyle = '#4ade80';
+            ctx.font = '18px "Font Awesome 6 Free"';
+            ctx.fillText('🦅', curX - 10, curY - 10);
+
+            drawLabelBox(ctx, (X.x + P2.x)/2 - 40, (X.y + P2.y)/2 - 20, 'Crow Flight L2 = 1.41', '#4ade80');
+
+            if (prog < 1) {
+                prog += 0.015;
+                distAnimId = requestAnimationFrame(frame);
+            }
+        }
+        frame();
+    }
+
+    function animateTaxiDrive() {
+        if (distAnimId) cancelAnimationFrame(distAnimId);
+        const c = document.getElementById('canvasDist'); 
+        const ctx = c.getContext('2d');
+        let prog = 0;
+
+        const P1 = { x: 80, y: 290, label: "P1 Healthy (1,2)" };
+        const P2 = { x: 380, y: 70, label: "P2 High-Risk (4,6)" };
+        const X  = { x: 280, y: 130, label: "Patient X (3,5)" };
+
+        function frame() {
+            ctx.clearRect(0, 0, c.width, c.height);
+            drawGrid(ctx, c);
+            drawPoint(ctx, P1, '#4ade80');
+            drawPoint(ctx, P2, '#f87171');
+            drawPoint(ctx, X, '#38bdf8');
+
+            ctx.strokeStyle = '#facc15'; ctx.lineWidth = 3.5; ctx.setLineDash([6, 4]);
+
+            let midX = P2.x;
+            let midY = X.y;
+            let taxiPos = { x: X.x, y: X.y };
+
+            ctx.beginPath();
+            ctx.moveTo(X.x, X.y);
+
+            if (prog <= 0.5) {
+                let p1 = prog / 0.5;
+                taxiPos.x = X.x + (midX - X.x) * p1;
+                ctx.lineTo(taxiPos.x, X.y);
+            } else {
+                let p2 = (prog - 0.5) / 0.5;
+                ctx.lineTo(midX, X.y);
+                taxiPos.x = midX;
+                taxiPos.y = X.y + (P2.y - X.y) * p2;
+                ctx.lineTo(midX, taxiPos.y);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#facc15';
+            ctx.font = '18px "Font Awesome 6 Free"';
+            ctx.fillText('🚕', taxiPos.x - 10, taxiPos.y - 10);
+
+            drawLabelBox(ctx, 250, 90, 'Taxi Grid L1 = 1 + 1 = 2', '#facc15');
+
+            if (prog < 1) {
+                prog += 0.015;
+                distAnimId = requestAnimationFrame(frame);
+            }
+        }
+        frame();
+    }
+
+    function drawGrid(ctx, c) {
+        ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+        for (let x = 40; x < c.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, c.height); ctx.stroke(); }
+        for (let y = 0; y < c.height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(c.width, y); ctx.stroke(); }
+    }
+
+    function drawPoint(ctx, p, color) {
+        ctx.fillStyle = color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.fill();
+        drawLabelBox(ctx, p.x + 10, p.y - 10, p.label, color);
+    }
+
+    function drawLine(ctx, p1, p2, color, label) {
+        ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+        drawLabelBox(ctx, (p1.x + p2.x) / 2 - 40, (p1.y + p2.y) / 2 - 15, label, color);
+    }
+
+    function drawLabelBox(ctx, x, y, text, color) {
+        ctx.font = 'bold 11px "Azeret Mono", monospace';
+        const m = ctx.measureText(text);
+        const w = m.width + 10;
+        const h = 20;
+
+        ctx.fillStyle = 'rgba(3, 7, 18, 0.92)';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.fillRect(x, y - h + 4, w, h);
+        ctx.strokeRect(x, y - h + 4, w, h);
+
+        ctx.fillStyle = color;
+        ctx.fillText(text, x + 5, y);
+    }
+
+    // -------------------------------------------------------------------------
+    // ANIMATION 2: WORD EMBEDDINGS TRAJECTORY (SLIDE 4)
+    // -------------------------------------------------------------------------
+    let wordsAnimId = null;
+    function animateWords() {
+        if (wordsAnimId) cancelAnimationFrame(wordsAnimId);
+        const c = document.getElementById('canvasWords'); 
+        const ctx = c.getContext('2d');
+        let prog = 0; 
+        const ox = 50, oy = 290;
+
+        function frame() {
+            ctx.clearRect(0, 0, c.width, c.height);
+
+            ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + 340, oy); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy - 250); ctx.stroke();
+            
+            ctx.fillStyle = '#94a3b8'; ctx.font = '11px "Azeret Mono"';
+            ctx.fillText('Masculinity Axis →', ox + 220, oy + 20);
+            ctx.fillText('Femininity Axis ↑', ox - 35, oy - 235);
+
+            drawArrow(ctx, ox, oy, ox + 220, oy - 180, '#38bdf8', 'King', '[0.9, 0.8, 0.1]', 'top');
+
+            if (prog > 0.3) {
+                let p1 = Math.min(1, (prog - 0.3) / 0.35);
+                let curX = (ox + 220) - 180 * p1;
+                let curY = (oy - 180) + 20 * p1;
+                drawArrow(ctx, ox + 220, oy - 180, curX, curY, '#f87171', '- Man', '', 'bottom');
+            }
+
+            if (prog > 0.65) {
+                let p2 = Math.min(1, (prog - 0.65) / 0.35);
+                let curX = (ox + 40) + 20 * p2;
+                let curY = (oy - 160) - 40 * p2;
+                drawArrow(ctx, ox + 40, oy - 160, curX, curY, '#4ade80', '= QUEEN', '[0.2, 0.8, 0.9]', 'top');
+            }
+
+            if (prog < 1) { 
+                prog += 0.008; 
+                wordsAnimId = requestAnimationFrame(frame); 
+            }
+        }
+        frame();
+    }
+
+    // -------------------------------------------------------------------------
+    // ANIMATION 3: RAG QUERY PROJECTION (SLIDE 5)
+    // -------------------------------------------------------------------------
+    let projAnimId = null;
+    function animateProj() {
+        if (projAnimId) cancelAnimationFrame(projAnimId);
+        const c = document.getElementById('canvasProj'); 
+        const ctx = c.getContext('2d');
+        let prog = 0; 
+        const ox = 50, oy = 280;
+
+        function frame() {
+            ctx.clearRect(0, 0, c.width, c.height);
+
+            ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + 340, oy); ctx.moveTo(ox, oy); ctx.lineTo(ox, oy - 230); ctx.stroke();
+
+            drawArrow(ctx, ox, oy, ox + 320, oy, '#4ade80', 'Doc Axis d (Tech)', '', 'bottom');
+            drawArrow(ctx, ox, oy, ox + 210, oy - 190, '#38bdf8', 'Query q', '(3, 4)', 'top');
+
+            if (prog > 0.2) {
+                let p = Math.min(1, (prog - 0.2) / 0.8);
+                let dropY = (oy - 190) + 190 * p;
+
+                ctx.setLineDash([5, 5]); ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(ox + 210, oy - 190); ctx.lineTo(ox + 210, dropY); ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawArrow(ctx, ox, oy, ox + 210 * p, oy, '#c084fc', 'Projection p', '(3.0, 0)', 'bottom');
+            }
+
+            if (prog < 1) { 
+                prog += 0.01; 
+                projAnimId = requestAnimationFrame(frame); 
+            }
+        }
+        frame();
+    }
+
+    // -------------------------------------------------------------------------
+    // ANIMATION 4: ONE-HOT VS DENSE EMBEDDINGS (SLIDE 7)
+    // -------------------------------------------------------------------------
+    function animateEnc(type) {
+        const c = document.getElementById('canvasEnc'); 
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, c.width, c.height);
+
+        const ox = 100, oy = 240;
+
+        if (type === 'onehot') {
+            drawArrow(ctx, ox, oy, ox + 170, oy, '#f87171', 'Laptop', '[1, 0]', 'bottom');
+            drawArrow(ctx, ox, oy, ox, oy - 170, '#f87171', 'Computer', '[0, 1]', 'left');
+            
+            ctx.strokeStyle = '#f87171'; ctx.lineWidth = 1.5;
+            ctx.strokeRect(ox, oy - 22, 22, 22);
+
+            drawLabelBox(ctx, 30, 25, 'One-Hot Encoding: Rigid 90° Orthogonal', '#f87171');
+            drawLabelBox(ctx, 30, 50, 'Dot product = 0. Model assumes ZERO relationship!', '#94a3b8');
+        } else {
+            drawArrow(ctx, ox, oy, ox + 200, oy - 65, '#38bdf8', 'Laptop', '[0.82, 0.15]', 'bottom');
+            drawArrow(ctx, ox, oy, ox + 180, oy - 90, '#4ade80', 'Computer', '[0.79, 0.18]', 'top');
+
+            ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(ox, oy, 55, -Math.atan2(65, 200), -Math.atan2(90, 180), true);
+            ctx.stroke();
+
+            drawLabelBox(ctx, 30, 25, 'Dense Embeddings: High Cosine Similarity', '#4ade80');
+            drawLabelBox(ctx, 30, 50, 'Small θ (<15°). Model captures semantic similarity!', '#94a3b8');
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // ANIMATION 5: QUESTION 11 IMAGE TRANSFORMATION (SLIDE 8)
+    // -------------------------------------------------------------------------
+    let q11AnimId = null;
+    function animateQ11() {
+        if (q11AnimId) cancelAnimationFrame(q11AnimId);
+        const c = document.getElementById('canvas11');
+        const ctx = c.getContext('2d');
+        let step = 0;
+        let progress = 0;
+
+        const baseValues = [50, 100, 150, 200];
+        const scaledValues = [75, 150, 225, 300];
+        const finalValues = [95, 170, 245, 320];
+        const clippedValues = [95, 170, 245, 255];
+
+        function frame() {
+            ctx.clearRect(0, 0, c.width, c.height);
+
+            // Draw Max Clip Threshold Line
+            const maxValY = 310 - (255 / 320) * 220;
+            ctx.strokeStyle = '#f87171';
+            ctx.setLineDash([4, 4]);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(40, maxValY);
+            ctx.lineTo(c.width - 20, maxValY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#f87171';
+            ctx.font = 'bold 11px "Azeret Mono", monospace';
+            ctx.fillText('MAX HARDWARE LIMIT = 255 (WHITE)', 40, maxValY - 6);
+
+            // Calculate animated pixel values based on sequence step
+            let currentVals = [50, 100, 150, 200];
+            let labelText = "Original x = [50, 100, 150, 200]";
+            let labelColor = "#38bdf8";
+
+            if (step === 0) { // Moving to Scaled
+                currentVals = baseValues.map((v, i) => v + (scaledValues[i] - v) * progress);
+                labelText = "Step 1: Contrast Scaling (1.5x)";
+                labelColor = "#38bdf8";
+            } else if (step === 1) { // Moving to Shifted
+                currentVals = scaledValues.map((v, i) => v + (finalValues[i] - v) * progress);
+                labelText = "Step 2: Brightness Shift (+20)";
+                labelColor = "#facc15";
+            } else if (step >= 2) { // Applying Clipping
+                currentVals = finalValues.map((v, i) => v + (clippedValues[i] - v) * progress);
+                labelText = "Step 3: Hardware Clipping (Max 255)";
+                labelColor = "#f87171";
+            }
+
+            drawLabelBox(ctx, 40, 30, labelText, labelColor);
+
+            // Render Animated Pixel Bars and Color Patches
+            const barWidth = 65;
+            const startX = 50;
+            const spacing = 95;
+
+            for (let i = 0; i < 4; i++) {
+                const x = startX + i * spacing;
+                const val = currentVals[i];
+                const height = (val / 320) * 220;
+                const y = 310 - height;
+
+                // Color sample block representation
+                const grayValue = Math.min(255, Math.max(0, Math.round(val)));
+                ctx.fillStyle = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
+                ctx.fillRect(x, 325, barWidth, 25);
+                ctx.strokeStyle = '#334155';
+                ctx.strokeRect(x, 325, barWidth, 25);
+
+                // Bar Graph Visualization
+                const isClipped = (i === 3 && step >= 2);
+                ctx.fillStyle = isClipped ? '#f87171' : (step === 1 ? '#facc15' : '#38bdf8');
+                ctx.fillRect(x, y, barWidth, height);
+
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px "Azeret Mono", monospace';
+                ctx.fillText(Math.round(val).toString(), x + 18, y - 8);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '11px "Urbanist", sans-serif';
+                ctx.fillText(`Pixel ${i + 1}`, x + 15, 368);
+            }
+
+            // Progression logic across animation phases
+            if (progress < 1) {
+                progress += 0.02;
+                q11AnimId = requestAnimationFrame(frame);
+            } else if (step < 2) {
+                step++;
+                progress = 0;
+                setTimeout(() => {
+                    q11AnimId = requestAnimationFrame(frame);
+                }, 500);
+            }
+        }
+        frame();
+    }
+
+    // INITIALIZE KATEX & ALL CANVASES ON DOM LOAD
+    document.addEventListener("DOMContentLoaded", function() {
+      renderMathInElement(document.body, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
+      });
+
+      animateCrowFlight();
+      animateWords();
+      animateProj();
+      animateEnc('onehot');
+      animateQ11();
+    });
+</script>
+
+</body>
+</html>
