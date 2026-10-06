@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python Coding Assessment: Strings, Lists &amp; Sets</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --emerald: #059669;
+      --amber: #d97706;
+      --code-bg: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--slate-800);
+      background-color: #f8fafc;
+      line-height: 1.6;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 36px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+      border: 1px solid var(--slate-200);
+    }
+
+    .header-banner {
+      background: var(--slate-900);
+      color: #ffffff;
+      padding: 28px 32px;
+      border-radius: 8px;
+      margin-bottom: 32px;
+    }
+
+    .header-banner .tag {
+      color: #38bdf8;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .header-banner h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .header-banner p {
+      color: #94a3b8;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .section-heading {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-top: 36px;
+      margin-bottom: 4px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--slate-200);
+    }
+
+    .section-subtitle {
+      font-size: 0.88rem;
+      color: var(--slate-600);
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .question-card {
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      page-break-inside: avoid;
+    }
+
+    .question-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 10px;
+    }
+
+    .question-number {
+      color: var(--primary);
+      margin-right: 4px;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: var(--slate-100);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      margin-bottom: 14px;
+    }
+
+    .meta-item {
+      display: flex;
+      gap: 4px;
+    }
+
+    .meta-label {
+      font-weight: 700;
+      color: var(--slate-600);
+    }
+
+    .meta-value {
+      color: var(--slate-900);
+    }
+
+    .badge-easy {
+      color: var(--emerald);
+      font-weight: 700;
+    }
+
+    .badge-med {
+      color: var(--amber);
+      font-weight: 700;
+    }
+
+    .desc {
+      font-size: 0.93rem;
+      color: var(--slate-700);
+      margin-bottom: 12px;
+      text-align: justify;
+    }
+
+    .desc strong {
+      color: var(--slate-900);
+    }
+
+    .callout {
+      background: var(--slate-50);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 6px 6px 0;
+      padding: 12px 16px;
+      margin: 14px 0;
+      font-size: 0.88rem;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .example-block {
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+
+    .example-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .example-label {
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+
+    code {
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      background: #e2e8f0;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #b91c1c;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 0.84rem;
+      margin-top: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .kw { color: #38bdf8; font-weight: bold; }
+    .fn { color: #facc15; }
+    .cm { color: #94a3b8; font-style: italic; }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .container {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .question-card {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header Banner -->
+  <div class="header-banner">
+    <div class="tag">Technical Interview Question Bank • Python</div>
+    <h1>15 Core Coding Interview Problems</h1>
+    <p>Practice problem statements, detailed test cases, edge cases, and function templates across Strings, Lists, and Sets (solutions omitted for self-evaluation).</p>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- SECTION 1: STRINGS                         -->
+  <!-- ========================================== -->
+  <h2 class="section-heading">Section 1: Strings</h2>
+  <p class="section-subtitle">Character sanitation, pointer convergence, hash lookups, and frequency balance.</p>
+
+  <!-- Q1 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 1:</span> Check for Valid Palindrome (Alpha-numeric)</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Strings</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-easy">Easy</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters (spaces, punctuation, symbols), it reads the exact same forward and backward. Given a string <code>s</code>, write a function that returns <code>True</code> if it is a palindrome, or <code>False</code> otherwise. You must achieve this with <code>O(1)</code> extra auxiliary space without creating a reversed copy of the string in memory.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>s = "A man, a plan, a canal: Panama"</code><br><strong>Output:</strong> <code>True</code><br><strong>Explanation:</strong> Sanitizing non-alphanumeric characters and lowercasing produces <code>"amanaplanacanalpanama"</code>, which reads identically forward and backward.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>s = "race a car"</code><br><strong>Output:</strong> <code>False</code><br><strong>Explanation:</strong> Stripping spaces leaves <code>"raceacar"</code>, which reverses to <code>"racaecar"</code>.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>s = "., "</code><br><strong>Output:</strong> <code>True</code><br><strong>Explanation:</strong> An empty string after stripping non-alphanumerics is considered a valid palindrome by definition.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">is_valid_palindrome</span>(s: str) -> bool:
+    <span class="cm"># Write your solution here (Target Space: O(1))</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 2:</span> Reverse Words in a Sentence</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Strings</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-med">Easy-Medium</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(n)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given an input string <code>s</code>, reverse the sequence of words. A word is defined as a continuous sequence of non-space characters. Return a string of the words in reverse order joined by a single space. All leading spaces, trailing spaces, and multiple consecutive spaces between words must be eliminated.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>s = "the sky is blue"</code><br><strong>Output:</strong> <code>"blue is sky the"</code><br><strong>Explanation:</strong> Word sequence is reversed directly.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>s = "  hello world  "</code><br><strong>Output:</strong> <code>"world hello"</code><br><strong>Explanation:</strong> Leading and trailing spaces are removed; the reversed words are joined with a single space.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>s = "a good   example"</code><br><strong>Output:</strong> <code>"example good a"</code><br><strong>Explanation:</strong> Three consecutive spaces between "good" and "example" are reduced to a single space.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">reverse_words</span>(s: str) -> str:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 3:</span> First Non-Repeating Character in a String</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Strings / Dict</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-easy">Easy</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given a string <code>s</code> consisting of lowercase English letters, find the first character in it that does not repeat anywhere else in the string and return its 0-based index. If no unique character exists, return <code>-1</code>. Solve this in linear <code>O(n)</code> time.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>s = "leetcode"</code><br><strong>Output:</strong> <code>0</code><br><strong>Explanation:</strong> Character 'l' at index 0 does not appear anywhere else.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>s = "loveleetcode"</code><br><strong>Output:</strong> <code>2</code><br><strong>Explanation:</strong> 'l' repeats at index 4 and 'o' repeats at index 3. The first non-repeating character is 'v' at index 2.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>s = "aabbcc"</code><br><strong>Output:</strong> <code>-1</code><br><strong>Explanation:</strong> Every character repeats; no unique character exists.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">first_unique_char</span>(s: str) -> int:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 4:</span> Valid Anagram Verification</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Strings / Dict</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-easy">Easy</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given two strings <code>s</code> and <code>t</code>, return <code>True</code> if <code>t</code> is an anagram of <code>s</code>, and <code>False</code> otherwise. An anagram is a word formed by rearranging the exact letters of another word using each original letter exactly once. Your solution must run in <code>O(n)</code> time without using Python's built-in <code>sorted()</code>.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>s = "anagram", t = "nagaram"</code><br><strong>Output:</strong> <code>True</code><br><strong>Explanation:</strong> Both strings contain 3 'a', 1 'g', 1 'm', 1 'n', and 1 'r'.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>s = "rat", t = "car"</code><br><strong>Output:</strong> <code>False</code><br><strong>Explanation:</strong> Character 'c' appears in t but not in s.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>s = "ab", t = "a"</code><br><strong>Output:</strong> <code>False</code><br><strong>Explanation:</strong> Strings with different lengths cannot be anagrams.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">is_anagram</span>(s: str, t: str) -> bool:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 5:</span> Count Vowels, Consonants, and Digits</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Strings</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-easy">Easy</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given an arbitrary string <code>s</code> containing alphanumeric characters, whitespace, and punctuation, compute and return a dictionary with the total count of vowels (<code>a, e, i, o, u</code> case-insensitive), consonants (alphabetic letters that are not vowels), and numeric digits (<code>0-9</code>). All symbols and spaces must be excluded.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>s = "Python 3.10 is Awesome!"</code><br><strong>Output:</strong> <code>{'vowels': 6, 'consonants': 10, 'digits': 3}</code><br><strong>Explanation:</strong> Vowels: o, i, A, e, o, e (6). Consonants: P, y, t, h, n, s, w, s, m (10). Digits: 3, 1, 0 (3).</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>s = "12345!@#"</code><br><strong>Output:</strong> <code>{'vowels': 0, 'consonants': 0, 'digits': 5}</code><br><strong>Explanation:</strong> Contains only numeric digits and symbols.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>s = " "</code><br><strong>Output:</strong> <code>{'vowels': 0, 'consonants': 0, 'digits': 0}</code><br><strong>Explanation:</strong> No alphanumeric characters present.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">count_chars</span>(s: str) -> dict[str, int]:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- SECTION 2: LISTS                          -->
+  <!-- ========================================== -->
+  <h2 class="section-heading">Section 2: Lists</h2>
+  <p class="section-subtitle">Boundary variable tracking, in-place rotations, mathematical sums, and partition schemes.</p>
+
+  <!-- Q6 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 6:</span> Find the Second Largest Element in a List</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Lists / Arrays</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-med">Easy-Medium</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given a list of integers <code>nums</code>, return the second largest <strong>distinct</strong> integer without sorting the list. If no distinct second largest integer exists (e.g., all numbers are identical or length &lt; 2), return <code>None</code>.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>nums = [12, 35, 1, 10, 34, 1]</code><br><strong>Output:</strong> <code>34</code><br><strong>Explanation:</strong> The maximum is 35; the distinct integer immediately below 35 is 34.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>nums = [-5, -10, -2, -1]</code><br><strong>Output:</strong> <code>-2</code><br><strong>Explanation:</strong> The maximum is -1; the next largest distinct value is -2.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>nums = [10, 10, 10]</code><br><strong>Output:</strong> <code>None</code><br><strong>Explanation:</strong> All values are identical; no second largest distinct number exists.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">find_second_largest</span>(nums: list[int]) -> int | None:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q7 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 7:</span> Rotate a List by k Steps In-Place</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Lists / Arrays</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-med">Medium</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given an integer list <code>nums</code>, rotate the list to the right by <code>k</code> steps in-place using strictly <code>O(1)</code> auxiliary memory. Note that <code>k</code> can be larger than the length of the list.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>nums = [1, 2, 3, 4, 5, 6, 7], k = 3</code><br><strong>Output:</strong> <code>[5, 6, 7, 1, 2, 3, 4]</code><br><strong>Explanation:</strong> The last 3 elements <code>[5, 6, 7]</code> are shifted to the beginning.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>nums = [-1, -100, 3, 99], k = 2</code><br><strong>Output:</strong> <code>[3, 99, -1, -100]</code><br><strong>Explanation:</strong> Every element is shifted right by 2 positions.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>nums = [1, 2], k = 5</code><br><strong>Output:</strong> <code>[2, 1]</code><br><strong>Explanation:</strong> Since <code>len(nums) = 2</code>, rotating by 5 is equivalent to rotating by <code>5 % 2 = 1</code> step.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">rotate_array</span>(nums: list[int], k: int) -> list[int]:
+    <span class="cm"># Write your solution here (Target Space: O(1))</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q8 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 8:</span> Find Missing Number in Range 1 to N</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Lists / Math</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-easy">Easy</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> You are given a list <code>nums</code> containing <code>n - 1</code> distinct integers from the range <code>[1, n]</code>. Exactly one number is missing. Find and return that missing number in <code>O(n)</code> time and <code>O(1)</code> auxiliary memory.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>nums = [3, 7, 1, 2, 8, 4, 5], n = 8</code><br><strong>Output:</strong> <code>6</code><br><strong>Explanation:</strong> Range [1, 8] contains all numbers except 6.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>nums = [1, 2, 4, 5], n = 5</code><br><strong>Output:</strong> <code>3</code><br><strong>Explanation:</strong> The missing number in [1, 5] is 3.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>nums = [2], n = 2</code><br><strong>Output:</strong> <code>1</code><br><strong>Explanation:</strong> Range is [1, 2]. 2 is present, so 1 is missing.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">find_missing_number</span>(nums: list[int], n: int) -> int:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q9 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 9:</span> Merge Two Sorted Lists</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Lists</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-med">Easy-Medium</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n + m), Space O(n + m)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given two sorted integer lists <code>l1</code> and <code>l2</code>, merge them into a single sorted list and return it. Construct the sorted output directly in <code>O(n + m)</code> time without combining them and calling Python's built-in <code>.sort()</code>.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>l1 = [1, 3, 5, 7], l2 = [2, 4, 6, 8, 10]</code><br><strong>Output:</strong> <code>[1, 2, 3, 4, 5, 6, 7, 8, 10]</code><br><strong>Explanation:</strong> Elements are merged in interleaved sorted order.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>l1 = [5, 10], l2 = [1, 2, 3]</code><br><strong>Output:</strong> <code>[1, 2, 3, 5, 10]</code><br><strong>Explanation:</strong> All elements in l2 precede l1.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>l1 = [], l2 = [0]</code><br><strong>Output:</strong> <code>[0]</code><br><strong>Explanation:</strong> Merging an empty list with a non-empty list returns the non-empty list.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">merge_sorted_lists</span>(l1: list[int], l2: list[int]) -> list[int]:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q10 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 10:</span> Segregate Positive and Negative Numbers</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Lists</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-med">Medium</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given an integer list <code>nums</code> containing positive and negative values, rearrange the elements in-place such that all negative numbers appear before all positive numbers (and zeros). The relative order within each partition does not need to be preserved.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>nums = [12, -7, 5, -3, -15, 8]</code><br><strong>Output:</strong> <code>[-7, -3, -15, 12, 5, 8]</code> (or any valid partition)<br><strong>Explanation:</strong> All negative values reside on the left, all positive values on the right.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>nums = [-1, -2, -3]</code><br><strong>Output:</strong> <code>[-1, -2, -3]</code><br><strong>Explanation:</strong> All numbers are already negative.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>nums = [4, 0, 2, 1]</code><br><strong>Output:</strong> <code>[4, 0, 2, 1]</code><br><strong>Explanation:</strong> No negative values present.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">segregate_pos_neg</span>(nums: list[int]) -> list[int]:
+    <span class="cm"># Write your solution here (Target Space: O(1))</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- SECTION 3: SETS                           -->
+  <!-- ========================================== -->
+  <h2 class="section-heading">Section 3: Sets</h2>
+  <p class="section-subtitle">Uniqueness checks, set algebra operations, sentence completeness, and multi-pointer intersections.</p>
+
+  <!-- Q11 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 11:</span> Check for Duplicates in a Collection</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Sets</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-easy">Easy</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(n)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given an integer list <code>nums</code>, return <code>True</code> if any element appears at least twice in the list, and <code>False</code> if every element is distinct. Optimize your algorithm to terminate early as soon as the first duplicate is identified.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>nums = [1, 2, 3, 1]</code><br><strong>Output:</strong> <code>True</code><br><strong>Explanation:</strong> Value 1 appears at index 0 and 3.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>nums = [1, 2, 3, 4]</code><br><strong>Output:</strong> <code>False</code><br><strong>Explanation:</strong> All elements are unique.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>nums = [9, 9]</code><br><strong>Output:</strong> <code>True</code><br><strong>Explanation:</strong> Exits early on the second element without scanning further.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">contains_duplicate</span>(nums: list[int]) -> bool:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q12 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 12:</span> Intersection and Union of Two Unsorted Lists</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Sets</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-easy">Easy</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n + m), Space O(n + m)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given two unsorted integer lists <code>a</code> and <code>b</code> that may contain duplicate values, return two lists:
+      <br>1. <strong>Intersection:</strong> All unique elements appearing in both lists.
+      <br>2. <strong>Union:</strong> All unique elements appearing in either list.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>a = [1, 2, 2, 1], b = [2, 2, 3]</code><br><strong>Output:</strong> <code>Intersection: [2], Union: [1, 2, 3]</code><br><strong>Explanation:</strong> 2 is the only element common to both lists. The set of all unique combined values is 1, 2, 3.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>a = [4, 9, 5], b = [9, 4, 9, 8, 4]</code><br><strong>Output:</strong> <code>Intersection: [4, 9], Union: [4, 5, 8, 9]</code><br><strong>Explanation:</strong> 4 and 9 are shared by both collections.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>a = [1, 2], b = [3, 4]</code><br><strong>Output:</strong> <code>Intersection: [], Union: [1, 2, 3, 4]</code><br><strong>Explanation:</strong> Disjoint collections have an empty intersection.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">intersection_and_union</span>(a: list[int], b: list[int]) -> tuple[list[int], list[int]]:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q13 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 13:</span> Pangram Sentence Verification</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Sets / Strings</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-easy">Easy</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> A pangram is a sentence containing every single letter of the English alphabet at least once. Given a string <code>sentence</code>, return <code>True</code> if it is a pangram, or <code>False</code> otherwise. The check must be case-insensitive and ignore spaces, digits, and punctuation.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>sentence = "The quick brown fox jumps over the lazy dog"</code><br><strong>Output:</strong> <code>True</code><br><strong>Explanation:</strong> Contains all 26 lowercase English letters from 'a' to 'z'.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>sentence = "Pack my box with five dozen liquor jugs"</code><br><strong>Output:</strong> <code>True</code><br><strong>Explanation:</strong> Contains every letter of the alphabet.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>sentence = "Hello World 123!"</code><br><strong>Output:</strong> <code>False</code><br><strong>Explanation:</strong> Missing several letters of the alphabet (e.g., 'a', 'b', 'c').</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">is_pangram</span>(sentence: str) -> bool:
+    <span class="cm"># Write your solution here</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q14 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 14:</span> Symmetric Difference of Two Collections Without '^'</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Sets</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-med">Easy-Medium</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n + m), Space O(n + m)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given two integer lists <code>list1</code> and <code>list2</code>, return a list containing all unique elements that are present in either <code>list1</code> or <code>list2</code>, but <strong>not in both</strong>. You must implement this logic without using the built-in symmetric difference operator <code>^</code> or the <code>.symmetric_difference()</code> method.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>list1 = [1, 2, 3, 4], list2 = [3, 4, 5, 6]</code><br><strong>Output:</strong> <code>[1, 2, 5, 6]</code><br><strong>Explanation:</strong> 3 and 4 appear in both lists and are excluded. 1 and 2 are exclusive to list1; 5 and 6 are exclusive to list2.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>list1 = [1, 1, 2], list2 = [2, 2, 3]</code><br><strong>Output:</strong> <code>[1, 3]</code><br><strong>Explanation:</strong> 2 is common. Unique to list1 is 1; unique to list2 is 3.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>list1 = [1, 2, 3], list2 = [1, 2, 3]</code><br><strong>Output:</strong> <code>[]</code><br><strong>Explanation:</strong> Identical collections leave no symmetric difference.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">manual_symmetric_diff</span>(list1: list[int], list2: list[int]) -> list[int]:
+    <span class="cm"># Write your solution here (Do not use '^' or .symmetric_difference())</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+  <!-- Q15 -->
+  <div class="question-card">
+    <div class="question-title"><span class="question-number">Question 15:</span> Common Elements Across Three Sorted Lists</div>
+    <div class="meta-bar">
+      <div class="meta-item"><span class="meta-label">Topic:</span> <span class="meta-value">Sets / Pointers</span></div>
+      <div class="meta-item"><span class="meta-label">Difficulty:</span> <span class="badge-med">Medium</span></div>
+      <div class="meta-item"><span class="meta-label">Target Complexity:</span> <span class="meta-value">Time O(n1 + n2 + n3), Space O(1)</span></div>
+    </div>
+    <p class="desc"><strong>Problem Description:</strong> Given three integer lists <code>a</code>, <code>b</code>, and <code>c</code> sorted in non-decreasing order, return a list of all unique elements that are present in all three lists. Your solution must run in <code>O(n1 + n2 + n3)</code> linear time using strictly <code>O(1)</code> auxiliary space (excluding the returned list) rather than converting the lists into large hash sets.</p>
+    
+    <div class="callout">
+      <div class="callout-title">Examples &amp; Test Cases</div>
+      <div class="example-block"><span class="example-label">Example 1:</span><br><strong>Input:</strong> <code>a = [1, 5, 10, 20, 40, 80], b = [6, 7, 20, 80, 100], c = [3, 4, 15, 20, 30, 70, 80, 120]</code><br><strong>Output:</strong> <code>[20, 80]</code><br><strong>Explanation:</strong> 20 and 80 are the only elements that appear in all three arrays simultaneously.</div>
+      <div class="example-block"><span class="example-label">Example 2:</span><br><strong>Input:</strong> <code>a = [1, 2, 3], b = [4, 5, 6], c = [7, 8, 9]</code><br><strong>Output:</strong> <code>[]</code><br><strong>Explanation:</strong> No common elements across the three arrays.</div>
+      <div class="example-block"><span class="example-label">Example 3 (Edge Case):</span><br><strong>Input:</strong> <code>a = [1, 5, 5], b = [3, 4, 5, 5], c = [5, 5, 10]</code><br><strong>Output:</strong> <code>[5]</code><br><strong>Explanation:</strong> Even though 5 repeats in all lists, the result must contain the unique value 5 only once without duplicates.</div>
+    </div>
+
+    <pre><span class="kw">def</span> <span class="fn">common_elements_three_lists</span>(a: list[int], b: list[int], c: list[int]) -> list[int]:
+    <span class="cm"># Write your solution here (Target Space: O(1) auxiliary)</span>
+    <span class="kw">pass</span></pre>
+  </div>
+
+</div>
+
+</body>
+</html>

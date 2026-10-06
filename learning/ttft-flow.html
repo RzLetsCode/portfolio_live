@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TTFT Enterprise Flow · Queue → Prefill → Tokens → KV → First Token</title>
+    <style>
+        :root {
+            --bg: #020617;
+            --bg-elevated: #0b1120;
+            --border-subtle: #1f2937;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-amber: #fbbf24;
+            --accent-orange: #f97316;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flow-root {
+            width: 1040px;
+            background: var(--bg-elevated);
+            border-radius: 22px;
+            padding: 24px 26px 28px;
+            box-shadow: 0 26px 60px rgba(15,23,42,0.85);
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* Global animation play control via classes */
+        .flow-root.flow-paused * {
+            animation-play-state: paused !important;
+        }
+
+        .flow-root.flow-running * {
+            animation-play-state: running !important;
+        }
+
+        /* Header + controls */
+        .flow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .flow-title-block {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .flow-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .flow-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .flow-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flow-btn {
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid #1f2937;
+            background: #020617;
+            color: var(--text-primary);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+        }
+
+        .flow-btn.start {
+            border-color: #22c55e;
+            color: #bbf7d0;
+        }
+
+        .flow-btn.pause {
+            border-color: #f97316;
+            color: #fed7aa;
+        }
+
+        .flow-btn.resume {
+            border-color: #38bdf8;
+            color: #bae6fd;
+        }
+
+        .flow-slo-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid #1d4ed8;
+            color: #bfdbfe;
+            background: rgba(15,23,42,0.7);
+            margin-left: 8px;
+        }
+
+        .flow-body {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-top: 8px;
+        }
+
+        /* TOP PANEL: TTFT Monitor (like attachment) */
+        .ttft-dashboard {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 20px;
+            background: #020617;
+            border-radius: 16px;
+            padding: 18px 20px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* Left: pipeline */
+        .ttft-pipeline {
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #020617;
+        }
+
+        .ttft-pipeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .ttft-pipeline-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .ttft-pipeline-caption {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .ttft-line {
+            position: relative;
+            height: 4px;
+            background: #0f172a;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .ttft-line-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-green));
+            animation: lineFillSync 9s linear infinite;
+        }
+
+        @keyframes lineFillSync {
+            0%   { width: 0%; }
+            33%  { width: 35%; }
+            66%  { width: 80%; }
+            100% { width: 100%; }
+        }
+
+        .ttft-stages {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+
+        .ttft-stage {
+            width: 32%;
+            text-align: left;
+        }
+
+        .ttft-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            background: #111827;
+            border: 2px solid #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .ttft-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .ttft-stage-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        /* Queue 0–3s, Prefill 3–6s, First Token 6–9s */
+        .ttft-dot.queue {
+            animation: dotQueueSync 9s linear infinite;
+        }
+
+        .ttft-dot.prefill {
+            animation: dotPrefillSync 9s linear infinite;
+        }
+
+        .ttft-dot.first-token {
+            animation: dotFirstSync 9s linear infinite;
+        }
+
+        @keyframes dotQueueSync {
+            0%   { background:#111827; border-color:#1f2937; box-shadow:none; }
+            5%   { background:var(--accent-orange); border-color:#fed7aa; box-shadow:0 0 0 6px rgba(249,115,22,0.45); }
+            30%  { background:var(--accent-orange); border-color:#fed7aa; box-shadow:0 0 0 4px rgba(249,115,22,0.25); }
+            34%  { background:#111827; border-color:#1f2937; box-shadow:none; }
+            100% { background:#111827; border-color:#1f2937; box-shadow:none; }
+        }
+
+        @keyframes dotPrefillSync {
+            0%   { background:#111827; border-color:#1f2937; box-shadow:none; }
+            33%  { background:#0ea5e9; border-color:#bae6fd; box-shadow:0 0 0 6px rgba(14,165,233,0.45); }
+            65%  { background:#0ea5e9; border-color:#bae6fd; box-shadow:0 0 0 4px rgba(14,165,233,0.25); }
+            68%  { background:#111827; border-color:#1f2937; box-shadow:none; }
+            100% { background:#111827; border-color:#1f2937; box-shadow:none; }
+        }
+
+        @keyframes dotFirstSync {
+            0%   { background:#111827; border-color:#1f2937; box-shadow:none; }
+            66%  { background:#111827; border-color:#1f2937; box-shadow:none; }
+            72%  { background:var(--accent-green); border-color:#bbf7d0; box-shadow:0 0 0 7px rgba(34,197,94,0.55); }
+            100% { background:var(--accent-green); border-color:#bbf7d0; box-shadow:0 0 0 9px rgba(34,197,94,0.30); }
+        }
+
+        /* Right: TTFT KPI */
+        .ttft-kpi {
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #020617;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ttft-kpi-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .ttft-kpi-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .ttft-kpi-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        .ttft-kpi-value::after {
+            content: "0 ms";
+            animation: ttftValueSync 9s linear infinite;
+        }
+
+        @keyframes ttftValueSync {
+            0%   { content: "0 ms"; }
+            20%  { content: "80 ms"; }
+            40%  { content: "140 ms"; }
+            66%  { content: "200 ms"; }
+            100% { content: "230 ms"; }
+        }
+
+        .ttft-band {
+            height: 6px;
+            border-radius: 999px;
+            background: #0f172a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ttft-band-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 6px;
+            width: 0%;
+            background: linear-gradient(to right, var(--accent-green), var(--accent-amber));
+            animation: ttftBandFillSync 9s linear infinite;
+        }
+
+        @keyframes ttftBandFillSync {
+            0%   { width: 0%; }
+            33%  { width: 40%; }
+            66%  { width: 72%; }
+            100% { width: 88%; }
+        }
+
+        .ttft-kpi-note {
+            font-size: 10px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .ttft-kpi-note strong {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .ttft-kpi-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .ttft-pill {
+            padding: 2px 8px;
+            border-radius: 999px;
+            border: 1px solid #1f2937;
+            background: rgba(15,23,42,0.7);
+        }
+
+        .ttft-pill.good {
+            border-color: #15803d;
+            color: #bbf7d0;
+        }
+
+        .ttft-pill.warn {
+            border-color: var(--accent-amber);
+            color: #fef3c7;
+        }
+
+        /* BOTTOM PANEL: Prompt → Tokens → KV → First Token */
+        .llm-flow {
+            background: #020617;
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            padding: 18px 20px;
+        }
+
+        .flow-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+        .flow-row-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .flow-row-subtitle {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .flow-bottom-body {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 20px;
+        }
+
+        .flow-left {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .flow-right {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .panel {
+            background: #020617;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            padding: 12px 14px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .panel-caption {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .prompt-box {
+            font-size: 12px;
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 8px 10px;
+            border: 1px solid #1f2937;
+        }
+
+        .prompt-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .prompt-text {
+            font-size: 12px;
+            color: var(--text-primary);
+        }
+
+        .tokens-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .token-pill {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid #1f2937;
+            background: #030712;
+            color: #9ca3af;
+            opacity: 0.1;
+            transform: translateY(4px);
+        }
+
+        /* Tokens appear mostly during Prefill window (3–6s) */
+        .token-pill:nth-child(1)  { animation: tokenInSync 9s linear infinite; animation-delay: 3.2s; }
+        .token-pill:nth-child(2)  { animation: tokenInSync 9s linear infinite; animation-delay: 3.4s; }
+        .token-pill:nth-child(3)  { animation: tokenInSync 9s linear infinite; animation-delay: 3.6s; }
+        .token-pill:nth-child(4)  { animation: tokenInSync 9s linear infinite; animation-delay: 3.8s; }
+        .token-pill:nth-child(5)  { animation: tokenInSync 9s linear infinite; animation-delay: 4.0s; }
+        .token-pill:nth-child(6)  { animation: tokenInSync 9s linear infinite; animation-delay: 4.2s; }
+        .token-pill:nth-child(7)  { animation: tokenInSync 9s linear infinite; animation-delay: 4.4s; }
+        .token-pill:nth-child(8)  { animation: tokenInSync 9s linear infinite; animation-delay: 4.6s; }
+        .token-pill:nth-child(9)  { animation: tokenInSync 9s linear infinite; animation-delay: 4.8s; }
+        .token-pill:nth-child(10) { animation: tokenInSync 9s linear infinite; animation-delay: 5.0s; }
+
+        @keyframes tokenInSync {
+            0%   { opacity: 0.0; transform: translateY(4px) scale(0.95); }
+            10%  { opacity: 1.0; transform: translateY(0) scale(1.0); border-color: var(--accent-blue); color: var(--text-primary); }
+            50%  { opacity: 1.0; transform: translateY(0) scale(1.0); border-color: #1f2937; color: var(--text-primary); }
+            100% { opacity: 0.2; transform: translateY(4px) scale(0.97); border-color: #1f2937; color: #9ca3af; }
+        }
+
+        .kv-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .kv-cell {
+            font-size: 10px;
+            text-align: center;
+            padding: 4px 4px;
+            border-radius: 8px;
+            border: 1px solid #1f2937;
+            background: #030712;
+            color: #9ca3af;
+            opacity: 0.1;
+            transform: translateY(4px);
+        }
+
+        /* KV cells fill slightly after tokens (still in Prefill) */
+        .kv-cell:nth-child(1)  { animation: kvFillSync 9s linear infinite; animation-delay: 4.2s; }
+        .kv-cell:nth-child(2)  { animation: kvFillSync 9s linear infinite; animation-delay: 4.6s; }
+        .kv-cell:nth-child(3)  { animation: kvFillSync 9s linear infinite; animation-delay: 5.0s; }
+        .kv-cell:nth-child(4)  { animation: kvFillSync 9s linear infinite; animation-delay: 5.4s; }
+        .kv-cell:nth-child(5)  { animation: kvFillSync 9s linear infinite; animation-delay: 5.8s; }
+
+        @keyframes kvFillSync {
+            0%   { opacity: 0.0; transform: translateY(4px) scale(0.95); border-color:#1f2937; }
+            20%  { opacity: 1.0; transform: translateY(0) scale(1.0); border-color:#0ea5e9; background:#0f172a; color:var(--text-primary); }
+            60%  { opacity: 1.0; transform: translateY(0) scale(1.0); border-color:#1f2937; background:#020617; color:var(--text-primary); }
+            100% { opacity: 0.2; transform: translateY(4px) scale(0.97); border-color:#1f2937; background:#030712; color:#9ca3af; }
+        }
+
+        .kv-caption {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        /* TTFT panel on right (reuses top timing) */
+        .ttft-panel {
+            background: #020617;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            padding: 12px 14px;
+        }
+
+        .ttft-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .ttft-panel-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .ttft-panel-sub {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .ttft-bar-small {
+            margin-top: 8px;
+            height: 6px;
+            border-radius: 999px;
+            background: #0f172a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ttft-bar-small-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 6px;
+            width: 0%;
+            background: linear-gradient(to right, var(--accent-amber), var(--accent-green));
+            animation: ttftBarFillSync 9s linear infinite;
+        }
+
+        .ttft-metrics-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 6px;
+        }
+
+        .ttft-ms-label-small {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .ttft-ms-value-small {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        .ttft-ms-value-small::after {
+            content: "TTFT: 0 ms";
+            animation: ttftNumberSmallSync 9s linear infinite;
+        }
+
+        @keyframes ttftNumberSmallSync {
+            0%   { content: "TTFT: 0 ms"; }
+            40%  { content: "TTFT: 120 ms"; }
+            66%  { content: "TTFT: 200 ms"; }
+            100% { content: "TTFT: 230 ms"; }
+        }
+
+        .ttft-note-small {
+            margin-top: 4px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .ttft-note-small strong {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* First token bubble synced with First Token stage (6–9s) */
+        .first-token-panel {
+            margin-top: 10px;
+            background: #020617;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            padding: 10px 12px;
+        }
+
+        .first-token-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .first-token-title {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .first-token-status {
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+
+        .first-token-bubble {
+            margin-top: 8px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: #0f172a;
+            border: 1px solid #1f2937;
+            font-size: 12px;
+            color: var(--text-primary);
+            opacity: 0;
+            transform: translateY(4px) scale(0.96);
+            animation: firstTokenAppearSync 9s ease-out infinite;
+        }
+
+        @keyframes firstTokenAppearSync {
+            0%   { opacity: 0; transform: translateY(4px) scale(0.96); border-color:#1f2937; }
+            66%  { opacity: 0; transform: translateY(4px) scale(0.96); border-color:#1f2937; }
+            75%  { opacity: 1; transform: translateY(0) scale(1.0); border-color:var(--accent-green); box-shadow:0 0 0 10px rgba(34,197,94,0.30); }
+            100% { opacity: 1; transform: translateY(0) scale(1.0); border-color:var(--accent-green); box-shadow:0 0 0 6px rgba(34,197,94,0.20); }
+        }
+
+        .first-token-bubble span.token-text {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .first-token-footnote {
+            margin-top: 4px;
+            font-size: 10px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="flow-root flow-running" id="flowRoot">
+    <div class="flow-header">
+        <div class="flow-title-block">
+            <div class="flow-title">TTFT Enterprise Flow · Queue → Prefill → Tokens → KV → First Token</div>
+            <div class="flow-subtitle">
+                Combined architect view: high-level TTFT monitor on top, detailed prompt/token/KV/first-token flow below, all synchronized in a 9s cycle.
+            </div>
+        </div>
+        <div class="flow-controls">
+            <button class="flow-btn start" type="button" id="btnStart">Start</button>
+            <button class="flow-btn pause" type="button" id="btnPause">Pause</button>
+            <button class="flow-btn resume" type="button" id="btnResume">Resume</button>
+            <div class="flow-slo-tag">SLO: TTFT &lt; 250ms · P95</div>
+        </div>
+    </div>
+
+    <div class="flow-body">
+        <!-- TOP: TTFT Monitor (Queue → Prefill → First Token + KPI) -->
+        <div class="ttft-dashboard">
+            <div class="ttft-pipeline">
+                <div class="ttft-pipeline-header">
+                    <div class="ttft-pipeline-title">Request pipeline (single user)</div>
+                    <div class="ttft-pipeline-caption">
+                        TTFT includes queueing, prefill, and the first decode step. The timeline below shows one full request.
+                    </div>
+                </div>
+                <div class="ttft-line">
+                    <div class="ttft-line-fill"></div>
+                </div>
+                <div class="ttft-stages">
+                    <div class="ttft-stage">
+                        <div class="ttft-dot queue"></div>
+                        <div class="ttft-label">Queue</div>
+                        <div class="ttft-stage-desc">
+                            Request enters inference service.<br>
+                            Waiting for a GPU slot (0–3s).
+                        </div>
+                    </div>
+                    <div class="ttft-stage">
+                        <div class="ttft-dot prefill"></div>
+                        <div class="ttft-label">Prefill</div>
+                        <div class="ttft-stage-desc">
+                            Model reads the prompt and<br>
+                            builds KV cache (3–6s, compute-bound).
+                        </div>
+                    </div>
+                    <div class="ttft-stage">
+                        <div class="ttft-dot first-token"></div>
+                        <div class="ttft-label">First Token</div>
+                        <div class="ttft-stage-desc">
+                            First output token is streamed<br>
+                            to the client (6–9s). TTFT stops here.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ttft-kpi">
+                <div class="ttft-kpi-row">
+                    <div class="ttft-kpi-label">Time To First Token (TTFT)</div>
+                    <div class="ttft-kpi-value"></div>
+                </div>
+                <div class="ttft-band">
+                    <div class="ttft-band-fill"></div>
+                </div>
+                <div class="ttft-kpi-note">
+                    <strong>TTFT</strong> is the latency from request arrival to the first generated token, combining queueing, prefill, 
+                    and the initial decode. In enterprise serving, this is the primary KPI for perceived responsiveness.
+                </div>
+                <div class="ttft-kpi-footer">
+                    <div class="ttft-pill good">Target: &lt; 250ms (interactive chat)</div>
+                    <div class="ttft-pill warn">If TTFT scales with prompt length, you are prefill-bound.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM: Prompt → Tokens → KV → First Token -->
+        <div class="llm-flow">
+            <div class="flow-row-header">
+                <div class="flow-row-title">Detailed flow: prompt to KV cache and first token</div>
+                <div class="flow-row-subtitle">
+                    The lower panel is synchronized with the upper timeline: tokens and KV fill during Prefill, the bubble appears at First Token.
+                </div>
+            </div>
+            <div class="flow-bottom-body">
+                <div class="flow-left">
+                    <!-- Prompt -->
+                    <div class="panel">
+                        <div class="panel-title">1. Prompt entered (time = 0s)</div>
+                        <div class="panel-caption">
+                            User sends a natural language query into the LLM gateway. TTFT clock starts at this moment.
+                        </div>
+                        <div class="prompt-box">
+                            <div class="prompt-label">prompt</div>
+                            <div class="prompt-text">
+                                I am going to London next week, can you recommend three places to visit with my friend Rahul?
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tokens -->
+                    <div class="panel">
+                        <div class="panel-title">2. Text → tokens (3–6s, during Prefill)</div>
+                        <div class="panel-caption">
+                            Serving layer converts the prompt into tokens. Chips below appear mostly while the Prefill stage is active.
+                        </div>
+                        <div class="prompt-label">tokens (simplified view)</div>
+                        <div class="tokens-row">
+                            <span class="token-pill">I</span>
+                            <span class="token-pill">am</span>
+                            <span class="token-pill">going</span>
+                            <span class="token-pill">to</span>
+                            <span class="token-pill">London</span>
+                            <span class="token-pill">next</span>
+                            <span class="token-pill">week</span>
+                            <span class="token-pill">Rahul</span>
+                            <span class="token-pill">?</span>
+                            <span class="token-pill">[EOS]</span>
+                        </div>
+                    </div>
+
+                    <!-- KV cache -->
+                    <div class="panel">
+                        <div class="panel-title">3. Prefill KV cache (tokens → KV blocks)</div>
+                        <div class="panel-caption">
+                            During prefill, the model runs attention over the tokens and builds a key–value (KV) cache. 
+                            Each block below represents stored KV for a segment of the prompt, filling in the same Prefill window.
+                        </div>
+                        <div class="kv-grid">
+                            <div class="kv-cell">KV[0]<br>I, am</div>
+                            <div class="kv-cell">KV[1]<br>going, to</div>
+                            <div class="kv-cell">KV[2]<br>London</div>
+                            <div class="kv-cell">KV[3]<br>next, week</div>
+                            <div class="kv-cell">KV[4]<br>Rahul, ?</div>
+                        </div>
+                        <div class="kv-caption">
+                            As KV fills, TTFT clock is still running. Once prefill completes and decode begins, the first output token can be emitted.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-right">
+                    <!-- TTFT metric (small) -->
+                    <div class="ttft-panel">
+                        <div class="ttft-panel-header">
+                            <div class="ttft-panel-title">TTFT for this request</div>
+                            <div class="ttft-panel-sub">Queue + prefill + first decode step</div>
+                        </div>
+                        <div class="ttft-bar-small">
+                            <div class="ttft-bar-small-fill"></div>
+                        </div>
+                        <div class="ttft-metrics-row">
+                            <div class="ttft-ms-label-small">Elapsed time until first token (TTFT)</div>
+                            <div class="ttft-ms-value-small"></div>
+                        </div>
+                        <div class="ttft-note-small">
+                            <strong>TTFT</strong> rises while the prompt is tokenized and the KV cache is built. 
+                            When the First Token stage on the top panel lights up, this value stabilizes around ~230ms.
+                        </div>
+                    </div>
+
+                    <!-- First token bubble -->
+                    <div class="first-token-panel">
+                        <div class="first-token-header">
+                            <div class="first-token-title">4. First token released (≈ 6–9s)</div>
+                            <div class="first-token-status">Boundary where TTFT stops</div>
+                        </div>
+                        <div class="first-token-bubble">
+                            <span class="token-text">Sure,</span> here are three places in London you can visit with Rahul…
+                        </div>
+                        <div class="first-token-footnote">
+                            This bubble appears only after the KV cache is ready and the decode loop starts. 
+                            Architecturally, this is where TTFT ends and stream throughput (tokens per second) becomes the next metric.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Minimal JS: control animation play state via root classes
+    const root = document.getElementById('flowRoot');
+    const btnStart = document.getElementById('btnStart');
+    const btnPause = document.getElementById('btnPause');
+    const btnResume = document.getElementById('btnResume');
+
+    btnStart.addEventListener('click', () => {
+        // restart by removing and re-adding flow-running
+        root.classList.remove('flow-paused');
+        void root.offsetWidth; // force reflow to restart animations
+        root.classList.add('flow-running');
+    });
+
+    btnPause.addEventListener('click', () => {
+        root.classList.remove('flow-running');
+        root.classList.add('flow-paused');
+    });
+
+    btnResume.addEventListener('click', () => {
+        root.classList.remove('flow-paused');
+        root.classList.add('flow-running');
+    });
+</script>
+
+</body>
+</html>

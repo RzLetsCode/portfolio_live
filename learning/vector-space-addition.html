@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Axioms Deep Dive | code2career_ai</title>
+    <style>
+        :root {
+            --bg-deep: #0a0e17;
+            --panel-bg: #111827;
+            --border-glow: #1f2937;
+            --accent-blue: #38bdf8;
+            --accent-purple: #a855f7;
+            --accent-green: #4caf50;
+            --accent-red: #ef4444;
+            --accent-amber: #fbbf24;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --grid-line: rgba(255, 255, 255, 0.03);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p { color: var(--text-secondary); font-size: 1.05rem; }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Axiom specific header coloring rules */
+        .card.comm-closure .card-title { color: var(--accent-blue); }
+        .card.assoc-zero .card-title { color: var(--accent-purple); }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            margin-bottom: 1.25rem;
+            text-align: center;
+            min-height: 40px;
+        }
+
+        .canvas-container {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background-color: #070b12;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            position: relative;
+            overflow: hidden;
+        }
+
+        svg { width: 100%; height: 100%; }
+
+        .controls {
+            width: 100%;
+            margin-top: 1.25rem;
+            background: rgba(255, 255, 255, 0.01);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #1f2937;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .control-group:last-child { margin-bottom: 0; }
+
+        label { font-size: 0.82rem; color: var(--text-secondary); font-family: monospace; }
+
+        input[type="range"] {
+            width: 55%;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .card.comm-closure input[type="range"] { accent-color: var(--accent-blue); background: rgba(56,189,248,0.1); }
+        .card.assoc-zero input[type="range"] { accent-color: var(--accent-purple); background: rgba(168,85,247,0.1); }
+
+        .svg-text { font-family: 'Courier New', Courier, monospace; font-size: 12px; fill: #ffffff; }
+        .math-bold { font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>code2career_ai • Vector Space Axioms Lab</h1>
+        <p>Interactive 2D simulation environments tracking algebraic closures, commutativity laws, and spatial relations.</p>
+    </header>
+
+    <div class="dashboard">
+
+        <div class="card comm-closure">
+            <div class="card-title">Commutativity, Closure & Scaling ($u+v = v+u$)</div>
+            <div class="card-desc">Parallelogram proof: Path $u \rightarrow v$ matches path $v \rightarrow u$, ending at the exact same space coordinate inside $V$. Scalar modulation scales component transformations dynamically.</div>
+            
+            <div class="canvas-container">
+                <svg viewBox="0 0 500 375" id="commSvg">
+                    <defs>
+                        <pattern id="grid-pattern-1" width="25" height="25" patternUnits="userSpaceOnUse">
+                            <path d="M 25 0 L 0 0 0 25" fill="none" stroke="var(--grid-line)" stroke-width="1"/>
+                        </pattern>
+                        <marker id="arr-u" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent-green)" />
+                        </marker>
+                        <marker id="arr-v" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent-red)" />
+                        </marker>
+                        <marker id="arr-res" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--accent-amber)" />
+                        </marker>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid-pattern-1)" />
+
+                    <text x="20" y="30" class="svg-text math-bold" fill="var(--accent-blue)">AXIOMS IN EFFECT:</text>
+                    <text id="lbl-comm-text" x="20" y="50" class="svg-text" fill="var(--text-secondary)">u + v = [160, -110]</text>
+                    <text id="lbl-closure-text" x="20" y="68" class="svg-text math-bold" fill="var(--accent-amber)">Closure Output: c·(u + v) ∈ V</text>
+
+                    <g transform="translate(80, 280)">
+                        <line id="line-res" x1="0" y1="0" x2="260" y2="-170" stroke="var(--accent-amber)" stroke-width="2.5" stroke-dasharray="4" marker-end="url(#arr-res)"/>
+
+                        <line id="line-u1" x1="0" y1="0" x2="100" y2="-120" stroke="var(--accent-green)" stroke-width="3" marker-end="url(#arr-u)"/>
+                        <line id="line-v1" x1="100" y1="-120" x2="260" y2="-170" stroke="var(--accent-red)" stroke-width="3" marker-end="url(#arr-v)"/>
+
+                        <line id="line-v2" x1="0" y1="0" x2="160" y2="-50" stroke="var(--accent-red)" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arr-v)"/>
+                        <line id="line-u2" x1="160" y1="-50" x2="260" y2="-170" stroke="var(--accent-green)" stroke-width="1.5" stroke-dasharray="3" marker-end="url(#arr-u)"/>
+
+                        <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+                        <text x="-45" y="15" class="svg-text">(0,0)</text>
+                        
+                        <text id="txt-u1" x="40" y="-70" class="svg-text math-bold" fill="var(--accent-green)">u</text>
+                        <text id="txt-v1" x="180" y="-155" class="svg-text math-bold" fill="var(--accent-red)">v</text>
+                        <text id="txt-v2" x="80" y="-15" class="svg-text math-bold" fill="var(--accent-red)">v</text>
+                        <text id="txt-u2" x="215" y="-100" class="svg-text math-bold" fill="var(--accent-green)">u</text>
+                        <text id="txt-res-lbl" x="135" y="-75" class="svg-text math-bold" fill="var(--accent-amber)">c·(u+v)</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Scale Parameter (Scalar Multiplication c)</label>
+                    <input type="range" id="param-c-val" min="0.4" max="1.5" step="0.05" value="1.0">
+                </div>
+            </div>
+        </div>
+
+        <div class="card assoc-zero">
+            <div class="card-title">Associativity & Zero Vector Identity</div>
+            <div class="card-desc">Visualizing 3-vector string grouping: $(u+v)+w = u+(v+w)$. Activating the <b>Zero Vector</b> parameter collapses vector $w$ entirely, demonstrating $v + 0 = v$.</div>
+            
+            <div class="canvas-container">
+                <svg viewBox="0 0 500 375" id="assocSvg">
+                    <defs>
+                        <pattern id="grid-pattern-2" width="25" height="25" patternUnits="userSpaceOnUse">
+                            <path d="M 25 0 L 0 0 0 25" fill="none" stroke="var(--grid-line)" stroke-width="1"/>
+                        </pattern>
+                        <marker id="arr-assoc" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="rgba(255,255,255,0.4)" />
+                        </marker>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid-pattern-2)" />
+
+                    <text x="20" y="30" class="svg-text math-bold" fill="var(--accent-purple)">ASSOCIATIVE SPACE GROUPING:</text>
+                    <text id="lbl-assoc-text" x="20" y="50" class="svg-text" fill="var(--text-secondary)">(u + v) + w = u + (v + w)</text>
+                    <text id="lbl-identity-text" x="20" y="68" class="svg-text math-bold" fill="var(--accent-purple)">Identity Condition: Standard Operation</text>
+
+                    <g transform="translate(50, 300)">
+                        <line id="asc-u" x1="0" y1="0" x2="90" y2="-90" stroke="var(--accent-green)" stroke-width="3" marker-end="url(#arr-assoc)"/>
+                        <line id="asc-v" x1="90" y1="-90" x2="230" y2="-130" stroke="var(--accent-blue)" stroke-width="3" marker-end="url(#arr-assoc)"/>
+                        <line id="asc-w" x1="230" y1="-130" x2="350" y2="-50" stroke="var(--accent-red)" stroke-width="3" marker-end="url(#arr-assoc)"/>
+
+                        <path id="path-bracket1" d="M 0,0 L 230,-130" fill="none" stroke="var(--accent-amber)" stroke-width="1.5" stroke-dasharray="3" opacity="0.75"/>
+                        <path id="path-bracket2" d="M 90,-90 L 350,-50" fill="none" stroke="var(--accent-purple)" stroke-width="1.5" stroke-dasharray="3" opacity="0.75"/>
+
+                        <line id="asc-res" x1="0" y1="0" x2="350" y2="-50" stroke="#ffffff" stroke-width="2" stroke-dasharray="5" opacity="0.9"/>
+
+                        <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+                        <text id="lbl-asc-u" x="40" y="-55" class="svg-text math-bold" fill="var(--accent-green)">u</text>
+                        <text id="lbl-asc-v" x="150" y="-120" class="svg-text math-bold" fill="var(--accent-blue)">v</text>
+                        <text id="lbl-asc-w" x="290" y="-100" class="svg-text math-bold" fill="var(--accent-red)">w</text>
+                        
+                        <text id="lbl-group1" x="80" y="-85" class="svg-text small-caption" fill="var(--accent-amber)">(u+v)</text>
+                        <text id="lbl-group2" x="230" y="-60" class="svg-text small-caption" fill="var(--accent-purple)">(v+w)</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Vector Group Operator Condition</label>
+                    <select id="param-identity-mode" style="background:#1f2937; color:#fff; border:1px solid #374151; padding:4px 8px; border-radius:4px; font-family:monospace; font-size:12px;">
+                        <option value="standard">Standard Vector w Operation</option>
+                        <option value="zero">Set Vector w = Zero Vector (0)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- PANEL 1 LOGIC: COMMUTATIVITY & CLOSURE SCALING ---
+        const paramC = document.getElementById('param-c-val');
+        const lU1 = document.getElementById('line-u1');
+        const lV1 = document.getElementById('line-v1');
+        const lV2 = document.getElementById('line-v2');
+        const lU2 = document.getElementById('line-u2');
+        const lRes = document.getElementById('line-res');
+
+        const tU1 = document.getElementById('txt-u1');
+        const tV1 = document.getElementById('txt-v1');
+        const tV2 = document.getElementById('txt-v2');
+        const tU2 = document.getElementById('txt-u2');
+        const tRes = document.getElementById('txt-res-lbl');
+
+        const lblComm = document.getElementById('lbl-comm-text');
+
+        // Baseline unscaled layout components configuration metrics vectors
+        const ux_base = 100, uy_base = -120;
+        const vx_base = 160, vy_base = -50;
+
+        function updateCommutativeView() {
+            const c = parseFloat(paramC.value);
+
+            // Compute structural transformations derived linearly via closure parameters
+            const ux = ux_base * c;
+            const uy = uy_base * c;
+            const vx = vx_base * c;
+            const vy = vy_base * c;
+
+            const resX = ux + vx;
+            const resY = uy + vy;
+
+            // Update Path 1 line bindings (u then v)
+            lU1.setAttribute('x2', ux);
+            lU1.setAttribute('y2', uy);
+            lV1.setAttribute('x1', ux);
+            lV1.setAttribute('y1', uy);
+            lV1.setAttribute('x2', resX);
+            lV1.setAttribute('y2', resY);
+
+            // Update Path 2 line bindings (v then u)
+            lV2.setAttribute('x2', vx);
+            lV2.setAttribute('y2', vy);
+            lU2.setAttribute('x1', vx);
+            lU2.setAttribute('y1', vy);
+            lU2.setAttribute('x2', resX);
+            lU2.setAttribute('y2', resY);
+
+            // Closure path vector rendering connection updates
+            lRes.setAttribute('x2', resX);
+            lRes.setAttribute('y2', resY);
+
+            // Re-align spatial text placement fields to follow path vectors seamlessly without overlaps
+            tU1.setAttribute('x', ux / 2 - 12); tU1.setAttribute('y', uy / 2);
+            tV1.setAttribute('x', ux + vx / 2); tV1.setAttribute('y', uy + vy / 2 - 10);
+            tV2.setAttribute('x', vx / 2 - 12); tV2.setAttribute('y', vy / 2 + 15);
+            tU2.setAttribute('x', vx + ux / 2 + 10); tU2.setAttribute('y', vy + uy / 2);
+            tRes.setAttribute('x', resX / 2 + 10); tRes.setAttribute('y', resY / 2 + 20);
+
+            // Print descriptive coordinate labels cleanly onto text overlay metrics
+            lblComm.textContent = `u+v = v+u = [X: ${resX.toFixed(0)}, Y: ${Math.abs(resY).toFixed(0)}]`;
+        }
+        paramC.addEventListener('input', updateCommutativeView);
+        updateCommutativeView();
+
+
+        // --- PANEL 2 LOGIC: ASSOCIATIVITY & IDENTITY VISUALIZER ---
+        const paramIdentity = document.getElementById('param-identity-mode');
+        
+        const lAscU = document.getElementById('asc-u');
+        const lAscV = document.getElementById('asc-v');
+        const lAscW = document.getElementById('asc-w');
+        const lAscRes = document.getElementById('asc-res');
+        
+        const brk1 = document.getElementById('path-bracket1');
+        const brk2 = document.getElementById('path-bracket2');
+
+        const lblAscU = document.getElementById('lbl-asc-u');
+        const lblAscV = document.getElementById('lbl-asc-v');
+        const lblAscW = document.getElementById('lbl-asc-w');
+        const lblG1 = document.getElementById('lbl-group1');
+        const lblG2 = document.getElementById('lbl-group2');
+
+        const readoutAssoc = document.getElementById('lbl-assoc-text');
+        const readoutIdentity = document.getElementById('lbl-identity-text');
+
+        // Static baseline mapping properties configurations vectors
+        const u_x = 90,   u_y = -90;
+        const v_x = 140,  v_y = -40;
+        const w_x_base = 120, w_y_base = 80;
+
+        function updateAssociativeView() {
+            const mode = paramIdentity.value;
+            
+            // If identity matrix lock mode active, vector w completely scales into zero vector boundaries [0,0]
+            const wx = (mode === 'zero') ? 0 : w_x_base;
+            const wy = (mode === 'zero') ? 0 : w_y_base;
+
+            // Compute interconnected node coordinate joints dynamically
+            const jointUV_x = u_x + v_x;
+            const jointUV_y = u_y + v_y;
+
+            const end_x = jointUV_x + wx;
+            const end_y = jointUV_y + wy;
+
+            // Re-bind physical layout lines
+            lAscV.setAttribute('x1', u_x);   lAscV.setAttribute('y1', u_y);
+            lAscV.setAttribute('x2', jointUV_x); lAscV.setAttribute('y2', jointUV_y);
+
+            lAscW.setAttribute('x1', jointUV_x); lAscW.setAttribute('y1', jointUV_y);
+            lAscW.setAttribute('x2', end_x);     lAscW.setAttribute('y2', end_y);
+
+            lAscRes.setAttribute('x2', end_x);   lAscRes.setAttribute('y2', end_y);
+
+            // Redraw path grouping bracket descriptions
+            brk1.setAttribute('d', `M 0,0 L ${jointUV_x},${jointUV_y}`);
+            brk2.setAttribute('d', `M ${u_x},${u_y} L ${end_x},${end_y}`);
+
+            // Text tag location updates
+            lblAscV.setAttribute('x', u_x + v_x/2 - 15);
+            lblAscV.setAttribute('y', u_y + v_y/2 - 10);
+            
+            lblAscW.setAttribute('x', jointUV_x + wx/2 + 10);
+            lblAscW.setAttribute('y', jointUV_y + wy/2);
+            
+            lblG1.setAttribute('x', jointUV_x / 2 - 20);
+            lblG1.setAttribute('y', jointUV_y / 2 + 15);
+            
+            lblG2.setAttribute('x', u_x + (end_x - u_x)/2 + 15);
+            lblG2.setAttribute('y', u_y + (end_y - u_y)/2 + 15);
+
+            // Modify text fields conditionally based on active rule constraints
+            if (mode === 'zero') {
+                lAscW.style.opacity = 0;
+                lblAscW.textContent = "w = 0";
+                brk1.style.visibility = "hidden";
+                brk2.style.visibility = "hidden";
+                lblG1.style.visibility = "hidden";
+                lblG2.style.visibility = "hidden";
+
+                readoutAssoc.textContent = `Axiom Check: v + 0 = v`;
+                readoutIdentity.textContent = `Identity Condition: Vector V unaltered by zero space vector addition.`;
+                readoutIdentity.setAttribute('fill', 'var(--accent-green)');
+            } else {
+                lAscW.style.opacity = 1;
+                lblAscW.textContent = "w";
+                brk1.style.visibility = "visible";
+                brk2.style.visibility = "visible";
+                lblG1.style.visibility = "visible";
+                lblG2.style.visibility = "visible";
+
+                readoutAssoc.textContent = `Path End Coordinate = [X: ${end_x}, Y: ${Math.abs(end_y)}]`;
+                readoutIdentity.textContent = `Identity Condition: Standard Operation`;
+                readoutIdentity.setAttribute('fill', 'var(--text-secondary)');
+            }
+        }
+
+        paramIdentity.addEventListener('change', updateAssociativeView);
+        updateAssociativeView();
+    </script>
+</body>
+</html>

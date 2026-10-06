@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LLM Learning Lab: Timed Context Lifecycle Demo (Three Friends & Rahul)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .dashboard {
+            width: 980px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .lanes {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .lane {
+            flex: 1;
+            min-height: 260px;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+            background: #fff;
+            overflow-y: auto;
+        }
+        .active-lane {
+            border-color: #2196f3;
+        }
+        .cache-lane {
+            border-color: #fb923c; /* orange border for cached lane */
+        }
+
+        .token {
+            padding: 8px 10px;
+            margin: 6px 0;
+            border-radius: 6px;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            background: #1d4ed8; /* default blue */
+            animation: fadeIn 0.4s;
+        }
+        .token-current {
+            background: #22c55e; /* bright green for current activity */
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+        }
+        .token-previous {
+            background: #1d4ed8; /* blue for former active items */
+            opacity: 0.7;
+        }
+        .cached {
+            background: #fb923c; /* orange for cached KV */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .perf-panel {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+        .meter {
+            height: 15px;
+            background: #ddd;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .bar {
+            height: 100%;
+            width: 20%;
+            background: #4caf50;
+            transition: width 0.4s;
+        }
+        .stat {
+            font-size: 12px;
+            margin: 3px 0;
+        }
+        .kv-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        .kv-table th,
+        .kv-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+        }
+        .kv-table th {
+            background: #eee;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .badge-hit {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .badge-miss {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .timeline {
+            font-size: 11px;
+            color:#777;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h2>LLM Learning Lab: Timed Context Lifecycle Demo (Three Friends & Rahul)</h2>
+    <p style="font-size: 13px; color: #555; margin-bottom: 10px;">
+        We auto-play five user turns over time, move them from <strong>Active Input</strong> to
+        <strong>Cached KV memory</strong> (orange), then answer multiple questions from cache:
+        destination, time, and "3 idiots" (friends + Rahul). This lets you see many clear cache hits.
+    </p>
+    
+    <div style="margin-bottom: 10px;">
+        <button id="btnStart" onclick="startDemo()" style="padding: 10px 20px;">Start Timed Demo</button>
+        <button id="btnPause" onclick="togglePause()" style="padding: 10px 20px; margin-left: 8px;" disabled>
+            Pause Demo
+        </button>
+        <span id="demoStatus" class="timeline">Status: idle</span>
+    </div>
+
+    <div class="lanes">
+        <div class="lane active-lane" id="active">
+            <h3>1. Active Input Stream (Prefill)</h3>
+            <p class="timeline">Current turn being processed before it is stored in KV cache.</p>
+        </div>
+        <div class="lane cache-lane" id="cache">
+            <h3>2. Cached Memory (KV Slots)</h3>
+            <p class="timeline">Each turn becomes a KV slot with a semantic key and friend identity.</p>
+        </div>
+    </div>
+
+    <div class="perf-panel">
+        <div>
+            <h4>Performance, Cache & Context Window</h4>
+            <div class="meter"><div id="ttftBar" class="bar"></div></div>
+            <p id="ttftVal" class="stat">TTFT: 220ms (Cold start)</p>
+            <p id="cacheHitStat" class="stat">Cache hits: 0 turns</p>
+            <p id="tokensStat" class="stat">Cached tokens: 0</p>
+            <p id="costStat" class="stat">Estimated cost saved: $0.0000</p>
+            <p id="windowStat" class="stat">Context window used: 0 / 4096</p>
+        </div>
+        <div>
+            <h4>System Queries (Three Friends)</h4>
+            <p id="queriesStatus" class="timeline">
+                Queries locked: waiting for all five turns to be cached.
+            </p>
+            <ul class="timeline">
+                <li>Q1: "Where am I going?" (destination)</li>
+                <li>Q2: "When am I going?" (time)</li>
+                <li>Q3: "Are all three idiots?" (friends + Rahul)</li>
+                <li>Q4: "Which city is the trip to?" (destination, second hit)</li>
+                <li>Q5: "In which week am I travelling?" (time, second hit)</li>
+                <li>Q6: "Is Rahul part of the 3 idiots group?" (friends, second hit)</li>
+                <li>Q7: "What is the destination city again?" (destination, third hit)</li>
+                <li>Q8: "Remind me, when exactly am I going?" (time, third hit)</li>
+                <li>Q9: "Who are the 3 idiots in this story?" (friends + Rahul, third hit)</li>
+            </ul>
+            <div style="margin-bottom: 6px;">
+                <button id="btnQ1" onclick="queryDestination()" disabled>Run Q1: Destination</button>
+                <button id="btnQ2" onclick="queryTime()" style="margin-left: 8px;" disabled>Run Q2: Time</button>
+                <button id="btnQ3" onclick="queryIdiots()" style="margin-left: 8px;" disabled>Run Q3: Idiots</button>
+            </div>
+            <div style="margin-bottom: 6px;">
+                <button id="btnQ4" onclick="queryDestinationAgain()" disabled>Run Q4: City (second hit)</button>
+                <button id="btnQ5" onclick="queryTimeAgain()" style="margin-left: 8px;" disabled>Run Q5: Week (second hit)</button>
+                <button id="btnQ6" onclick="queryRahulIdiots()" style="margin-left: 8px;" disabled>Run Q6: Rahul in 3 idiots</button>
+            </div>
+            <div style="margin-bottom: 6px;">
+                <button id="btnQ7" onclick="queryDestinationThird()" disabled>Run Q7: Destination again (third hit)</button>
+                <button id="btnQ8" onclick="queryTimeThird()" style="margin-left: 8px;" disabled>Run Q8: Time again (third hit)</button>
+                <button id="btnQ9" onclick="queryIdiotsThird()" style="margin-left: 8px;" disabled>Run Q9: 3 idiots list (third hit)</button>
+            </div>
+
+            <h4 id="responseDest">Destination Response: ...</h4>
+            <h4 id="responseTime">Time Response: ...</h4>
+            <h4 id="responseIdiots">Idiots Response: ...</h4>
+            <h4 id="responseDest2">City Response: ...</h4>
+            <h4 id="responseTime2">Week Response: ...</h4>
+            <h4 id="responseRahul">Rahul Response: ...</h4>
+            <h4 id="responseDest3">Destination Again Response: ...</h4>
+            <h4 id="responseTime3">Time Again Response: ...</h4>
+            <h4 id="responseIdiots3">Idiots List Response: ...</h4>
+
+            <table class="kv-table" id="kvTable">
+                <thead>
+                    <tr>
+                        <th>Slot</th>
+                        <th>Key (semantic)</th>
+                        <th>Friend</th>
+                        <th>Value (turn)</th>
+                        <th>Last used</th>
+                    </tr>
+                </thead>
+                <tbody id="kvBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const demoTurns = [
+        { speaker: 'friend1', text: 'I am going to London next week' },
+        { speaker: 'friend2', text: 'Great I will be there next week to meet you' },
+        { speaker: 'friend2', text: 'YOu will be also in london when ?' },
+        { speaker: 'friend1', text: 'Are you serious friend our childhood friend Rahul is also in london' },
+        { speaker: 'rahul',   text: 'Rahul where is he , omg its totally 3 idiots meet again' }
+    ];
+
+    let kvStore = [];
+    let cacheHits = 0;
+    let cachedTokens = 0;
+    let totalQueries = 0;
+
+    const CONTEXT_WINDOW = 4096;
+    const TOKEN_COST_PER_M = 0.002;
+
+    let isPaused = false;
+    let currentTurnIndex = 0;
+    let scheduledTimeouts = [];
+
+    function estimateTokens(text) {
+        if (!text) return 0;
+        return Math.ceil(text.split(/\s+/).length * 1.2);
+    }
+
+    function extractKeyAndFriend(turn) {
+        const lower = turn.text.toLowerCase().trim();
+        let key = '';
+
+        if (lower.includes('going') && lower.includes('london')) {
+            key = 'destination:london';
+        } else if (lower.includes('next week')) {
+            key = 'time:next_week';
+        } else if (lower.includes('next')) {
+            key = 'time:next';
+        } else if (lower.includes('rahul')) {
+            key = 'friend:rahul';
+        } else {
+            key = 'misc:' + (lower.split(/\s+/)[0] || 'misc');
+        }
+
+        return { key, friend: turn.speaker };
+    }
+
+    function renderKVTable() {
+        const body = document.getElementById('kvBody');
+        body.innerHTML = '';
+        kvStore.forEach((slot, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                `<td>#${idx + 1}</td>
+                 <td>${slot.key}</td>
+                 <td>${slot.friend}</td>
+                 <td>${slot.value}</td>
+                 <td>${slot.lastUsed}</td>`;
+            body.appendChild(tr);
+        });
+    }
+
+    function updateGlobalStats() {
+        document.getElementById('tokensStat').innerText =
+            'Cached tokens: ' + cachedTokens;
+        const usedWindow = Math.min(cachedTokens, CONTEXT_WINDOW);
+        document.getElementById('windowStat').innerText =
+            'Context window used: ' + usedWindow + ' / ' + CONTEXT_WINDOW;
+    }
+
+    function clearActiveHighlight() {
+        const activeLane = document.getElementById('active');
+        const tokens = activeLane.querySelectorAll('.token');
+        tokens.forEach(t => {
+            if (t.classList.contains('token-current')) {
+                t.classList.remove('token-current');
+                t.classList.add('token-previous');
+            }
+        });
+    }
+
+    function setQueriesLocked(locked) {
+        const status = document.getElementById('queriesStatus');
+        const ids = ['btnQ1','btnQ2','btnQ3','btnQ4','btnQ5','btnQ6','btnQ7','btnQ8','btnQ9'];
+        const buttons = ids.map(id => document.getElementById(id));
+        if (locked) {
+            status.innerText =
+                'Queries locked: waiting for all five turns to be cached.';
+            buttons.forEach(btn => btn.disabled = true);
+        } else {
+            status.innerText =
+                'Queries unlocked: all context cached, you can run Q1–Q9 to see multiple cache hits.';
+            buttons.forEach(btn => btn.disabled = false);
+        }
+    }
+
+    function cacheTurn(turn, index) {
+        const active = document.getElementById('active');
+        const cache = document.getElementById('cache');
+
+        clearActiveHighlight();
+
+        const tokenDiv = document.createElement('div');
+        tokenDiv.className = 'token token-current';
+        tokenDiv.innerText = `[T${index + 1} | ${turn.speaker}] ` + turn.text;
+        active.appendChild(tokenDiv);
+
+        document.getElementById('ttftBar').style.width = '35%';
+        document.getElementById('ttftVal').innerText =
+            'TTFT: 230ms (Cold prefill for T' + (index + 1) + ')';
+        document.getElementById('demoStatus').innerText =
+            'Status: processing turn T' + (index + 1) + ' (' + turn.speaker + ')';
+
+        const migrateTimeout = setTimeout(() => {
+            if (isPaused) return;
+
+            tokenDiv.classList.remove('token-current');
+            tokenDiv.classList.remove('token-previous');
+            tokenDiv.classList.add('cached');
+            active.removeChild(tokenDiv);
+            cache.appendChild(tokenDiv);
+
+            const meta = extractKeyAndFriend(turn);
+            const tokens = estimateTokens(turn.text);
+            cachedTokens += tokens;
+            kvStore.push({
+                key: meta.key,
+                friend: meta.friend,
+                value: turn.text,
+                lastUsed: 0
+            });
+
+            updateGlobalStats();
+            renderKVTable();
+
+            document.getElementById('ttftBar').style.width = '65%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: 170ms (Cache warming, T' + (index + 1) + ' stored)';
+
+            if (index === demoTurns.length - 1) {
+                document.getElementById('demoStatus').innerText =
+                    'Status: all turns cached; ready to query Q1–Q9.';
+                setQueriesLocked(false);
+                document.getElementById('btnPause').disabled = true;
+            }
+        }, 4000);
+        scheduledTimeouts.push(migrateTimeout);
+    }
+
+    function scheduleRemainingTurns() {
+        for (let i = currentTurnIndex; i < demoTurns.length; i++) {
+            const t = setTimeout(() => {
+                if (!isPaused) {
+                    cacheTurn(demoTurns[i], i);
+                    currentTurnIndex = i + 1;
+                }
+            }, (i - currentTurnIndex) * 5000);
+            scheduledTimeouts.push(t);
+        }
+    }
+
+    function startDemo() {
+        kvStore = [];
+        cacheHits = 0;
+        cachedTokens = 0;
+        totalQueries = 0;
+        isPaused = false;
+        currentTurnIndex = 0;
+        scheduledTimeouts.forEach(t => clearTimeout(t));
+        scheduledTimeouts = [];
+
+        document.getElementById('active').innerHTML =
+            '<h3>1. Active Input Stream (Prefill)</h3>' +
+            '<p class="timeline">Current turn being processed before it is stored in KV cache.</p>';
+        document.getElementById('cache').innerHTML =
+            '<h3>2. Cached Memory (KV Slots)</h3>' +
+            '<p class="timeline">Each turn becomes a KV slot with a semantic key and friend identity.</p>';
+
+        document.getElementById('responseDest').innerText = 'Destination Response: ...';
+        document.getElementById('responseTime').innerText = 'Time Response: ...';
+        document.getElementById('responseIdiots').innerText = 'Idiots Response: ...';
+        document.getElementById('responseDest2').innerText = 'City Response: ...';
+        document.getElementById('responseTime2').innerText = 'Week Response: ...';
+        document.getElementById('responseRahul').innerText = 'Rahul Response: ...';
+        document.getElementById('responseDest3').innerText = 'Destination Again Response: ...';
+        document.getElementById('responseTime3').innerText = 'Time Again Response: ...';
+        document.getElementById('responseIdiots3').innerText = 'Idiots List Response: ...';
+
+        document.getElementById('cacheHitStat').innerText =
+            'Cache hits: 0 turns';
+        document.getElementById('costStat').innerText =
+            'Estimated cost saved: $0.0000';
+        document.getElementById('ttftBar').style.width = '20%';
+        document.getElementById('ttftVal').innerText =
+            'TTFT: 220ms (Cold start)';
+        document.getElementById('demoStatus').innerText =
+            'Status: starting timed demo...';
+
+        renderKVTable();
+        updateGlobalStats();
+        setQueriesLocked(true);
+
+        document.getElementById('btnPause').disabled = false;
+        document.getElementById('btnPause').innerText = 'Pause Demo';
+
+        scheduleRemainingTurns();
+    }
+
+    function togglePause() {
+        const btnPause = document.getElementById('btnPause');
+        if (!isPaused) {
+            isPaused = true;
+            scheduledTimeouts.forEach(t => clearTimeout(t));
+            scheduledTimeouts = [];
+            btnPause.innerText = 'Resume Demo';
+            document.getElementById('demoStatus').innerText =
+                'Status: paused at T' + currentTurnIndex + '.';
+        } else {
+            isPaused = false;
+            btnPause.innerText = 'Pause Demo';
+            document.getElementById('demoStatus').innerText =
+                'Status: resuming from T' + (currentTurnIndex + 1) + '...';
+            scheduleRemainingTurns();
+        }
+    }
+
+    function registerHit(slot, label) {
+        cacheHits += 1;
+        slot.lastUsed = totalQueries;
+        renderKVTable();
+
+        const baseTTFT = 260;
+        const hitRatio = cacheHits / totalQueries;
+        const ttft = Math.round(baseTTFT * (1 - 0.5 * hitRatio));
+        const avoidedTokens = estimateTokens(slot.value);
+        const costSaved = (avoidedTokens / 1_000_000) * TOKEN_COST_PER_M;
+
+        document.getElementById('cacheHitStat').innerText =
+            'Cache hits: ' + cacheHits + ' turns';
+        document.getElementById('ttftBar').style.width = '90%';
+        document.getElementById('ttftVal').innerText =
+            'TTFT: ' + ttft + 'ms (Cache hit: ' + label + ')';
+        document.getElementById('costStat').innerText =
+            'Estimated cost saved: $' + costSaved.toFixed(4);
+
+        return { ttft, costSaved };
+    }
+
+    function queryDestination() {
+        const res = document.getElementById('responseDest');
+        totalQueries += 1;
+
+        const destinationSlot =
+            kvStore.find(slot => slot.key.startsWith('destination:'));
+        const baseTTFT = 260;
+        let ttft;
+
+        if (destinationSlot) {
+            const meta = registerHit(destinationSlot, 'destination KV reuse (Q1)');
+            ttft = meta.ttft;
+            const destinationName = destinationSlot.key.split(':')[1];
+            const slotIndex = kvStore.indexOf(destinationSlot) + 1;
+
+            res.innerHTML =
+                'Destination Response (Q1): You are going to ' + destinationName +
+                ' <span class="badge badge-hit">served from cached KV slot #' +
+                slotIndex + '</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: no destination KV)';
+            document.getElementById('costStat').innerText =
+                'Estimated cost saved: $0.0000';
+
+            res.innerHTML =
+                'Destination Response (Q1): unknown ' +
+                '<span class="badge badge-miss">no destination in cache</span>';
+        }
+    }
+
+    function queryTime() {
+        const res = document.getElementById('responseTime');
+        totalQueries += 1;
+
+        const timeSlot = kvStore.find(slot => slot.key.startsWith('time:'));
+        const baseTTFT = 260;
+        let ttft;
+
+        if (timeSlot) {
+            const meta = registerHit(timeSlot, 'time KV reuse (Q2)');
+            ttft = meta.ttft;
+
+            let timeAnswer = 'next week';
+            if (timeSlot.key === 'time:next') timeAnswer = 'next';
+            const slotIndex = kvStore.indexOf(timeSlot) + 1;
+
+            res.innerHTML =
+                'Time Response (Q2): You are going ' + timeAnswer +
+                ' <span class="badge badge-hit">served from cached KV slot #' +
+                slotIndex + '</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: no time KV)';
+            document.getElementById('costStat').innerText =
+                'Estimated cost saved: $0.0000';
+
+            res.innerHTML =
+                'Time Response (Q2): unknown ' +
+                '<span class="badge badge-miss">no time info in cache</span>';
+        }
+    }
+
+    function queryIdiots() {
+        const res = document.getElementById('responseIdiots');
+        totalQueries += 1;
+
+        const friends = new Set(kvStore.map(slot => slot.friend));
+        const hasRahulKey = kvStore.some(slot => slot.key === 'friend:rahul');
+        const baseTTFT = 260;
+        let ttft;
+
+        if (friends.has('friend1') && friends.has('friend2') && friends.has('rahul') && hasRahulKey) {
+            cacheHits += 1;
+            const hitRatio = cacheHits / totalQueries;
+            ttft = Math.round(baseTTFT * (1 - 0.5 * hitRatio));
+
+            document.getElementById('cacheHitStat').innerText =
+                'Cache hits: ' + cacheHits + ' turns';
+            document.getElementById('ttftBar').style.width = '88%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache hit: friends KV reuse (Q3))';
+
+            res.innerHTML =
+                'Idiots Response (Q3): Yes, all three friends (person1, person2, Rahul) are marked as \"3 idiots\" in this story ' +
+                '<span class="badge badge-hit">served from cached friend KV</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: incomplete friend info)';
+
+            res.innerHTML =
+                'Idiots Response (Q3): cannot confirm all three without Rahul fully in cache ' +
+                '<span class="badge badge-miss">friend KV incomplete</span>';
+        }
+    }
+
+    function queryDestinationAgain() {
+        const res = document.getElementById('responseDest2');
+        totalQueries += 1;
+
+        const destinationSlot =
+            kvStore.find(slot => slot.key.startsWith('destination:'));
+        const baseTTFT = 260;
+        let ttft;
+
+        if (destinationSlot) {
+            const meta = registerHit(destinationSlot, 'destination KV reuse (Q4)');
+            ttft = meta.ttft;
+            const destinationName = destinationSlot.key.split(':')[1];
+            const slotIndex = kvStore.indexOf(destinationSlot) + 1;
+
+            res.innerHTML =
+                'City Response (Q4): The trip city is ' + destinationName +
+                ' <span class="badge badge-hit">reused cached KV slot #' +
+                slotIndex + '</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: no destination KV for Q4)';
+            document.getElementById('costStat').innerText =
+                'Estimated cost saved: $0.0000';
+
+            res.innerHTML =
+                'City Response (Q4): unknown ' +
+                '<span class="badge badge-miss">no destination in cache</span>';
+        }
+    }
+
+    function queryTimeAgain() {
+        const res = document.getElementById('responseTime2');
+        totalQueries += 1;
+
+        const timeSlot = kvStore.find(slot => slot.key.startsWith('time:'));
+        const baseTTFT = 260;
+        let ttft;
+
+        if (timeSlot) {
+            const meta = registerHit(timeSlot, 'time KV reuse (Q5)');
+            ttft = meta.ttft;
+
+            let timeAnswer = 'next week';
+            if (timeSlot.key === 'time:next') timeAnswer = 'next';
+            const slotIndex = kvStore.indexOf(timeSlot) + 1;
+
+            res.innerHTML =
+                'Week Response (Q5): You are travelling in ' + timeAnswer +
+                ' <span class="badge badge-hit">reused cached KV slot #' +
+                slotIndex + '</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: no time KV for Q5)';
+            document.getElementById('costStat').innerText =
+                'Estimated cost saved: $0.0000';
+
+            res.innerHTML =
+                'Week Response (Q5): unknown ' +
+                '<span class="badge badge-miss">no time info in cache</span>';
+        }
+    }
+
+    function queryRahulIdiots() {
+        const res = document.getElementById('responseRahul');
+        totalQueries += 1;
+
+        const rahulSlots = kvStore.filter(slot => slot.friend === 'rahul' || slot.key === 'friend:rahul');
+        const baseTTFT = 260;
+        let ttft;
+
+        if (rahulSlots.length > 0) {
+            cacheHits += 1;
+            const hitRatio = cacheHits / totalQueries;
+            ttft = Math.round(baseTTFT * (1 - 0.5 * hitRatio));
+
+            document.getElementById('cacheHitStat').innerText =
+                'Cache hits: ' + cacheHits + ' turns';
+            document.getElementById('ttftBar').style.width = '88%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache hit: Rahul KV reuse (Q6))';
+
+            res.innerHTML =
+                'Rahul Response (Q6): Yes, Rahul is part of the \"3 idiots\" group in this cached story ' +
+                '<span class="badge badge-hit">served from cached Rahul KV</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: no Rahul KV for Q6)';
+
+            res.innerHTML =
+                'Rahul Response (Q6): cannot confirm Rahul without Rahul in cache ' +
+                '<span class="badge badge-miss">Rahul KV missing</span>';
+        }
+    }
+
+    // THIRD DESTINATION QUESTION – third cache hit on destination
+    function queryDestinationThird() {
+        const res = document.getElementById('responseDest3');
+        totalQueries += 1;
+
+        const destinationSlot =
+            kvStore.find(slot => slot.key.startsWith('destination:'));
+        const baseTTFT = 260;
+        let ttft;
+
+        if (destinationSlot) {
+            const meta = registerHit(destinationSlot, 'destination KV reuse (Q7)');
+            ttft = meta.ttft;
+            const destinationName = destinationSlot.key.split(':')[1];
+            const slotIndex = kvStore.indexOf(destinationSlot) + 1;
+
+            res.innerHTML =
+                'Destination Again Response (Q7): Once more, your destination city is ' + destinationName +
+                ' <span class=\"badge badge-hit\">third reuse of cached KV slot #' +
+                slotIndex + '</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: no destination KV for Q7)';
+            document.getElementById('costStat').innerText =
+                'Estimated cost saved: $0.0000';
+
+            res.innerHTML =
+                'Destination Again Response (Q7): unknown ' +
+                '<span class=\"badge badge-miss\">no destination in cache</span>';
+        }
+    }
+
+    // THIRD TIME QUESTION – third cache hit on time
+    function queryTimeThird() {
+        const res = document.getElementById('responseTime3');
+        totalQueries += 1;
+
+        const timeSlot = kvStore.find(slot => slot.key.startsWith('time:'));
+        const baseTTFT = 260;
+        let ttft;
+
+        if (timeSlot) {
+            const meta = registerHit(timeSlot, 'time KV reuse (Q8)');
+            ttft = meta.ttft;
+
+            let timeAnswer = 'next week';
+            if (timeSlot.key === 'time:next') timeAnswer = 'next';
+            const slotIndex = kvStore.indexOf(timeSlot) + 1;
+
+            res.innerHTML =
+                'Time Again Response (Q8): Once more, you are travelling in ' + timeAnswer +
+                ' <span class=\"badge badge-hit\">third reuse of cached KV slot #' +
+                slotIndex + '</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: no time KV for Q8)';
+            document.getElementById('costStat').innerText =
+                'Estimated cost saved: $0.0000';
+
+            res.innerHTML =
+                'Time Again Response (Q8): unknown ' +
+                '<span class=\"badge badge-miss\">no time info in cache</span>';
+        }
+    }
+
+    // THIRD IDIOTS QUESTION – third cache hit on friends/Rahul
+    function queryIdiotsThird() {
+        const res = document.getElementById('responseIdiots3');
+        totalQueries += 1;
+
+        const friends = new Set(kvStore.map(slot => slot.friend));
+        const hasRahulKey = kvStore.some(slot => slot.key === 'friend:rahul');
+        const baseTTFT = 260;
+        let ttft;
+
+        if (friends.has('friend1') && friends.has('friend2') && friends.has('rahul') && hasRahulKey) {
+            cacheHits += 1;
+            const hitRatio = cacheHits / totalQueries;
+            ttft = Math.round(baseTTFT * (1 - 0.5 * hitRatio));
+
+            document.getElementById('cacheHitStat').innerText =
+                'Cache hits: ' + cacheHits + ' turns';
+            document.getElementById('ttftBar').style.width = '88%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache hit: friends KV reuse (Q9))';
+
+            res.innerHTML =
+                'Idiots List Response (Q9): The \"3 idiots\" in this cached story are friend1, friend2, and Rahul ' +
+                '<span class=\"badge badge-hit\">third reuse of cached friend/Rahul KV</span>';
+        } else {
+            ttft = baseTTFT;
+            document.getElementById('ttftBar').style.width = '25%';
+            document.getElementById('ttftVal').innerText =
+                'TTFT: ' + ttft + 'ms (Cache miss: incomplete friend info for Q9)';
+
+            res.innerHTML =
+                'Idiots List Response (Q9): cannot list the 3 idiots without all friends in cache ' +
+                '<span class=\"badge badge-miss\">friend KV incomplete</span>';
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive 3D Matrix Properties</title>
+  
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --accent: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+    }
+
+    .viz-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    .viz-card h2 {
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    .viz-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .canvas-container {
+      width: 100%;
+      height: 400px;
+      background: #090d16;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    input[type="range"] {
+      accent-color: var(--primary);
+    }
+
+    .info-badge {
+      margin-left: auto;
+      font-weight: bold;
+      color: var(--accent);
+      font-family: monospace;
+      font-size: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Interactive 3D Matrix Transformations</h1>
+      <p>Rotate, zoom, and adjust parameters to visualize how matrices transform space, scale areas, and define surfaces.</p>
+    </header>
+
+    <main>
+      <div class="viz-card">
+        <h2>1. Determinant (Area Transformation in 2D/3D)</h2>
+        <p>
+          A matrix transforms the standard unit square (or cube) into a parallelogram. 
+          The <strong>determinant</strong> represents the area scale factor.
+        </p>
+        <div class="canvas-container" id="canvas-det"></div>
+        <div class="controls-panel">
+          <div class="control-group">
+            <label>Matrix Entry $a$:</label>
+            <input type="range" id="det-a" min="-3" max="3" step="0.1" value="2">
+          </div>
+          <div class="control-group">
+            <label>Matrix Entry $d$:</label>
+            <input type="range" id="det-d" min="-3" max="3" step="0.1" value="1.5">
+          </div>
+          <div class="info-badge" id="det-val">Determinant: 3.00</div>
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <h2>2. Rank & Column Space Collapse</h2>
+        <p>
+          When columns are linearly independent, the column space spans a full plane (Rank 2). 
+          When columns are linearly dependent, the matrix squashes space down to a single line (Rank 1).
+        </p>
+        <div class="canvas-container" id="canvas-rank"></div>
+        <div class="controls-panel">
+          <div class="control-group">
+            <label>Dependency Factor:</label>
+            <input type="range" id="rank-factor" min="0" max="1" step="0.01" value="0">
+          </div>
+          <div class="info-badge" id="rank-val">Rank: 2 (Plane)</div>
+        </div>
+      </div>
+
+      <div class="viz-card">
+        <h2>3. Positive Definite Quadratic Surfaces</h2>
+        <p>
+          For a positive definite matrix $A$, the quadratic form $z = \mathbf{x}^T A \mathbf{x}$ forms a bowl with a unique minimum at zero.
+        </p>
+        <div class="canvas-container" id="canvas-posdef"></div>
+        <div class="controls-panel">
+          <div class="control-group">
+            <label>Curvature $a$:</label>
+            <input type="range" id="pos-a" min="0.1" max="2" step="0.1" value="1">
+          </div>
+          <div class="control-group">
+            <label>Curvature $b$:</label>
+            <input type="range" id="pos-b" min="0.1" max="2" step="0.1" value="1">
+          </div>
+          <div class="info-badge" id="pos-val">Status: Positive Definite</div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>Built with Three.js & MathJax | Interactive Matrix Learning Module</p>
+    </footer>
+  </div>
+
+  <script>
+    // --- HELPER TO CREATE SCENE & ORBIT CONTROLS ---
+    function create3DScene(containerId) {
+      const container = document.getElementById(containerId);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(4, 4, 6);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(5, 10, 7);
+      scene.add(dirLight);
+
+      // Grid & Axes Helper
+      const grid = new THREE.GridHelper(10, 10, 0x475569, 0x1e293b);
+      scene.add(grid);
+
+      window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      return { scene, camera, renderer, controls };
+    }
+
+    // --- DEMO 1: DETERMINANT VISUALIZATION ---
+    (function initDeterminantDemo() {
+      const { scene, camera, renderer, controls } = create3DScene('canvas-det');
+      
+      // Unit Quad Geometry
+      const geometry = new THREE.BufferGeometry();
+      const vertices = new Float32Array([
+        0, 0, 0,
+        1, 0, 0,
+        1, 1, 0,
+        0, 1, 0
+      ]);
+      const indices = [0, 1, 2, 0, 2, 3];
+      geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+      geometry.setIndex(indices);
+
+      const material = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+      const mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+
+      const wireframe = new THREE.LineSegments(
+        new THREE.WireframeGeometry(geometry),
+        new THREE.LineBasicMaterial({ color: 0xffffff })
+      );
+      scene.add(wireframe);
+
+      const sliderA = document.getElementById('det-a');
+      const sliderD = document.getElementById('det-d');
+      const valLabel = document.getElementById('det-val');
+
+      function updateMatrix() {
+        const a = parseFloat(sliderA.value);
+        const d = parseFloat(sliderD.value);
+        const det = a * d;
+
+        const pos = geometry.attributes.position;
+        // Transform vertices: [x, y] -> [a*x, d*y]
+        pos.setXYZ(0, 0, 0, 0);
+        pos.setXYZ(1, a, 0, 0);
+        pos.setXYZ(2, a, d, 0);
+        pos.setXYZ(3, 0, d, 0);
+        pos.needsUpdate = true;
+
+        wireframe.geometry.dispose();
+        wireframe.geometry = new THREE.WireframeGeometry(geometry);
+
+        valLabel.innerText = `Determinant: ${det.toFixed(2)}`;
+      }
+
+      sliderA.addEventListener('input', updateMatrix);
+      sliderD.addEventListener('input', updateMatrix);
+      updateMatrix();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+
+    // --- DEMO 2: RANK & COLUMN SPACE VISUALIZATION ---
+    (function initRankDemo() {
+      const { scene, camera, renderer, controls } = create3DScene('canvas-rank');
+
+      // Vectors representing columns
+      const origin = new THREE.Vector3(0, 0, 0);
+      
+      const dir1 = new THREE.Vector3(2, 0, 0);
+      const arrow1 = new THREE.ArrowHelper(dir1.clone().normalize(), origin, dir1.length(), 0xef4444, 0.2, 0.1);
+      scene.add(arrow1);
+
+      let dir2 = new THREE.Vector3(0, 2, 0);
+      const arrow2 = new THREE.ArrowHelper(dir2.clone().normalize(), origin, dir2.length(), 0x22c55e, 0.2, 0.1);
+      scene.add(arrow2);
+
+      // Plane representation for column space
+      const planeGeo = new THREE.PlaneGeometry(4, 4);
+      const planeMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.3 });
+      const plane = new THREE.Mesh(planeGeo, planeMat);
+      scene.add(plane);
+
+      const slider = document.getElementById('rank-factor');
+      const valLabel = document.getElementById('rank-val');
+
+      function updateRank() {
+        const factor = parseFloat(slider.value);
+        // Interpolate dir2 towards dir1 (making them linearly dependent)
+        const currentDir2 = new THREE.Vector3().lerpVectors(new THREE.Vector3(0, 2, 0), new THREE.Vector3(2, 0, 0), factor);
+        
+        arrow2.setDirection(currentDir2.clone().normalize());
+        arrow2.setLength(currentDir2.length());
+
+        // Rotate plane according to the span
+        plane.rotation.z = (Math.PI / 2) * (1 - factor);
+
+        if (factor > 0.95) {
+          valLabel.innerText = "Rank: 1 (Line / Dependent)";
+          valLabel.style.color = "#ef4444";
+        } else {
+          valLabel.innerText = "Rank: 2 (Plane / Independent)";
+          valLabel.style.color = "#38bdf8";
+        }
+      }
+
+      slider.addEventListener('input', updateRank);
+      updateRank();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+
+    // --- DEMO 3: POSITIVE DEFINITE SURFACE VISUALIZATION ---
+    (function initPosDefDemo() {
+      const { scene, camera, renderer, controls } = create3DScene('canvas-posdef');
+      camera.position.set(5, 5, 5);
+
+      const size = 30;
+      const geometry = new THREE.PlaneGeometry(4, 4, size, size);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: 0x3b82f6, 
+        wireframe: true, 
+        side: THREE.DoubleSide 
+      });
+      const surface = new THREE.Mesh(geometry, material);
+      surface.rotation.x = -Math.PI / 2;
+      scene.add(surface);
+
+      const sliderA = document.getElementById('pos-a');
+      const sliderB = document.getElementById('pos-b');
+
+      function updateSurface() {
+        const a = parseFloat(sliderA.value);
+        const b = parseFloat(sliderB.value);
+
+        const pos = geometry.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i);
+          const y = pos.getY(i);
+          // z = a*x^2 + b*y^2
+          const z = (a * x * x) + (b * y * y);
+          pos.setZ(i, z * 0.5);
+        }
+        pos.needsUpdate = true;
+        geometry.computeVertexNormals();
+      }
+
+      sliderA.addEventListener('input', updateSurface);
+      sliderB.addEventListener('input', updateSurface);
+      updateSurface();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+  </script>
+</body>
+</html>

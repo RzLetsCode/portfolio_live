@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scalar Projection: Flashlight & Shadow Analogy</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-6 font-sans">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <header class="text-center space-y-2">
+      <h1 class="text-3xl font-bold text-indigo-400">Understanding Scalar Projection</h1>
+      <p class="text-slate-400">Think of scalar projection as the <span class="text-amber-400 font-semibold">shadow</span> cast by Vector X onto Vector Y</p>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-slate-800 p-5 rounded-xl space-y-5 border border-slate-700">
+        <button id="animToggleBtn" class="w-full py-2.5 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 font-semibold text-white transition-all">
+          Pause Rotation
+        </button>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Vector X Angle: <span id="angleXVal" class="text-rose-400">45°</span></label>
+          <input id="angleX" type="range" min="0" max="360" value="45" class="w-full accent-rose-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Vector X Length: <span id="lenXVal" class="text-rose-400">130</span></label>
+          <input id="lenX" type="range" min="30" max="170" value="130" class="w-full accent-rose-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Base Vector Y Angle: <span id="angleYVal" class="text-emerald-400">0°</span></label>
+          <input id="angleY" type="range" min="0" max="360" value="0" class="w-full accent-emerald-500">
+        </div>
+
+        <div class="bg-slate-950 p-4 rounded-lg border border-slate-700 space-y-2 text-sm">
+          <div class="text-slate-400 flex justify-between">
+            <span>Angle Difference:</span>
+            <span id="angleDiff" class="font-bold text-white">45°</span>
+          </div>
+          <div class="text-slate-400 flex justify-between">
+            <span>Projection Sign:</span>
+            <span id="projState" class="font-bold text-emerald-400">Positive Shadow</span>
+          </div>
+          <div class="border-t border-slate-800 pt-2 flex justify-between text-base font-bold">
+            <span class="text-amber-400">Shadow Length:</span>
+            <span id="scalarProj" class="font-mono text-amber-400">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="md:col-span-2 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center p-4">
+        <canvas id="vectorCanvas" width="500" height="400" class="w-full h-full rounded-lg bg-slate-950"></canvas>
+        <div class="flex gap-6 mt-3 text-xs font-semibold">
+          <span class="text-rose-400">■ Vector X (Stick)</span>
+          <span class="text-emerald-400">■ Vector Y (Base)</span>
+          <span class="text-amber-400">■ Projection (Shadow Length)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('vectorCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const angleXInput = document.getElementById('angleX');
+    const lenXInput = document.getElementById('lenX');
+    const angleYInput = document.getElementById('angleY');
+    const animBtn = document.getElementById('animToggleBtn');
+
+    let isAnimating = true;
+
+    function drawArrow(fromX, fromY, toX, toY, color, width = 3, dash = []) {
+      const headlen = 10;
+      const angle = Math.atan2(toY - fromY, toX - fromX);
+      
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash);
+
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(toX, toY);
+      ctx.stroke();
+
+      if (dash.length === 0) {
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function render() {
+      const originX = canvas.width / 2;
+      const originY = canvas.height / 2;
+
+      const angXDeg = parseFloat(angleXInput.value);
+      const angYDeg = parseFloat(angleYInput.value);
+
+      const radX = (-angXDeg * Math.PI) / 180;
+      const radY = (-angYDeg * Math.PI) / 180;
+      const lenX = parseFloat(lenXInput.value);
+      const lenY = 160;
+
+      const xVec = { x: lenX * Math.cos(radX), y: lenX * Math.sin(radX) };
+      const yVec = { x: lenY * Math.cos(radY), y: lenY * Math.sin(radY) };
+
+      const dot = xVec.x * yVec.x + (-xVec.y) * (-yVec.y);
+      const magY = Math.sqrt(yVec.x ** 2 + yVec.y ** 2);
+      const projScalar = dot / magY;
+
+      const unitY = { x: yVec.x / magY, y: yVec.y / magY };
+      const projPoint = {
+        x: originX + unitY.x * projScalar,
+        y: originY - unitY.y * projScalar
+      };
+
+      let diff = (angXDeg - angYDeg) % 360;
+      if (diff < 0) diff += 360;
+
+      // Update HUD
+      document.getElementById('angleXVal').innerText = `${Math.round(angXDeg)}°`;
+      document.getElementById('lenXVal').innerText = lenXInput.value;
+      document.getElementById('angleYVal').innerText = `${Math.round(angYDeg)}°`;
+      document.getElementById('angleDiff').innerText = `${Math.round(diff)}°`;
+      document.getElementById('scalarProj').innerText = projScalar.toFixed(1);
+
+      const stateEl = document.getElementById('projState');
+      if (Math.abs(projScalar) < 1) {
+        stateEl.innerText = "Zero Shadow (Perpendicular)";
+        stateEl.className = "font-bold text-slate-400";
+      } else if (projScalar > 0) {
+        stateEl.innerText = "Positive Shadow (Same direction)";
+        stateEl.className = "font-bold text-emerald-400";
+      } else {
+        stateEl.innerText = "Negative Shadow (Opposite direction)";
+        stateEl.className = "font-bold text-rose-400";
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Extended Line for Vector Y
+      ctx.save();
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(originX - unitY.x * 250, originY + unitY.y * 250);
+      ctx.lineTo(originX + unitY.x * 250, originY - unitY.y * 250);
+      ctx.stroke();
+      ctx.restore();
+
+      // Vector Y (Base line)
+      drawArrow(originX, originY, originX + yVec.x, originY + yVec.y, '#10b981', 3);
+
+      // Vector X (Vector to project)
+      drawArrow(originX, originY, originX + xVec.x, originY + xVec.y, '#f43f5e', 3);
+
+      // Perpendicular Light Ray (Dashed Line)
+      drawArrow(originX + xVec.x, originY + xVec.y, projPoint.x, projPoint.y, '#f59e0b', 1.5, [4, 4]);
+
+      // Scalar Projection Line (Amber Highlight Shadow)
+      drawArrow(originX, originY, projPoint.x, projPoint.y, '#f59e0b', 5);
+    }
+
+    function loop() {
+      if (isAnimating) {
+        let currentAngle = parseFloat(angleXInput.value);
+        angleXInput.value = (currentAngle + 0.5) % 360;
+      }
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    animBtn.addEventListener('click', () => {
+      isAnimating = !isAnimating;
+      animBtn.innerText = isAnimating ? 'Pause Rotation' : 'Resume Rotation';
+    });
+
+    angleXInput.addEventListener('input', render);
+    lenXInput.addEventListener('input', render);
+    angleYInput.addEventListener('input', render);
+
+    loop();
+  </script>
+</body>
+</html>
