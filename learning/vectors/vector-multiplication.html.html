@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector Multiplication Master Guide | Code2Career AI</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="mathjax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --panel-bg: #151c2c;
+      --card-bg: #0f172a;
+      --accent-blue: #38bdf8;
+      --accent-green: #34d399;
+      --accent-yellow: #fbbf24;
+      --accent-red: #f87171;
+      --accent-purple: #a78bfa;
+      --accent-orange: #f97316;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #1e293b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; line-height: 1.6; }
+
+    header { background: var(--panel-bg); border-bottom: 1px solid var(--border-color); padding: 0.8rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .brand-logo { background: linear-gradient(135deg, #0284c7, #7c3aed); color: #fff; font-weight: 800; padding: 0.3rem 0.7rem; border-radius: 6px; font-size: 1rem; }
+    .brand-title { font-size: 1.1rem; font-weight: 600; }
+
+    .nav-tabs { display: flex; gap: 0.75rem; }
+    .nav-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-muted); padding: 0.4rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: all 0.2s; }
+    .nav-btn:hover, .nav-btn.active { background: var(--accent-blue); color: #000; border-color: var(--accent-blue); }
+
+    .hero { text-align: center; padding: 2.5rem 1.5rem; background: radial-gradient(circle at top, rgba(56, 189, 248, 0.12), transparent 70%); border-bottom: 1px solid var(--border-color); }
+    .hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+    .hero p { color: var(--text-muted); max-width: 780px; margin: 0 auto; font-size: 0.95rem; }
+
+    .app-container { display: flex; height: 620px; border-bottom: 1px solid var(--border-color); }
+    @media (max-width: 960px) { .app-container { flex-direction: column; height: auto; } }
+
+    .calculation-hub { width: 420px; background: var(--panel-bg); border-right: 1px solid var(--border-color); padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    .section-header { font-size: 0.82rem; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border-color); padding-bottom: 0.35rem; margin-bottom: 0.75rem; }
+
+    .vector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .vector-card { background: var(--card-bg); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--border-color); }
+    .vector-card h4 { font-size: 0.85rem; margin-bottom: 0.5rem; }
+
+    .input-group { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.4rem; }
+    .input-group label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; width: 14px; text-align: center; }
+    .input-group input { width: 100%; background: var(--panel-bg); border: 1px solid var(--border-color); color: #fff; padding: 0.3rem 0.4rem; border-radius: 5px; text-align: center; font-size: 0.85rem; font-weight: 500; }
+
+    .calc-card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color); padding: 0.9rem; }
+    .calc-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; font-size: 0.85rem; }
+    .calc-steps { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; background: rgba(0,0,0,0.25); padding: 0.6rem 0.75rem; border-radius: 6px; }
+
+    .note-card { background: rgba(249, 115, 22, 0.06); border: 1px solid rgba(249, 115, 22, 0.25); border-radius: 8px; padding: 0.9rem; font-size: 0.82rem; color: #fed7aa; line-height: 1.5; }
+    .note-card h5 { color: var(--accent-orange); font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 700; }
+    .note-item { display: flex; gap: 0.5rem; margin-top: 0.4rem; }
+    .note-item span.num { color: var(--accent-orange); font-weight: 700; }
+
+    .viewport-container { flex: 1; position: relative; background: #030712; }
+    #threejs-canvas { width: 100%; height: 100%; display: block; }
+
+    .toolbar-overlay { position: absolute; top: 1rem; right: 1rem; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(10px); padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.35rem; width: 230px; }
+    .tool-btn { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; border: 1px solid transparent; font-size: 0.8rem; transition: all 0.2s; background: rgba(255,255,255,0.02); user-select: none; }
+    .tool-btn:hover { background: rgba(255,255,255,0.06); }
+    .tool-btn.active { background: rgba(56, 189, 248, 0.15); border-color: var(--accent-blue); }
+    .color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .label3d { position: absolute; color: white; font-weight: 600; font-size: 11px; padding: 3px 8px; background: rgba(15, 23, 42, 0.9); border-radius: 4px; pointer-events: none; border: 1px solid rgba(255,255,255,0.18); transform: translate(-50%, -100%); white-space: nowrap; }
+
+    .doc-container { max-width: 1200px; margin: 2.5rem auto; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 2.5rem; }
+    .section-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .section-title { font-size: 1.35rem; font-weight: 700; color: var(--accent-blue); margin-bottom: 1rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
+    @media (max-width: 868px) { .grid-2col { grid-template-columns: 1fr; } }
+
+    .interactive-visual { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    canvas.interactive-canvas { background: var(--bg-dark); border-radius: 6px; border: 1px solid var(--border-color); cursor: crosshair; }
+    .canvas-hint { font-size: 0.8rem; color: var(--accent-yellow); }
+
+    .formula-box { background: var(--card-bg); border-left: 4px solid var(--accent-blue); padding: 1rem; border-radius: 0 8px 8px 0; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 1rem; }
+    th, td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border-color); }
+    th { background-color: var(--card-bg); color: var(--accent-blue); font-size: 0.85rem; text-transform: uppercase; }
+
+    .callout { background: rgba(167, 139, 250, 0.08); border: 1px solid var(--accent-purple); border-radius: 8px; padding: 1rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">C2C</div>
+      <div class="brand-title">Code2Career AI <span style="font-weight: 300; font-size: 0.85rem; color: var(--text-muted);">| Master Vector Engine</span></div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-btn active" onclick="scrollToSection('3d-lab')">Interactive 3D Lab</button>
+      <button class="nav-btn" onclick="scrollToSection('phd-theory')">Ph.D. Theory & Proofs</button>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>The Mathematics & Geometry of Vector Multiplication</h1>
+    <p>Comprehensive interactive learning resource combining 3D real-time vector transformations, 2D drag-and-drop projection proofs, and Clifford Algebra extensions.</p>
+  </div>
+
+  <div id="3d-lab" class="app-container">
+    <div class="calculation-hub">
+      <div>
+        <div class="section-header">1. Input Vector Components</div>
+        <div class="vector-grid">
+          <div class="vector-card">
+            <h4 style="color: var(--accent-blue);">Vector a</h4>
+            <div class="input-group"><label>X</label><input type="number" id="ax" value="3" step="0.5"></div>
+            <div class="input-group"><label>Y</label><input type="number" id="ay" value="2" step="0.5"></div>
+            <div class="input-group"><label>Z</label><input type="number" id="az" value="1" step="0.5"></div>
+          </div>
+          <div class="vector-card">
+            <h4 style="color: var(--accent-green);">Vector b</h4>
+            <div class="input-group"><label>X</label><input type="number" id="bx" value="1" step="0.5"></div>
+            <div class="input-group"><label>Y</label><input type="number" id="by" value="4" step="0.5"></div>
+            <div class="input-group"><label>Z</label><input type="number" id="bz" value="3" step="0.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="section-header">2. Dot Product (Scalar Output)</div>
+        <div class="calc-row">
+          <span>Result (\(\mathbf{a} \cdot \mathbf{b}\)):</span>
+          <strong id="dot-val" style="color: var(--accent-orange); font-size: 1.05rem;">14.00</strong>
+        </div>
+        <div class="calc-steps" id="dot-math"></div>
+      </div>
+
+      <div class="note-card">
+        <h5>💡 What does 14.00 represent?</h5>
+        <div class="note-item">
+          <span class="num">1.</span>
+          <div><strong>Alignment & Energy:</strong> A positive scalar (\(+14.00\)) confirms vectors \(\mathbf{a}\) and \(\mathbf{b}\) point in a similar acute direction (\(\theta \approx 42.8^\circ\)).</div>
+        </div>
+        <div class="note-item">
+          <span class="num">2.</span>
+          <div><strong>Scaled Shadow (Plot):</strong> Equals shadow length (\(2.75\)) \(\times\) total length of \(\mathbf{b}\) (\(5.10\)). Plotted in orange on the 3D canvas!</div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="section-header">3. Cross Product (Vector & Area)</div>
+        <div class="calc-row">
+          <span>Orthogonal Vector:</span>
+          <strong id="cross-val" style="color: var(--accent-red); font-size: 0.9rem;">&lt;2.0, -8.0, 10.0&gt;</strong>
+        </div>
+        <div class="calc-steps" id="cross-math"></div>
+      </div>
+    </div>
+
+    <div class="viewport-container">
+      <div id="threejs-canvas"></div>
+      <div id="labels-container"></div>
+
+      <div class="toolbar-overlay">
+        <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.2rem; font-weight: 700;">3D VISUAL TOGGLES</div>
+        
+        <div class="tool-btn" data-target="vector-a" onclick="toggleHighlight('vector-a')">
+          <div class="color-dot" style="background: var(--accent-blue);"></div>
+          <span>Vector <b>a</b></span>
+        </div>
+        <div class="tool-btn" data-target="vector-b" onclick="toggleHighlight('vector-b')">
+          <div class="color-dot" style="background: var(--accent-green);"></div>
+          <span>Vector <b>b</b></span>
+        </div>
+        <div class="tool-btn" data-target="projection" onclick="toggleHighlight('projection')">
+          <div class="color-dot" style="background: var(--accent-yellow);"></div>
+          <span>Projection System \(Proj_{\mathbf{b}}(\mathbf{a})\)</span>
+        </div>
+        <div class="tool-btn" data-target="dot-bar" onclick="toggleHighlight('dot-bar')">
+          <div class="color-dot" style="background: var(--accent-orange);"></div>
+          <span>Dot Value Bar (14.00)</span>
+        </div>
+        <div class="tool-btn" data-target="cross-product" onclick="toggleHighlight('cross-product')">
+          <div class="color-dot" style="background: var(--accent-red);"></div>
+          <span>Cross Product (\(\mathbf{a} \times \mathbf{b}\))</span>
+        </div>
+        <div class="tool-btn" data-target="parallelogram" onclick="toggleHighlight('parallelogram')">
+          <div class="color-dot" style="background: rgba(248, 113, 113, 0.5); border: 1px dashed #f87171;"></div>
+          <span>Parallelogram Area</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="phd-theory" class="doc-container">
+    <div class="section-card">
+      <div class="section-title">1. Executive Overview: Mathematical Necessity</div>
+      <p>In standard vector space algebra over \(\mathbb{R}^n\), field multiplication cannot be directly defined while preserving a single unified division algebra. Unlike scalars, vector division is non-unique because infinitely many vectors can project onto the same component.</p>
+      <div class="formula-box">
+        <ul>
+          <li><strong>Inner Product (Dot Product):</strong> Maps \(\mathbb{R}^n \times \mathbb{R}^n \to \mathbb{R}\). Measures directional alignment, scalar length, and energy.</li>
+          <li style="margin-top: 0.5rem;"><strong>Exterior Product (Cross Product):</strong> Maps \(\mathbb{R}^3 \times \mathbb{R}^3 \to \mathbb{R}^3\). Measures spanned area, rotational torque, and spatial orientation.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">2. Dot Product & Vector Projection Decomposition</div>
+      <div class="grid-2col">
+        <div>
+          <p>The inner product decomposes vector \(\mathbf{a}\) into a parallel component \(\mathbf{a}_\|\) along \(\mathbf{b}\) and a residual orthogonal component \(\mathbf{a}_\perp\):</p>
+          $$\mathbf{a}_\| = \text{Proj}_{\mathbf{b}}(\mathbf{a}) = \left( \frac{\mathbf{a} \cdot \mathbf{b}}{\|\mathbf{b}\|^2} \right) \mathbf{b}$$
+          $$\mathbf{a}_\perp = \mathbf{a} - \text{Proj}_{\mathbf{b}}(\mathbf{a})$$
+        </div>
+        <div class="interactive-visual">
+          <canvas id="projCanvas" class="interactive-canvas" width="360" height="250"></canvas>
+          <div class="canvas-hint">💡 Drag Vector A's head to see live decomposition!</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">3. Cross Product & Spanned Parallelogram Area</div>
+      <div class="grid-2col">
+        <div class="interactive-visual">
+          <canvas id="crossCanvas" class="interactive-canvas" width="360" height="250"></canvas>
+          <div class="canvas-hint">⚡ Animated Real-Time Area & Pseudovector Orientation</div>
+        </div>
+        <div>
+          <p>The cross product calculates an orthogonal vector whose norm strictly equals the spanned parallelogram surface area:</p>
+          $$\|\mathbf{a} \times \mathbf{b}\| = \|\mathbf{a}\| \|\mathbf{b}\| \sin(\theta) = \text{Area}$$
+          <p>The vector orientation follows the <strong>Right-Hand Rule</strong>, enforcing anti-commutativity: \(\mathbf{a} \times \mathbf{b} = -(\mathbf{b} \times \mathbf{a})\).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">4. Analytical Rigor Comparison</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Dot Product (\(\mathbf{a} \cdot \mathbf{b}\))</th>
+            <th>Cross Product (\(\mathbf{a} \times \mathbf{b}\))</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Output Type</strong></td>
+            <td>Scalar (\(\mathbb{R}\))</td>
+            <td>Pseudovector (\(\mathbb{R}^3\))</td>
+          </tr>
+          <tr>
+            <td><strong>Dimensions</strong></td>
+            <td>Arbitrary \(n\)-dimensions (\(\mathbb{R}^n\))</td>
+            <td>Strictly \(\mathbb{R}^3\) (and \(\mathbb{R}^7\))</td>
+          </tr>
+          <tr>
+            <td><strong>Trigonometry</strong></td>
+            <td>Cosine (\(\cos \theta\))</td>
+            <td>Sine (\(\sin \theta\))</td>
+          </tr>
+          <tr>
+            <td><strong>Symmetry</strong></td>
+            <td>Commutative (\(\mathbf{a} \cdot \mathbf{b} = \mathbf{b} \cdot \mathbf{a}\))</td>
+            <td>Anti-commutative (\(\mathbf{a} \times \mathbf{b} = -\mathbf{b} \times \mathbf{a}\))</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">5. Advanced Extension: Geometric Algebra (\(\mathbf{u}\mathbf{v} = \mathbf{u}\cdot\mathbf{v} + \mathbf{u}\wedge\mathbf{v}\))</div>
+      <p>Clifford Algebra unifies the scalar dot product and vector cross product into a singular operation across arbitrary dimensions. Adjust the angle slider to see energy transfer between the <strong>Scalar Component</strong> and the <strong>Bivector Blade Area Component</strong>:</p>
+
+      <div class="interactive-visual" style="margin-top: 1rem;">
+        <canvas id="gaCanvas" class="interactive-canvas" width="600" height="220"></canvas>
+        <div style="margin-top: 0.5rem; display: flex; gap: 1rem; align-items: center;">
+          <label style="font-size: 0.85rem; color: var(--text-muted);">Angle (\(\theta\)): <span id="angleVal" style="color:#fff;">45°</span></label>
+          <input type="range" id="angleSlider" min="0" max="180" value="45" style="accent-color: var(--accent-purple);">
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Key Takeaway:</strong> Geometric Algebra resolves the cross product's 3D restriction by introducing higher-grade multivectors (Bivectors, Trivectors), enabling continuous spatial rotations without gimbal lock.
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- 1. THREE.JS 3D VIEWPORT ENGINE ---
+    let activeHighlight = null;
+    const container = document.getElementById('threejs-canvas');
+    const labelsContainer = document.getElementById('labels-container');
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030712);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(8, 10, 14);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    scene.add(new THREE.GridHelper(20, 20, 0x1e293b, 0x0f172a));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, 10);
+    scene.add(dirLight);
+
+    let arrowA, arrowB, arrowProj, arrowCross, parallelogramMesh, dropLineMesh, dotBarMesh;
+    let labelTargets = [];
+
+    const BASE_COLORS = { 'vector-a': 0x38bdf8, 'vector-b': 0x34d399, 'projection': 0xfbbf24, 'dot-bar': 0xf97316, 'cross-product': 0xf87171, 'parallelogram': 0xf87171 };
+    const DIM_COLOR = 0x1e293b;
+
+    function createArrow(dir, origin, length, color) {
+      return new THREE.ArrowHelper(dir.clone().normalize(), origin, length, color, 0.35, 0.18);
+    }
+
+    function toggleHighlight(targetKey) {
+      activeHighlight = (activeHighlight === targetKey) ? null : targetKey;
+      document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.classList.toggle('active', activeHighlight && btn.getAttribute('data-target') === activeHighlight);
+      });
+      applyHighlighting();
+    }
+
+    // DYNAMIC SELECTION LOGIC FOR SOLOING VS PROJECTION SYSTEM
+    function applyHighlighting() {
+      if (!activeHighlight) {
+        // Show everything normally
+        if (arrowA) arrowA.setColor(BASE_COLORS['vector-a']);
+        if (arrowB) arrowB.setColor(BASE_COLORS['vector-b']);
+        if (arrowProj) arrowProj.setColor(BASE_COLORS['projection']);
+        if (arrowCross) arrowCross.setColor(BASE_COLORS['cross-product']);
+        if (dotBarMesh) { dotBarMesh.material.color.setHex(BASE_COLORS['dot-bar']); dotBarMesh.material.opacity = 0.9; }
+        if (parallelogramMesh) { parallelogramMesh.material.color.setHex(BASE_COLORS['parallelogram']); parallelogramMesh.material.opacity = 0.3; }
+        if (dropLineMesh) dropLineMesh.material.opacity = 0.8;
+        return;
+      }
+
+      // Solo Vector A
+      if (activeHighlight === 'vector-a') {
+        if (arrowA) arrowA.setColor(BASE_COLORS['vector-a']);
+        if (arrowB) arrowB.setColor(DIM_COLOR);
+        if (arrowProj) arrowProj.setColor(DIM_COLOR);
+        if (arrowCross) arrowCross.setColor(DIM_COLOR);
+        if (dotBarMesh) dotBarMesh.material.opacity = 0.05;
+        if (parallelogramMesh) parallelogramMesh.material.opacity = 0.05;
+        if (dropLineMesh) dropLineMesh.material.opacity = 0.05;
+      }
+      // Solo Vector B
+      else if (activeHighlight === 'vector-b') {
+        if (arrowA) arrowA.setColor(DIM_COLOR);
+        if (arrowB) arrowB.setColor(BASE_COLORS['vector-b']);
+        if (arrowProj) arrowProj.setColor(DIM_COLOR);
+        if (arrowCross) arrowCross.setColor(DIM_COLOR);
+        if (dotBarMesh) dotBarMesh.material.opacity = 0.05;
+        if (parallelogramMesh) parallelogramMesh.material.opacity = 0.05;
+        if (dropLineMesh) dropLineMesh.material.opacity = 0.05;
+      }
+      // System View: Projection Proj_b(a) (Shows Vector A, Vector B, Projection, and Drop-line together)
+      else if (activeHighlight === 'projection') {
+        if (arrowA) arrowA.setColor(BASE_COLORS['vector-a']);
+        if (arrowB) arrowB.setColor(BASE_COLORS['vector-b']);
+        if (arrowProj) arrowProj.setColor(BASE_COLORS['projection']);
+        if (arrowCross) arrowCross.setColor(DIM_COLOR);
+        if (dotBarMesh) dotBarMesh.material.opacity = 0.05;
+        if (parallelogramMesh) parallelogramMesh.material.opacity = 0.05;
+        if (dropLineMesh) dropLineMesh.material.opacity = 0.9;
+      }
+      // Solo Dot Value Bar
+      else if (activeHighlight === 'dot-bar') {
+        if (arrowA) arrowA.setColor(DIM_COLOR);
+        if (arrowB) arrowB.setColor(BASE_COLORS['vector-b']);
+        if (arrowProj) arrowProj.setColor(DIM_COLOR);
+        if (arrowCross) arrowCross.setColor(DIM_COLOR);
+        if (dotBarMesh) { dotBarMesh.material.color.setHex(BASE_COLORS['dot-bar']); dotBarMesh.material.opacity = 1.0; }
+        if (parallelogramMesh) parallelogramMesh.material.opacity = 0.05;
+        if (dropLineMesh) dropLineMesh.material.opacity = 0.05;
+      }
+      // Solo Cross Product Vector
+      else if (activeHighlight === 'cross-product') {
+        if (arrowA) arrowA.setColor(DIM_COLOR);
+        if (arrowB) arrowB.setColor(DIM_COLOR);
+        if (arrowProj) arrowProj.setColor(DIM_COLOR);
+        if (arrowCross) arrowCross.setColor(BASE_COLORS['cross-product']);
+        if (dotBarMesh) dotBarMesh.material.opacity = 0.05;
+        if (parallelogramMesh) parallelogramMesh.material.opacity = 0.05;
+        if (dropLineMesh) dropLineMesh.material.opacity = 0.05;
+      }
+      // Parallelogram Area View
+      else if (activeHighlight === 'parallelogram') {
+        if (arrowA) arrowA.setColor(BASE_COLORS['vector-a']);
+        if (arrowB) arrowB.setColor(BASE_COLORS['vector-b']);
+        if (arrowProj) arrowProj.setColor(DIM_COLOR);
+        if (arrowCross) arrowCross.setColor(DIM_COLOR);
+        if (dotBarMesh) dotBarMesh.material.opacity = 0.05;
+        if (parallelogramMesh) { parallelogramMesh.material.color.setHex(BASE_COLORS['parallelogram']); parallelogramMesh.material.opacity = 0.75; }
+        if (dropLineMesh) dropLineMesh.material.opacity = 0.05;
+      }
+    }
+
+    function update3DLabels() {
+      labelsContainer.innerHTML = '';
+      labelTargets.forEach(target => {
+        // Filter label visibility according to active highlight mode
+        if (activeHighlight === 'vector-a' && target.key !== 'a') return;
+        if (activeHighlight === 'vector-b' && target.key !== 'b') return;
+        if (activeHighlight === 'cross-product' && target.key !== 'cross') return;
+        if (activeHighlight === 'dot-bar' && target.key !== 'dot-bar' && target.key !== 'b') return;
+        if (activeHighlight === 'projection' && (target.key === 'cross' || target.key === 'dot-bar')) return;
+
+        const tempV = target.pos.clone();
+        tempV.project(camera);
+
+        const x = (tempV.x * .5 + .5) * container.clientWidth;
+        const y = (tempV.y * -.5 + .5) * container.clientHeight;
+
+        if (tempV.z < 1) {
+          const div = document.createElement('div');
+          div.className = 'label3d';
+          div.style.left = `${x}px`;
+          div.style.top = `${y}px`;
+          div.style.color = target.color;
+          div.innerText = target.text;
+          labelsContainer.appendChild(div);
+        }
+      });
+    }
+
+    function updateCalculations() {
+      const ax = parseFloat(document.getElementById('ax').value) || 0;
+      const ay = parseFloat(document.getElementById('ay').value) || 0;
+      const az = parseFloat(document.getElementById('az').value) || 0;
+      const bx = parseFloat(document.getElementById('bx').value) || 0;
+      const by = parseFloat(document.getElementById('by').value) || 0;
+      const bz = parseFloat(document.getElementById('bz').value) || 0;
+
+      const vecA = new THREE.Vector3(ax, ay, az);
+      const vecB = new THREE.Vector3(bx, by, bz);
+
+      const dot = vecA.dot(vecB);
+      const magA = vecA.length();
+      const magB = vecB.length();
+
+      let cosTheta = 0, angleDeg = 0;
+      if (magA > 0 && magB > 0) {
+        cosTheta = Math.min(Math.max(dot / (magA * magB), -1), 1);
+        angleDeg = (Math.acos(cosTheta) * (180 / Math.PI)).toFixed(1);
+      }
+
+      const projVector = vecB.clone().multiplyScalar(magB > 0 ? dot / (magB * magB) : 0);
+
+      document.getElementById('dot-val').innerText = dot.toFixed(2);
+      document.getElementById('dot-math').innerHTML = `
+        \\(\\mathbf{a} \\cdot \\mathbf{b} = (${ax}\\cdot${bx}) + (${ay}\\cdot${by}) + (${az}\\cdot${bz}) = ${dot.toFixed(2)}\\)<br>
+        \\(\\theta = ${angleDeg}^\\circ \\quad \\text{Shadow Length} = ${projVector.length().toFixed(2)}\\)
+      `;
+
+      const crossVec = new THREE.Vector3().crossVectors(vecA, vecB);
+      const area = crossVec.length();
+
+      document.getElementById('cross-val').innerText = `<${crossVec.x.toFixed(1)}, ${crossVec.y.toFixed(1)}, ${crossVec.z.toFixed(1)}>`;
+      document.getElementById('cross-math').innerHTML = `
+        \\(\\mathbf{a} \\times \\mathbf{b} = \\langle (${ay}\\cdot${bz} - ${az}\\cdot${by}),\\, (${az}\\cdot${bx} - ${ax}\\cdot${bz}),\\, (${ax}\\cdot${by} - ${ay}\\cdot${bx}) \\rangle\\)<br>
+        \\(\\text{Parallelogram Area} = ||\\mathbf{a} \\times \\mathbf{b}|| = ${area.toFixed(2)}\\)
+      `;
+
+      if (window.MathJax && window.MathJax.typesetPromise) MathJax.typesetPromise();
+
+      // Clear Scene
+      if (arrowA) scene.remove(arrowA);
+      if (arrowB) scene.remove(arrowB);
+      if (arrowProj) scene.remove(arrowProj);
+      if (arrowCross) scene.remove(arrowCross);
+      if (parallelogramMesh) scene.remove(parallelogramMesh);
+      if (dropLineMesh) scene.remove(dropLineMesh);
+      if (dotBarMesh) scene.remove(dotBarMesh);
+
+      labelTargets = [];
+      const origin = new THREE.Vector3(0, 0, 0);
+
+      if (magA > 0) {
+        arrowA = createArrow(vecA, origin, magA, BASE_COLORS['vector-a']);
+        scene.add(arrowA);
+        labelTargets.push({ pos: vecA, text: 'a', color: '#38bdf8', key: 'a' });
+      }
+
+      if (magB > 0) {
+        arrowB = createArrow(vecB, origin, magB, BASE_COLORS['vector-b']);
+        scene.add(arrowB);
+        labelTargets.push({ pos: vecB, text: 'b', color: '#34d399', key: 'b' });
+      }
+
+      if (projVector.length() > 0) {
+        arrowProj = createArrow(projVector, origin, projVector.length(), BASE_COLORS['projection']);
+        scene.add(arrowProj);
+        labelTargets.push({ pos: projVector, text: 'Proj_b(a)', color: '#fbbf24', key: 'proj' });
+
+        const lineGeo = new THREE.BufferGeometry().setFromPoints([vecA, projVector]);
+        const lineMat = new THREE.LineDashedMaterial({ color: 0xfbbf24, dashSize: 0.2, gapSize: 0.1 });
+        dropLineMesh = new THREE.Line(lineGeo, lineMat);
+        dropLineMesh.computeLineDistances();
+        scene.add(dropLineMesh);
+      }
+
+      if (magB > 0 && Math.abs(dot) > 0) {
+        const normB = vecB.clone().normalize();
+        const dotScaledVec = normB.clone().multiplyScalar(dot / magB); 
+        const barGeo = new THREE.BufferGeometry().setFromPoints([origin, dotScaledVec]);
+        const barMat = new THREE.LineBasicMaterial({ color: BASE_COLORS['dot-bar'], linewidth: 4 });
+        dotBarMesh = new THREE.Line(barGeo, barMat);
+        scene.add(dotBarMesh);
+
+        labelTargets.push({ pos: dotScaledVec, text: `Dot Value = ${dot.toFixed(2)}`, color: '#f97316', key: 'dot-bar' });
+      }
+
+      if (area > 0) {
+        arrowCross = createArrow(crossVec, origin, area, BASE_COLORS['cross-product']);
+        scene.add(arrowCross);
+        labelTargets.push({ pos: crossVec, text: 'a × b', color: '#f87171', key: 'cross' });
+
+        const geom = new THREE.BufferGeometry();
+        const verts = new Float32Array([0,0,0, ax,ay,az, ax+bx,ay+by,az+bz, 0,0,0, ax+bx,ay+by,az+bz, bx,by,bz]);
+        geom.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+        parallelogramMesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ color: BASE_COLORS['parallelogram'], side: THREE.DoubleSide, transparent: true, opacity: 0.3 }));
+        scene.add(parallelogramMesh);
+      }
+
+      applyHighlighting();
+    }
+
+    ['ax','ay','az','bx','by','bz'].forEach(id => document.getElementById(id).addEventListener('input', updateCalculations));
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    updateCalculations();
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      update3DLabels();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // --- 2. 2D INTERACTIVE PROJECTION CANVAS ---
+    const pCanvas = document.getElementById('projCanvas');
+    const pCtx = pCanvas.getContext('2d');
+    let vec2DA = { x: 240, y: 70 }, vec2DOrigin = { x: 40, y: 200 }, vec2DB = { x: 300, y: 200 }, isDragging2D = false;
+
+    pCanvas.addEventListener('mousedown', (e) => {
+      const r = pCanvas.getBoundingClientRect();
+      if (Math.hypot((e.clientX - r.left) - vec2DA.x, (e.clientY - r.top) - vec2DA.y) < 20) isDragging2D = true;
+    });
+    pCanvas.addEventListener('mousemove', (e) => {
+      if (isDragging2D) {
+        const r = pCanvas.getBoundingClientRect();
+        vec2DA.x = e.clientX - r.left; vec2DA.y = e.clientY - r.top;
+        draw2DProj();
+      }
+    });
+    window.addEventListener('mouseup', () => isDragging2D = false);
+
+    function drawArrow2D(ctx, fx, fy, tx, ty, color, label, dashed=false) {
+      const angle = Math.atan2(ty - fy, tx - fx);
+      ctx.save(); ctx.beginPath(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5;
+      if (dashed) ctx.setLineDash([4, 4]);
+      ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke();
+      if (!dashed) {
+        ctx.beginPath(); ctx.moveTo(tx, ty);
+        ctx.lineTo(tx - 8 * Math.cos(angle - Math.PI/6), ty - 8 * Math.sin(angle - Math.PI/6));
+        ctx.lineTo(tx - 8 * Math.cos(angle + Math.PI/6), ty - 8 * Math.sin(angle + Math.PI/6));
+        ctx.fill();
+      }
+      if (label) { ctx.font = '12px Inter'; ctx.fillText(label, (fx+tx)/2 + 5, (fy+ty)/2 - 5); }
+      ctx.restore();
+    }
+
+    function draw2DProj() {
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      drawArrow2D(pCtx, vec2DOrigin.x, vec2DOrigin.y, vec2DB.x, vec2DB.y, '#34d399', 'b');
+      drawArrow2D(pCtx, vec2DOrigin.x, vec2DOrigin.y, vec2DA.x, vec2DA.y, '#38bdf8', 'a');
+      
+      const ax = vec2DA.x - vec2DOrigin.x, ay = vec2DA.y - vec2DOrigin.y;
+      const bx = vec2DB.x - vec2DOrigin.x, by = vec2DB.y - vec2DOrigin.y;
+      const scale = (ax*bx + ay*by) / (bx*bx + by*by);
+      const px = vec2DOrigin.x + scale * bx, py = vec2DOrigin.y + scale * by;
+
+      drawArrow2D(pCtx, vec2DOrigin.x, vec2DOrigin.y, px, py, '#fbbf24', 'Proj_b(a)');
+      drawArrow2D(pCtx, vec2DA.x, vec2DA.y, px, py, '#f87171', 'a_⊥', true);
+    }
+    draw2DProj();
+
+    // --- 3. ANIMATED CROSS PRODUCT CANVAS ---
+    const cCanvas = document.getElementById('crossCanvas'), cCtx = cCanvas.getContext('2d');
+    let t = 0;
+    function animateCross2D() {
+      cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height); t += 0.03;
+      const ox = 50, oy = 180, ax = ox + 150, ay = oy;
+      const bx = ox + 60 + Math.cos(t) * 25, by = oy - 90 + Math.sin(t) * 15;
+
+      cCtx.beginPath(); cCtx.moveTo(ox, oy); cCtx.lineTo(ax, ay); cCtx.lineTo(ax + (bx - ox), ay + (by - oy)); cCtx.lineTo(bx, by); cCtx.closePath();
+      cCtx.fillStyle = 'rgba(248, 113, 113, 0.25)'; cCtx.fill(); cCtx.strokeStyle = '#f87171'; cCtx.stroke();
+
+      drawArrow2D(cCtx, ox, oy, ax, ay, '#38bdf8', 'a');
+      drawArrow2D(cCtx, ox, oy, bx, by, '#34d399', 'b');
+      drawArrow2D(cCtx, ox, oy, ox, oy - 55, '#f87171', 'a × b');
+      requestAnimationFrame(animateCross2D);
+    }
+    animateCross2D();
+
+    // --- 4. GEOMETRIC ALGEBRA CANVAS ---
+    const gaCanvas = document.getElementById('gaCanvas'), gaCtx = gaCanvas.getContext('2d');
+    const angleSlider = document.getElementById('angleSlider'), angleVal = document.getElementById('angleVal');
+
+    function drawGA() {
+      gaCtx.clearRect(0, 0, gaCanvas.width, gaCanvas.height);
+      const ang = parseFloat(angleSlider.value); angleVal.innerText = `${ang}°`;
+      const rad = ang * (Math.PI / 180), ox = 80, oy = 150, len = 100;
+
+      const ux = ox + len, uy = oy, vx = ox + len * Math.cos(-rad), vy = oy + len * Math.sin(-rad);
+      drawArrow2D(gaCtx, ox, oy, ux, uy, '#38bdf8', 'u');
+      drawArrow2D(gaCtx, ox, oy, vx, vy, '#34d399', 'v');
+
+      const dotV = Math.cos(rad), wedgeV = Math.sin(rad);
+      gaCtx.fillStyle = '#38bdf8'; gaCtx.fillRect(280, 40, dotV * 130, 18);
+      gaCtx.fillStyle = '#fff'; gaCtx.font = '12px Inter'; gaCtx.fillText(`Scalar Part (u · v): ${dotV.toFixed(2)}`, 280, 32);
+
+      gaCtx.fillStyle = '#a78bfa'; gaCtx.fillRect(280, 110, wedgeV * 130, 18);
+      gaCtx.fillStyle = '#fff'; gaCtx.fillText(`Bivector Blade (u ∧ v): ${wedgeV.toFixed(2)}`, 280, 102);
+    }
+    angleSlider.addEventListener('input', drawGA);
+    drawGA();
+  </script>
+</body>
+</html>

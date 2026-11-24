@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matrix Properties & Practice Quiz</title>
+  
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-color: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --accent-light: #eff6ff;
+      --success: #16a34a;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    .math-block {
+      background: var(--code-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+      text-align: center;
+      border-left: 4px solid var(--primary);
+    }
+
+    .callout {
+      background: var(--accent-light);
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+
+    /* Quiz Widget Styles */
+    .quiz-container {
+      margin-top: 1.5rem;
+    }
+
+    .quiz-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      background: #fafafa;
+    }
+
+    .quiz-card h4 {
+      margin-bottom: 0.75rem;
+      font-size: 1.05rem;
+      color: var(--text-main);
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .quiz-option {
+      padding: 0.65rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: var(--accent-light);
+      border-color: var(--primary);
+    }
+
+    .quiz-option.correct {
+      background: #dcfce7 !important;
+      border-color: var(--success) !important;
+      color: #14532d;
+      font-weight: 600;
+    }
+
+    .quiz-option.incorrect {
+      background: #fee2e2 !important;
+      border-color: #ef4444 !important;
+      color: #7f1d1d;
+    }
+
+    .explanation {
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: none;
+      padding: 0.75rem;
+      background: #fff;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 1rem 0.5rem;
+      }
+      section {
+        padding: 1.25rem;
+      }
+      header h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Matrix Properties & Fundamentals</h1>
+      <p>A comprehensive guide to matrix theory, linear transformations, and interactive self-assessment.</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>1. Matrix Core Definitions</h2>
+        <p>A <strong>matrix</strong> is a rectangular grid of numbers arranged in rows and columns. If a vector is a single list of numbers, a matrix is a table of them.</p>
+
+        <div class="math-block">
+          $$A = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix}$$
+        </div>
+
+        <p>You can also think of a matrix as a stack of vectors. Each entry is designated by $A_{ij}$ for row $i$, column $j$.</p>
+      </section>
+
+      <section>
+        <h2>2. Transpose & Trace</h2>
+        <p>The <strong>transpose</strong> $A^T$ flips $A$ along its diagonal, turning rows into columns. For an $m \times n$ matrix $A$, $A^T$ is $n \times m$.</p>
+        <p>The <strong>trace</strong> $\text{tr}(A)$ is the sum of main diagonal elements for a square matrix and equals the sum of its eigenvalues.</p>
+      </section>
+
+      <section>
+        <h2>3. Rank & Vector Subspaces</h2>
+        <p>The <strong>rank</strong> measures linearly independent rows or columns.</p>
+        <div class="callout">
+          <strong>Rank-Nullity Theorem:</strong>
+          $$\text{rank}(A) + \text{nullity}(A) = \text{number of columns of } A$$
+        </div>
+      </section>
+
+      <section>
+        <h2>4. Interactive Practice Quiz (20 Questions)</h2>
+        <div class="quiz-container" id="quizContainer">
+          </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; Matrix Properties Interactive Practice Module.</p>
+    </footer>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        q: "1. If a matrix $A$ has dimensions $2 \\times 3$, what are the dimensions of its transpose $A^T$?",
+        options: ["A) $2 \\times 3$", "B) $3 \\times 2$", "C) $3 \\times 3$", "D) $2 \\times 2$"],
+        correct: 1,
+        exp: "The transpose flips rows and columns, turning an $m \\times n$ matrix into $n \\times m$."
+      },
+      {
+        q: "2. For any $m \\times n$ matrix $A$, what are the dimensions of $A^T A$?",
+        options: ["A) $m \\times m$", "B) $n \\times n$", "C) $m \\times n$", "D) $n \\times m$"],
+        correct: 1,
+        exp: "Multiplying an $n \\times m$ matrix ($A^T$) by an $m \\times n$ matrix ($A$) produces an $n \\times n$ square matrix."
+      },
+      {
+        q: "3. What is the trace of $A = \\begin{bmatrix} 1 & 2 & 3 \\\\ 4 & 5 & 6 \\\\ 7 & 8 & 9 \\end{bmatrix}$?",
+        options: ["A) 15", "B) 45", "C) 14", "D) 0"],
+        correct: 0,
+        exp: "The trace is the sum of the main diagonal elements: $1 + 5 + 9 = 15$."
+      },
+      {
+        q: "4. Which of the following is true about the trace of a square matrix?",
+        options: [
+          "A) It changes depending on the basis chosen.",
+          "B) It equals the product of all elements.",
+          "C) It is basis-independent and equals the sum of its eigenvalues.",
+          "D) It is defined for non-square matrices."
+        ],
+        correct: 2,
+        exp: "If two matrices represent the same linear transformation under different bases, their traces remain identical."
+      },
+      {
+        q: "5. What is the rank of $\\begin{bmatrix} 1 & 2 \\\\ 2 & 4 \\end{bmatrix}$?",
+        options: ["A) 2", "B) 1", "C) 0", "D) 4"],
+        correct: 1,
+        exp: "The second row is $2 \\times$ the first row, meaning there is only 1 linearly independent row."
+      },
+      {
+        q: "6. What is the maximum possible rank for a $5 \\times 3$ matrix?",
+        options: ["A) 5", "B) 3", "C) 15", "D) 2"],
+        correct: 1,
+        exp: "Rank cannot exceed the smaller dimension: $\\text{rank}(A) \\le \\min(m, n) = 3$."
+      },
+      {
+        q: "7. According to the Rank-Nullity theorem for an $m \\times n$ matrix $A$, what does $\\text{rank}(A) + \\text{nullity}(A)$ equal?",
+        options: ["A) $m$ (number of rows)", "B) $n$ (number of columns)", "C) $\\det(A)$", "D) $\\text{tr}(A)$"],
+        correct: 1,
+        exp: "Rank (column space dimension) plus nullity (null space dimension) equals total domain columns $n$."
+      },
+      {
+        q: "8. What geometrical space does the column space of a matrix represent?",
+        options: [
+          "A) All inputs mapped to zero",
+          "B) All possible outputs when multiplying the matrix by any input vector",
+          "C) The diagonal entries of the transformation",
+          "D) The scaling factor of area"
+        ],
+        correct: 1,
+        exp: "The column space is spanned by the columns and contains every reachable output vector $A\\mathbf{x}$."
+      },
+      {
+        q: "9. What is the determinant of $\\begin{bmatrix} 2 & 1 \\\\ 0 & 3 \\end{bmatrix}$?",
+        options: ["A) 5", "B) 6", "C) 0", "D) 2"],
+        correct: 1,
+        exp: "$\\det(A) = ad - bc = (2)(3) - (1)(0) = 6$."
+      },
+      {
+        q: "10. Geometrically, what does a negative determinant indicate for a $2 \\times 2$ matrix?",
+        options: [
+          "A) Space collapses to a line",
+          "B) Preserves orientation",
+          "C) Flips orientation (mirror reflection)",
+          "D) Matrix has no trace"
+        ],
+        correct: 2,
+        exp: "A negative determinant scales area by $|\\det(A)|$ while inverting spatial orientation."
+      },
+      {
+        q: "11. What term describes a square matrix whose determinant is zero?",
+        options: ["A) Full rank", "B) Well-conditioned", "C) Singular", "D) Orthogonal"],
+        correct: 2,
+        exp: "A singular matrix collapses space to a lower dimension and lacks an inverse."
+      },
+      {
+        q: "12. How is the cofactor $C_{ij}$ defined in terms of the minor $M_{ij}$?",
+        options: [
+          "A) $C_{ij} = M_{ij}^2$",
+          "B) $C_{ij} = (-1)^{i+j} M_{ij}$",
+          "C) $C_{ij} = (i+j) M_{ij}$",
+          "D) $C_{ij} = \\frac{1}{M_{ij}}$"
+        ],
+        correct: 1,
+        exp: "The cofactor attaches an alternating sign pattern $(-1)^{i+j}$ to the minor $M_{ij}$."
+      },
+      {
+        q: "13. What is the inverse formula for $A = \\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}$?",
+        options: [
+          "A) $\\begin{bmatrix} d & -b \\\\ -c & a \\end{bmatrix}$",
+          "B) $\\frac{1}{ad - bc} \\begin{bmatrix} d & -b \\\\ -c & a \\end{bmatrix}$",
+          "C) $\\frac{1}{ad + bc} \\begin{bmatrix} a & -b \\\\ -c & d \\end{bmatrix}$",
+          "D) $\\frac{1}{ad - bc} \\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}$"
+        ],
+        correct: 1,
+        exp: "Swap main diagonal entries, negate off-diagonal entries, and divide by $\\det(A) = ad - bc$."
+      },
+      {
+        q: "14. Which condition is necessary for a square matrix to be invertible?",
+        options: [
+          "A) Determinant must be zero",
+          "B) Matrix must be singular",
+          "C) Matrix must be full rank (non-zero determinant)",
+          "D) Trace must equal 1"
+        ],
+        correct: 2,
+        exp: "An inverse exists if and only if the matrix is full rank and non-singular."
+      },
+      {
+        q: "15. How is the condition number $\\kappa(A)$ defined for an invertible matrix?",
+        options: [
+          "A) $\\kappa(A) = \\|A\\| \\cdot \\|A^{-1}\\|$",
+          "B) $\\kappa(A) = \\text{tr}(A) \\cdot \\det(A)$",
+          "C) $\\kappa(A) = \\frac{\\text{rank}(A)}{\\text{nullity}(A)}$",
+          "D) $\\kappa(A) = \\|A\\| + \\|A^{-1}\\|$"
+        ],
+        correct: 0,
+        exp: "The condition number is defined as the product of matrix norms: $\\kappa(A) = \\|A\\| \\cdot \\|A^{-1}\\|$"
+      },
+      {
+        q: "16. What does a very large condition number ($10^8$) indicate?",
+        options: [
+          "A) The matrix is orthogonal",
+          "B) It is well-conditioned",
+          "C) It is ill-conditioned: small input changes cause huge output errors",
+          "D) It is singular"
+        ],
+        correct: 2,
+        exp: "High condition numbers imply extreme sensitivity to noise and numerical instability."
+      },
+      {
+        q: "17. What is the Frobenius norm of $A = \\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\end{bmatrix}$?",
+        options: ["A) 10", "B) $\\sqrt{30}$", "C) 5", "D) 30"],
+        correct: 1,
+        exp: "$\\|A\\|_F = \\sqrt{1^2 + 2^2 + 3^2 + 4^2} = \\sqrt{1 + 4 + 9 + 16} = \\sqrt{30}$."
+      },
+      {
+        q: "18. What does the spectral norm $\\|A\\|_2$ measure?",
+        options: [
+          "A) Sum of diagonal entries",
+          "B) Largest singular value of $A$",
+          "C) Determinant divided by rank",
+          "D) Sum of squared elements"
+        ],
+        correct: 1,
+        exp: "The spectral norm represents the maximum amount the matrix can stretch any unit vector, which equals its largest singular value."
+      },
+      {
+        q: "19. A symmetric matrix $A$ is positive definite if for every non-zero vector $\\mathbf{x}$:",
+        options: [
+          "A) $\\mathbf{x}^T A \\mathbf{x} > 0$",
+          "B) $\\mathbf{x}^T A \\mathbf{x} = 0$",
+          "C) $\\mathbf{x}^T A \\mathbf{x} \\le 0$",
+          "D) $\\det(A) < 0$"
+        ],
+        correct: 0,
+        exp: "A positive definite matrix guarantees a strictly positive quadratic scalar output for any non-zero vector."
+      },
+      {
+        q: "20. Which of the following machine learning structures are positive semi-definite (PSD)?",
+        options: [
+          "A) Covariance matrices",
+          "B) Kernel matrices in SVMs",
+          "C) Hessian matrices at local minima",
+          "D) All of the above"
+        ],
+        correct: 3,
+        exp: "Covariance matrices, SVM kernel matrices, and Hessians at local minima all satisfy $\\mathbf{x}^T A \\mathbf{x} \\ge 0$."
+      }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quizContainer');
+      quizData.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        
+        let html = `<h4>${item.q}</h4><div class="quiz-options">`;
+        item.options.forEach((opt, optIdx) => {
+          html += `<button class="quiz-option" onclick="checkAnswer(${index}, ${optIdx}, this)">${opt}</button>`;
+        });
+        html += `</div><div class="explanation" id="exp-${index}">${item.exp}</div>`;
+        
+        card.innerHTML = html;
+        container.appendChild(card);
+      });
+
+      if (window.MathJax) {
+        MathJax.typesetPromise();
+      }
+    }
+
+    function checkAnswer(qIdx, selectedIdx, btn) {
+      const parent = btn.parentElement;
+      const options = parent.querySelectorAll('.quiz-option');
+      const exp = document.getElementById(`exp-${qIdx}`);
+
+      options.forEach((optBtn, idx) => {
+        optBtn.disabled = true;
+        if (idx === quizData[qIdx].correct) {
+          optBtn.classList.add('correct');
+        } else if (idx === selectedIdx) {
+          optBtn.classList.add('incorrect');
+        }
+      });
+
+      exp.style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', renderQuiz);
+  </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Note: Scalar Projection of Vectors</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen py-10 px-4 font-sans">
+  
+  <main class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 p-8 sm:p-12 space-y-10">
+    
+    <header class="border-b border-slate-200 pb-6">
+      <div class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-full uppercase tracking-wider mb-2">
+        Vector Calculus & Linear Algebra
+      </div>
+      <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">Scalar Projection of Vectors</h1>
+      <p class="text-lg text-slate-600 mt-2">A Comprehensive Guide: Intuition, Formulas, and Worked Examples</p>
+    </header>
+
+    <section class="space-y-4">
+      <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm">1</span>
+        Intuition: The "Shadow" Concept
+      </h2>
+      <p class="text-slate-700 leading-relaxed">
+        The <strong>scalar projection</strong> of vector \(\mathbf{x}\) onto vector \(\mathbf{y}\) (written as \(\text{comp}_{\mathbf{y}}\mathbf{x}\)) measures the <em>effective length</em> of vector \(\mathbf{x}\) along the direction of vector \(\mathbf{y}\).
+      </p>
+
+      <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg space-y-2">
+        <h3 class="font-bold text-amber-900 flex items-center gap-2">
+          💡 The Flashlight Analogy
+        </h3>
+        <p class="text-amber-800 text-sm leading-relaxed">
+          Imagine vector \(\mathbf{y}\) is a straight road, and vector \(\mathbf{x}\) is a stick tilted upward from the start of the road. If you hold a flashlight high above, shining <strong>perpendicular to the road</strong>, the length of the shadow cast by the stick along the road is the <strong>scalar projection</strong>.
+        </p>
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm">2</span>
+        Mathematical Formulas
+      </h2>
+      <p class="text-slate-700">Depending on what information you are given, there are two standard ways to calculate scalar projection:</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Trigonometric Form</span>
+          <div class="text-xl font-mono text-indigo-600 my-2">
+            $$\text{comp}_{\mathbf{y}}\mathbf{x} = \|\mathbf{x}\| \cos\theta$$
+          </div>
+          <p class="text-xs text-slate-600">Used when you know the magnitude of \(\mathbf{x}\) and the angle \(\theta\) between vectors \(\mathbf{x}\) and \(\mathbf{y}\).</p>
+        </div>
+
+        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Component / Dot Product Form</span>
+          <div class="text-xl font-mono text-indigo-600 my-2">
+            $$\text{comp}_{\mathbf{y}}\mathbf{x} = \frac{\mathbf{x} \cdot \mathbf{y}}{\|\mathbf{y}\|}$$
+          </div>
+          <p class="text-xs text-slate-600">Used when vectors are given in component form \(\langle x_1, x_2, x_3 \rangle\). No angle required!</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm">3</span>
+        Sign Interpretation (Angle Behavior)
+      </h2>
+      <p class="text-slate-700">The sign of the scalar projection indicates the relative direction of the two vectors:</p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+              <th class="p-3 font-semibold">Angle (\(\theta\))</th>
+              <th class="p-3 font-semibold">Alignment</th>
+              <th class="p-3 font-semibold">Scalar Projection Sign</th>
+              <th class="p-3 font-semibold">Meaning</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-slate-600">
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-mono font-medium text-slate-800">\(\theta < 90^\circ\)</td>
+              <td class="p-3">Acute Angle</td>
+              <td class="p-3 font-bold text-emerald-600">Positive (\(> 0\))</td>
+              <td class="p-3">Shadow points forward in the same direction as \(\mathbf{y}\).</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-mono font-medium text-slate-800">\(\theta = 90^\circ\)</td>
+              <td class="p-3">Perpendicular</td>
+              <td class="p-3 font-bold text-slate-500">Zero (\(= 0\))</td>
+              <td class="p-3">Light is directly overhead; no shadow along \(\mathbf{y}\).</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-mono font-medium text-slate-800">\(\theta > 90^\circ\)</td>
+              <td class="p-3">Obtuse Angle</td>
+              <td class="p-3 font-bold text-rose-600">Negative (\(< 0\))</td>
+              <td class="p-3">Shadow points backward in the opposite direction of \(\mathbf{y}\).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="space-y-6">
+      <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm">4</span>
+        Step-by-Step Worked Example (Evaluating at \(k = 0\))
+      </h2>
+
+      <div class="bg-indigo-50 border border-indigo-200 p-5 rounded-xl space-y-2">
+        <h3 class="font-bold text-indigo-950">Problem Statement:</h3>
+        <p class="text-slate-700 text-sm">
+          Given the parametric vectors \(\mathbf{x}(k) = \langle 3 + k, \, 4, \, -1 \rangle\) and \(\mathbf{y}(k) = \langle 2, \, 1 + k, \, 2 \rangle\), calculate the scalar projection of \(\mathbf{x}\) onto \(\mathbf{y}\) when \(k = 0\).
+        </p>
+      </div>
+
+      <div class="space-y-6">
+        
+        <div class="border-l-2 border-indigo-500 pl-4 space-y-2">
+          <h3 class="font-bold text-slate-900">Step 1: Evaluate the Vectors at \(k = 0\)</h3>
+          <p class="text-sm text-slate-600">Substitute \(k = 0\) directly into both vector expressions to get simple numeric vectors:</p>
+          <div class="bg-slate-900 text-slate-100 p-3 rounded-lg font-mono text-sm">
+            \(\mathbf{x} = \langle 3 + 0, \, 4, \, -1 \rangle = \langle 3, \, 4, \, -1 \rangle\)<br>
+            \(\mathbf{y} = \langle 2, \, 1 + 0, \, 2 \rangle = \langle 2, \, 1, \, 2 \rangle\)
+          </div>
+        </div>
+
+        <div class="border-l-2 border-indigo-500 pl-4 space-y-2">
+          <h3 class="font-bold text-slate-900">Step 2: Compute the Dot Product \(\mathbf{x} \cdot \mathbf{y}\)</h3>
+          <p class="text-sm text-slate-600">Multiply corresponding components and add them together:</p>
+          <div class="bg-slate-900 text-slate-100 p-3 rounded-lg font-mono text-sm">
+            \(\mathbf{x} \cdot \mathbf{y} = (3)(2) + (4)(1) + (-1)(2)\)<br>
+            \(\mathbf{x} \cdot \mathbf{y} = 6 + 4 - 2 = \mathbf{8}\)
+          </div>
+        </div>
+
+        <div class="border-l-2 border-indigo-500 pl-4 space-y-2">
+          <h3 class="font-bold text-slate-900">Step 3: Compute the Magnitude of the Baseline Vector \(\|\mathbf{y}\|\)</h3>
+          <p class="text-sm text-slate-600">Calculate the length of the vector being projected <em>onto</em> (\(\mathbf{y}\)):</p>
+          <div class="bg-slate-900 text-slate-100 p-3 rounded-lg font-mono text-sm">
+            \(\|\mathbf{y}\| = \sqrt{2^2 + 1^2 + 2^2} = \sqrt{4 + 1 + 4} = \sqrt{9} = \mathbf{3}\)
+          </div>
+        </div>
+
+        <div class="border-l-2 border-indigo-500 pl-4 space-y-2">
+          <h3 class="font-bold text-slate-900">Step 4: Apply the Scalar Projection Formula</h3>
+          <p class="text-sm text-slate-600">Divide the dot product by the magnitude of \(\mathbf{y}\):</p>
+          <div class="bg-slate-900 text-slate-100 p-4 rounded-lg font-mono text-sm text-amber-400">
+            $$\text{comp}_{\mathbf{y}}\mathbf{x} = \frac{\mathbf{x} \cdot \mathbf{y}}{\|\mathbf{y}\|} = \frac{8}{3} \approx 2.67$$
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="bg-slate-900 text-slate-100 p-6 rounded-xl space-y-3">
+      <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+        📌 Important Student Pitfalls & Key Takeaways
+      </h2>
+      <ul class="list-disc list-inside space-y-2 text-sm text-slate-300">
+        <li><strong>Which magnitude goes in the denominator?</strong> Always place the magnitude of the target vector (\(\mathbf{y}\) in \(\text{comp}_{\mathbf{y}}\mathbf{x}\)) in the denominator, because \(\mathbf{y}\) serves as the baseline scale.</li>
+        <li><strong>Scalar vs. Vector Projection:</strong> Scalar projection produces a single <em>number</em> (scalar). Vector projection turns that number back into a <em>vector</em> pointing along \(\mathbf{y}\).</li>
+        <li><strong>Order Matters in Notation:</strong> \(\text{comp}_{\mathbf{y}}\mathbf{x}\) means projecting \(\mathbf{x}\) ONTO \(\mathbf{y}\).</li>
+      </ul>
+    </section>
+
+  </main>
+
+</body>
+</html>

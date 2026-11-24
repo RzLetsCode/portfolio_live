@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Token Utilization & Architecture Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #070A12;
+            color: #F3F4F6;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1F2937;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8 antialiased selection:bg-blue-500/30">
+    <main class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Enterprise Dashboard Header -->
+        <header class="border-b border-white/[0.08] pb-6 flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <h1 class="text-xl font-black tracking-tight sm:text-2xl flex items-center gap-2.5">
+                    <span class="text-blue-500">⚡</span> Token Utilization & Optimization Terminal
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Production-grade LLM inference matrix metrics, BPE chunk visualizer, and context caching cost structures.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-900 border border-white/[0.08] rounded-xl px-3 py-1.5 flex gap-4 text-xs font-mono">
+                    <span class="text-slate-400">Mode: <strong id="currentModeLabel" class="text-blue-400">Sandbox</strong></span>
+                </div>
+                <div class="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-400 border border-emerald-500/20 font-mono">
+                    System Diagnostic Active
+                </div>
+            </div>
+        </header>
+
+        <!-- Top Row: Dual Workspace Input Environments -->
+        <div class="grid gap-6 lg:grid-cols-12">
+            
+            <!-- Ingestion Playground Canvas (8 Columns) -->
+            <div class="lg:col-span-8 bg-[#111622] border border-white/[0.08] rounded-3xl p-6 space-y-5 shadow-xl">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <div>
+                        <h2 class="text-xs font-black uppercase tracking-widest text-blue-400">Ingestion Context Framework</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Toggle sandbox models to simulate multi-turn enterprise configurations.</p>
+                    </div>
+                    
+                    <!-- Workspace Toggle Tabs -->
+                    <div class="bg-[#070A12] p-1 border border-white/[0.08] rounded-xl flex gap-1 text-xs font-bold">
+                        <button id="btnTabSandbox" onclick="switchWorkspaceMode('sandbox')" class="px-4 py-1.5 rounded-lg bg-blue-600 text-white transition-all">Raw Sandbox</button>
+                        <button id="btnTabChat" onclick="switchWorkspaceMode('chat')" class="px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">Chat Persona Array</button>
+                    </div>
+                </div>
+
+                <!-- Environment 1: Raw Text Sandbox (Default) -->
+                <div id="wrapperSandboxMode" class="block">
+                    <textarea 
+                        id="sandboxInput" 
+                        rows="4"
+                        oninput="processActiveTextEngine()"
+                        class="w-full rounded-xl border border-white/[0.1] bg-[#070A12] px-4 py-3 text-sm text-white outline-none focus:border-blue-500 transition-all font-medium custom-scrollbar"
+                    >AI Architects deployment parameters are robust. This is our secondary enterprise validation sequence engine pipeline node.</textarea>
+                </div>
+
+                <!-- Environment 2: Advanced Dynamic Chat Array Matrix -->
+                <div id="wrapperChatMode" class="hidden space-y-3">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-purple-500"></span><span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">System Prompt (Static Rules/KV Base)</span></div>
+                        <input type="text" id="chatSystem" value="You are an expert AI Architect assisting with enterprise telemetry architecture deployment blueprints." oninput="processActiveTextEngine()" class="w-full rounded-xl border border-white/[0.08] bg-[#070A12] px-3.5 py-2 text-xs text-slate-300 outline-none focus:border-blue-500 transition-all">
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span><span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">User Prompt (Variable Context)</span></div>
+                            <textarea id="chatUser" rows="2" oninput="processActiveTextEngine()" class="w-full rounded-xl border border-white/[0.08] bg-[#070A12] px-3.5 py-2 text-xs text-slate-300 outline-none focus:border-blue-500 transition-all custom-scrollbar">Explain vector index strategies for high-frequency database updates.</textarea>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Expected Assistant Output</span></div>
+                            <textarea id="chatAssistant" rows="2" oninput="processActiveTextEngine()" class="w-full rounded-xl border border-white/[0.08] bg-[#070A12] px-3.5 py-2 text-xs text-slate-300 outline-none focus:border-blue-500 transition-all custom-scrollbar">Implement HNSW graphing constraints decoupled from active memory layers to preserve thread latency metrics.</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colorized Sub-Word Parsing Monitor Panel -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between text-xs text-slate-400">
+                        <span class="font-bold uppercase text-[10px] tracking-wider text-slate-500">BPE Tokenizer Color Splitter Stream</span>
+                        <div class="flex gap-4 font-mono text-[11px] bg-[#070A12] px-3 py-1 rounded-lg border border-white/[0.04]">
+                            <div>Chars: <span id="statChars" class="text-amber-400 font-bold">0</span></div>
+                            <div>Tokens: <span id="statTokens" class="text-cyan-400 font-bold">0</span></div>
+                            <div>Density: <span id="statRatio" class="text-purple-400 font-bold">0.0</span> <span class="text-[9px] text-slate-500">ch/tk</span></div>
+                        </div>
+                    </div>
+                    <div class="p-4 rounded-xl bg-[#070A12] border border-white/[0.04] min-h-[70px] max-h-[160px] overflow-y-auto flex flex-wrap items-center gap-1 leading-relaxed text-sm custom-scrollbar" id="sandboxVisualOutput"></div>
+                </div>
+            </div>
+
+            <!-- Left Strategy Parameter Control Panel (4 Columns) -->
+            <div class="lg:col-span-4 bg-[#111622] border border-white/[0.08] rounded-3xl p-6 space-y-4 shadow-xl h-fit">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-black uppercase tracking-widest text-indigo-400">Telemetry Volume Inputs</h2>
+                    <span class="text-[9px] font-bold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-md font-mono">Real-Time Sync</span>
+                </div>
+                
+                <div class="space-y-3.5">
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Input Tokens (Standard Prompt)</label>
+                        <input type="number" id="inputTokens" value="0" class="w-full rounded-xl border border-white/[0.1] bg-[#070A12] px-3.5 py-2 text-sm text-white font-mono outline-none focus:border-indigo-500 transition-all" oninput="calculateMetrics()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Cached Input Tokens (KV Hits)</label>
+                            <span id="labelCachePercent" class="text-[10px] text-cyan-400 font-mono">0% ratio</span>
+                        </div>
+                        <input type="range" id="cacheRatioSlider" min="0" max="100" value="35" class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 mb-2" oninput="handleCacheSliderUpdate()">
+                        <input type="number" id="cachedTokens" value="0" class="w-full rounded-xl border border-white/[0.1] bg-[#070A12] px-3.5 py-2 text-sm text-white font-mono outline-none focus:border-cyan-400 transition-all" oninput="calculateMetrics()">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Output Tokens (Completions)</label>
+                        <input type="number" id="outputTokens" value="0" class="w-full rounded-xl border border-white/[0.1] bg-[#070A12] px-3.5 py-2 text-sm text-white font-mono outline-none focus:border-indigo-500 transition-all" oninput="calculateMetrics()">
+                    </div>
+                </div>
+
+                <div class="border-t border-white/[0.08] pt-4 space-y-3">
+                    <div class="flex items-center justify-between flex-wrap gap-1">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-400">Ecosystem Framework Architecture</h3>
+                        <select id="modelPreset" onchange="applyModelPreset()" class="bg-[#070A12] border border-white/[0.1] text-[11px] rounded-lg px-2 py-1 outline-none text-slate-300 font-mono">
+                            <option value="gpt4o">GPT-4o Standard</option>
+                            <option value="claude35">Claude 3.5 Sonnet</option>
+                            <option value="gemini15">Gemini 1.5 Pro</option>
+                            <option value="llama405">Llama 3.1 405B</option>
+                            <option value="deepseekv3">DeepSeek V3</option>
+                            <option value="custom">Custom Configuration</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 block mb-1">Base Input ($/1M)</label>
+                            <input type="number" id="priceInput" value="5.00" step="0.01" class="w-full rounded-lg border border-white/[0.08] bg-[#070A12] px-2.5 py-1.5 text-xs text-slate-200 font-mono outline-none" oninput="setCustomPreset()">
+                        </div>
+                        <div>
+                            <label class="text-[9px] font-bold text-slate-400 block mb-1">Base Output ($/1M)</label>
+                            <input type="number" id="priceOutput" value="15.00" step="0.01" class="w-full rounded-lg border border-white/[0.08] bg-[#070A12] px-2.5 py-1.5 text-xs text-slate-200 font-mono outline-none" oninput="setCustomPreset()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: High-Density Analytics & Allocation State Maps -->
+        <div class="grid gap-6 md:grid-cols-3">
+            
+            <!-- Proportional Bar Visualization Panel (2 Columns) -->
+            <div class="md:col-span-2 bg-[#111622] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between space-y-6 shadow-xl">
+                <div>
+                    <h2 class="text-xs font-black uppercase tracking-widest text-indigo-400">Context Window Lifecycle State Map</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">High-contrast distribution weights across the aggregated input-to-output matrix frames.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- High-Contrast Segment Bar -->
+                    <div class="flex h-10 w-full rounded-xl overflow-hidden bg-white/[0.02] p-1.5 border border-white/[0.08]">
+                        <div id="barInput" class="h-full bg-blue-500 rounded-l-md transition-all duration-500 shadow-[0_0_15px_rgba(59,130,246,0.25)]"></div>
+                        <div id="barCached" class="h-full bg-cyan-400 transition-all duration-500 shadow-[0_0_15px_rgba(34,211,238,0.25)]"></div>
+                        <div id="barOutput" class="h-full bg-amber-500 rounded-r-md transition-all duration-500 shadow-[0_0_15px_rgba(245,158,11,0.25)]"></div>
+                    </div>
+
+                    <!-- Redesigned Grid Legend Tokens -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="p-3 rounded-xl bg-[#070A12] border-l-4 border-blue-500 bg-blue-500/[0.01]">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Input Payload</span>
+                            <span id="pctInput" class="text-base font-black block text-white font-mono mt-0.5">0%</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-[#070A12] border-l-4 border-cyan-400 bg-cyan-400/[0.01]">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Context Cache Hit</span>
+                            <span id="pctCached" class="text-base font-black block text-white font-mono mt-0.5">0%</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-[#070A12] border-l-4 border-amber-500 bg-amber-500/[0.01]">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Generated Target</span>
+                            <span id="pctOutput" class="text-base font-black block text-amber-500 font-mono mt-0.5">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aggregated Balance Summaries -->
+                <div class="grid gap-4 sm:grid-cols-2 border-t border-white/[0.06] pt-5">
+                    <div class="p-4 rounded-2xl bg-[#070A12] border border-white/[0.04] flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Aggregated Context Footprint</span>
+                        <div id="totalTokensDisplay" class="text-2xl font-black text-white font-mono mt-1">0 Tokens</div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-[#070A12] border border-amber-500/10 flex flex-col justify-between">
+                        <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Computed Saccadic Run Invoice Cost</span>
+                        <div id="totalCostDisplay" class="text-2xl font-black text-cyan-400 font-mono mt-1">$0.00000</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep-Tier Context Efficiency Analytics Dashboard (1 Column) -->
+            <div class="md:col-span-1 bg-[#111622] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between space-y-4 shadow-xl">
+                <div>
+                    <h2 class="text-xs font-black uppercase tracking-widest text-purple-400">Context Optimization Insights</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Network execution latency acceleration estimations via smart caching parameters.</p>
+                </div>
+
+                <div class="space-y-3.5 my-auto">
+                    <!-- Efficiency Optimization Percentage -->
+                    <div class="bg-[#070A12] p-4 rounded-2xl border border-white/[0.04] flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Net Cost Reduction</span>
+                            <div id="metricCostSavedPct" class="text-xl font-black text-emerald-400 font-mono mt-0.5">0.0% saved</div>
+                        </div>
+                        <span class="text-2xl">📉</span>
+                    </div>
+
+                    <!-- Latency Multiplier Shift Estimate -->
+                    <div class="bg-[#070A12] p-4 rounded-2xl border border-white/[0.04] flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">TTFT Latency Speedup</span>
+                            <div id="metricLatencySpeedup" class="text-xl font-black text-cyan-400 font-mono mt-0.5">1.0x Faster</div>
+                        </div>
+                        <span class="text-2xl">🚀</span>
+                    </div>
+
+                    <!-- Computational Density -->
+                    <div class="bg-[#070A12] p-4 rounded-2xl border border-white/[0.04] flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Compute Bypass Efficiency</span>
+                            <div id="metricComputeSaved" class="text-xl font-black text-purple-400 font-mono mt-0.5">0 TFLOPs</div>
+                        </div>
+                        <span class="text-2xl">⚙️</span>
+                    </div>
+                </div>
+
+                <div class="rounded-xl bg-blue-500/[0.03] border border-blue-500/10 p-3 flex gap-2 text-[11px] text-slate-400 leading-relaxed">
+                    <span>💡</span>
+                    <span>Increasing the <strong>Context Cache</strong> percentage bypasses the quadratic pre-fill phase, optimizing engine workloads.</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // High-fidelity provider fee matrices per 1M tokens
+        const pricingPresets = {
+            gpt4o: { input: 5.00, output: 15.00 },
+            claude35: { input: 3.00, output: 15.00 },
+            gemini15: { input: 1.25, output: 5.00 },
+            llama405: { input: 2.66, output: 8.11 },
+            deepseekv3: { input: 0.14, output: 0.28 }
+        };
+
+        let currentActiveMode = 'sandbox';
+
+        function switchWorkspaceMode(mode) {
+            currentActiveMode = mode;
+            document.getElementById('currentModeLabel').innerText = mode === 'sandbox' ? 'Sandbox' : 'Chat Matrix';
+            
+            if (mode === 'sandbox') {
+                document.getElementById('btnTabSandbox').className = "px-4 py-1.5 rounded-lg bg-blue-600 text-white transition-all";
+                document.getElementById('btnTabChat').className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+                document.getElementById('wrapperSandboxMode').classList.replace('hidden', 'block');
+                document.getElementById('wrapperChatMode').classList.replace('block', 'hidden');
+            } else {
+                document.getElementById('btnTabSandbox').className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+                document.getElementById('btnTabChat').className = "px-4 py-1.5 rounded-lg bg-blue-600 text-white transition-all";
+                document.getElementById('wrapperSandboxMode').classList.replace('block', 'hidden');
+                document.getElementById('wrapperChatMode').classList.replace('hidden', 'block');
+            }
+            processActiveTextEngine();
+        }
+
+        function applyModelPreset() {
+            const selected = document.getElementById('modelPreset').value;
+            if (selected !== 'custom') {
+                document.getElementById('priceInput').value = pricingPresets[selected].input.toFixed(2);
+                document.getElementById('priceOutput').value = pricingPresets[selected].output.toFixed(2);
+            }
+            calculateMetrics();
+        }
+
+        function setCustomPreset() {
+            document.getElementById('modelPreset').value = 'custom';
+            calculateMetrics();
+        }
+
+        function handleCacheSliderUpdate() {
+            const ratio = parseInt(document.getElementById('cacheRatioSlider').value) || 0;
+            const inputVal = parseFloat(document.getElementById('inputTokens').value) || 0;
+            
+            document.getElementById('labelCachePercent').innerText = `${ratio}% ratio`;
+            
+            // Re-proportion the cached inputs based on the standard input count
+            if (inputVal > 0) {
+                const simulatedCacheTokens = Math.round(inputVal * (ratio / 100));
+                document.getElementById('cachedTokens').value = simulatedCacheTokens;
+            }
+            calculateMetrics();
+        }
+
+        function calculateMetrics() {
+            const input = parseFloat(document.getElementById('inputTokens').value) || 0;
+            const cached = parseFloat(document.getElementById('cachedTokens').value) || 0;
+            const output = parseFloat(document.getElementById('outputTokens').value) || 0;
+            const rateInput = parseFloat(document.getElementById('priceInput').value) || 0;
+            const rateOutput = parseFloat(document.getElementById('priceOutput').value) || 0;
+
+            const total = input + cached + output;
+            
+            if (total === 0) {
+                resetVisualizationDisplays();
+                return;
+            }
+
+            // Segment Percentage Computations
+            const pInput = (input / total) * 100;
+            const pCached = (cached / total) * 100;
+            const pOutput = (output / total) * 100;
+
+            document.getElementById('barInput').style.width = `${pInput}%`;
+            document.getElementById('barCached').style.width = `${pCached}%`;
+            document.getElementById('barOutput').style.width = `${pOutput}%`;
+
+            document.getElementById('pctInput').innerText = `${pInput.toFixed(1)}%`;
+            document.getElementById('pctCached').innerText = `${pCached.toFixed(1)}%`;
+            document.getElementById('pctOutput').innerText = `${pOutput.toFixed(1)}%`;
+
+            // Operational Financial Calculations (50% typical pricing discount applied to cache hits)
+            const rawInputCostNoCache = ((input + cached) / 1000000) * rateInput;
+            const optimizedInputCost = (input / 1000000) * rateInput;
+            const cachedHitCost = (cached / 1000000) * (rateInput * 0.5);
+            const outputCompletionCost = (output / 1000000) * rateOutput;
+
+            const totalOptimizedInvoice = optimizedInputCost + cachedHitCost + outputCompletionCost;
+            const baselineInvoiceNoCache = rawInputCostNoCache + outputCompletionCost;
+
+            document.getElementById('totalTokensDisplay').innerText = total.toLocaleString() + " Tokens";
+            document.getElementById('totalCostDisplay').innerText = `$${totalOptimizedInvoice.toFixed(5)}`;
+
+            // Structural Optimization Efficiency Analytics Renders
+            if (baselineInvoiceNoCache > 0 && cached > 0) {
+                const savingsPct = ((baselineInvoiceNoCache - totalOptimizedInvoice) / baselineInvoiceNoCache) * 100;
+                document.getElementById('metricCostSavedPct').innerText = `${savingsPct.toFixed(1)}% saved`;
+                
+                // Latency curve mapping simulation (TTFT speed scales with cache distribution ratio)
+                const relativeBypassRatio = cached / (input + cached);
+                const latencySpeedupMultiplier = 1 + (relativeBypassRatio * 7); // up to 8x latency reduction thresholds
+                document.getElementById('metricLatencySpeedup').innerText = `${latencySpeedupMultiplier.toFixed(1)}x Faster`;
+                
+                // FLOP estimation scaling approximation ($O(N^2)$ matrix attention tokens mapped to metrics)
+                const gigaFlopsSaved = Math.round((Math.pow(cached, 2) * 0.0002));
+                document.getElementById('metricComputeSaved').innerText = `~${gigaFlopsSaved.toLocaleString()} GFLOPs`;
+            } else {
+                document.getElementById('metricCostSavedPct').innerText = "0.0% saved";
+                document.getElementById('metricLatencySpeedup').innerText = "1.0x Faster";
+                document.getElementById('metricComputeSaved').innerText = "0 GFLOPs";
+            }
+        }
+
+        function processActiveTextEngine() {
+            let integratedTextString = "";
+            
+            if (currentActiveMode === 'sandbox') {
+                integratedTextString = document.getElementById('sandboxInput').value;
+            } else {
+                integratedTextString = document.getElementById('chatSystem').value + " " +
+                                       document.getElementById('chatUser').value + " " +
+                                       document.getElementById('chatAssistant').value;
+            }
+
+            const container = document.getElementById('sandboxVisualOutput');
+            container.innerHTML = "";
+            document.getElementById('statChars').innerText = integratedTextString.length;
+
+            if (!integratedTextString.trim()) {
+                container.innerHTML = "<span class='text-slate-600 italic text-xs'>Awaiting unified engineering input sequences...</span>";
+                resetVisualizationDisplays();
+                return;
+            }
+
+            // Enterprise High-Contrast Segment Styles for Sub-Word Distinctions
+            const tokenStyles = [
+                { bg: 'rgba(59,130,246,0.12)', text: '#60a5fa', border: 'rgba(59,130,246,0.25)' },
+                { bg: 'rgba(34,211,238,0.12)', text: '#22d3ee', border: 'rgba(34,211,238,0.25)' },
+                { bg: 'rgba(245,158,11,0.12)', text: '#fbbf24', border: 'rgba(245,158,11,0.25)' },
+                { bg: 'rgba(168,85,247,0.12)', text: '#c084fc', border: 'rgba(168,85,247,0.25)' },
+                { bg: 'rgba(244,63,94,0.12)', text: '#fb7185', border: 'rgba(244,63,94,0.25)' }
+            ];
+
+            // BPE Chunk Splitter Tokenizer Approximation Logic
+            const simulatedTokensArray = integratedTextString.match(/\s+\w+|\w+|[^\w\s]/g) || [integratedTextString];
+            const tokenCountLength = simulatedTokensArray.length;
+
+            document.getElementById('statTokens').innerText = tokenCountLength;
+            document.getElementById('statRatio').innerText = (integratedTextString.length / tokenCountLength).toFixed(1);
+
+            simulatedTokensArray.forEach((token, idx) => {
+                const design = tokenStyles[idx % tokenStyles.length];
+                const node = document.createElement('span');
+                let functionalSpaceCharacter = token.replace(/ /g, "␣");
+                
+                node.innerText = functionalSpaceCharacter;
+                node.style.backgroundColor = design.bg;
+                node.style.color = design.text;
+                node.style.border = `1px solid ${design.border}`;
+                node.className = "px-2 py-0.5 rounded font-mono text-xs font-bold inline-block my-0.5 tracking-wide transition-all hover:scale-105 cursor-help";
+                node.title = `Token Address Slot [${idx + 1}]`;
+                
+                container.appendChild(node);
+            });
+
+            // Distribute values based on real text inputs or contextual layouts
+            if (currentActiveMode === 'sandbox') {
+                const simulatedPromptInput = Math.ceil(tokenCountLength * 0.65);
+                const simulatedOutputCompletion = Math.floor(tokenCountLength * 0.35);
+                document.getElementById('inputTokens').value = simulatedPromptInput;
+                document.getElementById('outputTokens').value = simulatedOutputCompletion > 0 ? simulatedOutputCompletion : 1;
+            } else {
+                // In chat array mode, separate system variables directly
+                const systemTokens = (document.getElementById('chatSystem').value.match(/\s+\w+|\w+|[^\w\s]/g) || []).length;
+                const userTokens = (document.getElementById('chatUser').value.match(/\s+\w+|\w+|[^\w\s]/g) || []).length;
+                const assistantTokens = (document.getElementById('chatAssistant').value.match(/\s+\w+|\w+|[^\w\s]/g) || []).length;
+
+                document.getElementById('inputTokens').value = systemTokens + userTokens;
+                document.getElementById('outputTokens').value = assistantTokens > 0 ? assistantTokens : 1;
+            }
+
+            // Sync cache ratios automatically relative to new metrics input balances
+            const cacheRatioPct = parseInt(document.getElementById('cacheRatioSlider').value) || 0;
+            const currentBaseInput = parseFloat(document.getElementById('inputTokens').value) || 0;
+            document.getElementById('cachedTokens').value = Math.round(currentBaseInput * (cacheRatioPct / 100));
+
+            calculateMetrics();
+        }
+
+        function resetVisualizationDisplays() {
+            document.getElementById('barInput').style.width = '0%';
+            document.getElementById('barCached').style.width = '0%';
+            document.getElementById('barOutput').style.width = '0%';
+            document.getElementById('pctInput').innerText = '0%';
+            document.getElementById('pctCached').innerText = '0%';
+            document.getElementById('pctOutput').innerText = '0%';
+            document.getElementById('totalTokensDisplay').innerText = "0 Tokens";
+            document.getElementById('totalCostDisplay').innerText = "$0.00000";
+            document.getElementById('metricCostSavedPct').innerText = "0.0% saved";
+            document.getElementById('metricLatencySpeedup').innerText = "1.0x Faster";
+            document.getElementById('metricComputeSaved').innerText = "0 GFLOPs";
+        }
+
+        window.onload = function() {
+            processActiveTextEngine();
+        };
+    </script>
+</body>
+</html>

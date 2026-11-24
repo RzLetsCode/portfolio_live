@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vector Spaces vs Euclidean Geometry | code2career_ai</title>
+    <style>
+        :root {
+            --bg-deep: #0a0e17;
+            --panel-bg: #111827;
+            --border-glow: #1f2937;
+            --accent-blue: #38bdf8;
+            --accent-amber: #fbbf24;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --vec-u: #4caf50;
+            --vec-v: #ef4444;
+            --vec-res: #a855f7;
+            --helper-line: rgba(255, 255, 255, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-amber));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p { color: var(--text-secondary); font-size: 1.05rem; }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card.algebra .card-title { color: var(--accent-blue); }
+        .card.geometry .card-title { color: var(--accent-amber); }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            min-height: 45px;
+        }
+
+        .canvas-container {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background-color: #070b12;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            position: relative;
+            overflow: hidden;
+        }
+
+        svg { width: 100%; height: 100%; }
+
+        /* Classroom Interface Controls */
+        .controls {
+            width: 100%;
+            margin-top: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #1f2937;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .control-group:last-child { margin-bottom: 0; }
+
+        label { font-size: 0.85rem; color: var(--text-secondary); font-family: monospace; }
+
+        input[type="range"] {
+            width: 65%;
+            accent-color: var(--accent-blue);
+            background: #1f2937;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .card.geometry input[type="range"] { accent-color: var(--accent-amber); }
+
+        /* Typography inside SVGs */
+        .svg-text { font-family: 'Courier New', Courier, monospace; font-size: 13px; fill: #ffffff; }
+        .math-bold { font-weight: bold; }
+        .small-caption { font-size: 11px; fill: var(--text-secondary); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>code2career_ai • Interactive Learning Lab</h1>
+        <p>Axiomatic Structures (Abstract Relations) vs. Euclidean Frameworks (Geometric Realities)</p>
+    </header>
+
+    <div class="dashboard">
+
+        <div class="card algebra">
+            <div class="card-title">Standard Vector Space (V)</div>
+            <div class="card-desc">纯 Purely Algebraic rules apply. Notice there is no background metric grid here, emphasizing that vectors are defined by linear combinations, not fixed coordinate graphs.</div>
+            
+            <div class="canvas-container">
+                <svg viewBox="0 0 500 375" id="algebraSvg">
+                    <defs>
+                        <marker id="arrow-u" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-u)" />
+                        </marker>
+                        <marker id="arrow-v" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-v)" />
+                        </marker>
+                        <marker id="arrow-res" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-res)" />
+                        </marker>
+                    </defs>
+
+                    <text x="20" y="35" class="svg-text math-bold" fill="var(--accent-blue)">Axiom 1: Closure Under Addition</text>
+                    <text x="20" y="55" class="svg-text small-caption">No coordinate lines exist. Only spatial relative paths hold meaning.</text>
+                    
+                    <g transform="translate(50, 260)">
+                        <line id="alg-u" x1="0" y1="0" x2="140" y2="-120" stroke="var(--vec-u)" stroke-width="3" marker-end="url(#arrow-u)"/>
+                        <line id="alg-v" x1="140" y1="-120" x2="320" y2="-70" stroke="var(--vec-v)" stroke-width="3" marker-end="url(#arrow-v)"/>
+                        <line id="alg-res" x1="0" y1="0" x2="320" y2="-70" stroke="var(--vec-res)" stroke-width="2.5" stroke-dasharray="6" marker-end="url(#arrow-res)"/>
+                        
+                        <text id="lbl-alg-u" x="60" y="-70" class="svg-text math-bold" fill="var(--vec-u)">u</text>
+                        <text id="lbl-alg-v" x="240" y="-110" class="svg-text math-bold" fill="var(--vec-v)">v</text>
+                        <text id="lbl-alg-res" x="160" y="-20" class="svg-text math-bold" fill="var(--vec-res)">u + v ∈ V</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Scale Vector (u) [Scalar Multiplication Axiom]</label>
+                    <input type="range" id="param-u" min="0.5" max="1.8" step="0.05" value="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="card geometry">
+            <div class="card-title">Euclidean Vector Space (E)</div>
+            <div class="card-desc">Adds an Inner Product framework. We can now accurately determine vector norms (lengths), projections, and exact orthogonal intersections.</div>
+            
+            <div class="canvas-container">
+                <svg viewBox="0 0 500 375" id="euclideanSvg">
+                    <defs>
+                        <pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse">
+                            <path d="M 25 0 L 0 0 0 25" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+                        </pattern>
+                        <marker id="e-arrow-u" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-u)" />
+                        </marker>
+                        <marker id="e-arrow-v" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--vec-v)" />
+                        </marker>
+                    </defs>
+
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+
+                    <line x1="60" y1="300" x2="440" y2="300" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="60" y1="40" x2="60" y2="300" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <text x="445" y="305" class="svg-text" fill="var(--text-secondary)">X</text>
+                    <text x="55" y="30" class="svg-text" fill="var(--text-secondary)">Y</text>
+
+                    <text x="20" y="35" class="svg-text math-bold" fill="var(--accent-amber)">METRIC EVALUATIONS:</text>
+                    <text id="readout-u-norm" x="20" y="60" class="svg-text" fill="var(--vec-u)">||u|| = 200.0 (Magnitude)</text>
+                    <text id="readout-v-norm" x="20" y="80" class="svg-text" fill="var(--vec-v)">||v|| = 204.0 (Magnitude)</text>
+                    <text id="readout-dot" x="20" y="105" class="svg-text math-bold" fill="var(--accent-blue)">u · v = 0.0</text>
+                    <text id="readout-angle" x="20" y="125" class="svg-text" fill="var(--text-secondary)">Angle θ = 90.0°</text>
+
+                    <g transform="translate(60, 300)">
+                        <path id="orthogonal-box" d="M 12 -16 L 24 -7 L 12 9" fill="none" stroke="var(--accent-amber)" stroke-width="1.5" style="visibility: hidden;"/>
+                        
+                        <line id="projection-line" x1="0" y1="0" x2="0" y2="0" stroke="var(--accent-blue)" stroke-width="1.5" stroke-dasharray="3"/>
+
+                        <line id="e-u" x1="0" y1="0" x2="120" y2="-160" stroke="var(--vec-u)" stroke-width="3" marker-end="url(#e-arrow-u)"/>
+                        <line id="e-v" x1="0" y1="0" x2="200" y2="-40" stroke="var(--vec-v)" stroke-width="3" marker-end="url(#e-arrow-v)"/>
+                        
+                        <path id="angle-arc" d="M 30 -6 A 30 30 0 0 0 18 -24" fill="none" stroke="var(--accent-amber)" stroke-width="1.5"/>
+
+                        <text id="lbl-e-u" x="130" y="-165" class="svg-text math-bold" fill="var(--vec-u)">u</text>
+                        <text id="lbl-e-v" x="210" y="-45" class="svg-text math-bold" fill="var(--vec-v)">v</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Rotate Vector v (Modulate Angle & Dot Product)</label>
+                    <input type="range" id="param-angle" min="-165" max="15" step="0.5" value="-11.5">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- PANEL 1 LOGIC: Standard Abstract Space Scaling ---
+        const paramU = document.getElementById('param-u');
+        const algU = document.getElementById('alg-u');
+        const algV = document.getElementById('alg-v');
+        const algRes = document.getElementById('alg-res');
+        
+        const lblAlgU = document.getElementById('lbl-alg-u');
+        const lblAlgV = document.getElementById('lbl-alg-v');
+        const lblAlgRes = document.getElementById('lbl-alg-res');
+
+        function updateAlgebraicView() {
+            const scale = parseFloat(paramU.value);
+            
+            const uX = 140 * scale;
+            const uY = -120 * scale;
+            
+            const vDX = 180;
+            const vDY = 50;
+            
+            const resX = uX + vDX;
+            const resY = uY + vDY;
+
+            algU.setAttribute('x2', uX);
+            algU.setAttribute('y2', uY);
+            
+            algV.setAttribute('x1', uX);
+            algV.setAttribute('y1', uY);
+            algV.setAttribute('x2', resX);
+            algV.setAttribute('y2', resY);
+            
+            algRes.setAttribute('x2', resX);
+            algRes.setAttribute('y2', resY);
+
+            lblAlgU.setAttribute('x', uX / 2 - 15);
+            lblAlgU.setAttribute('y', uY / 2 - 10);
+            
+            lblAlgV.setAttribute('x', uX + vDX / 2);
+            lblAlgV.setAttribute('y', uY + vDY / 2 - 15);
+            
+            lblAlgRes.setAttribute('x', resX / 2 - 20);
+            lblAlgRes.setAttribute('y', resY / 2 + 25);
+        }
+
+        paramU.addEventListener('input', updateAlgebraicView);
+        updateAlgebraicView();
+
+
+        // --- PANEL 2 LOGIC: Euclidean Metrical Computation ---
+        const paramAngle = document.getElementById('param-angle');
+        const eV = document.getElementById('e-v');
+        const lblEV = document.getElementById('lbl-e-v');
+        const angleArc = document.getElementById('angle-arc');
+        const orthoBox = document.getElementById('orthogonal-box');
+        const projLine = document.getElementById('projection-line');
+        
+        const readoutDot = document.getElementById('readout-dot');
+        const readoutAngle = document.getElementById('readout-angle');
+        const readoutVNorm = document.getElementById('readout-v-norm');
+
+        // Fixed baseline values for Vector u = (120, -160) -> Magnitude = 200
+        const ux = 120;
+        const uy = -160; 
+
+        function updateEuclideanView() {
+            const degrees = parseFloat(paramAngle.value);
+            const rad = degrees * Math.PI / 180;
+            
+            const vMag = 204; 
+            const vx = vMag * Math.cos(rad);
+            const vy = vMag * Math.sin(rad);
+
+            eV.setAttribute('x2', vx);
+            eV.setAttribute('y2', vy);
+            lblEV.setAttribute('x', vx + 10);
+            lblEV.setAttribute('y', vy - 5);
+
+            // True coordinate space vector adjustments (negate SVG Y axis)
+            const realUy = -uy;
+            const realVy = -vy;
+
+            const dotProduct = (ux * vx) + (realUy * realVy);
+            const magU = Math.sqrt(ux*ux + realUy*realUy);
+            const magV = Math.sqrt(vx*vx + realVy*realVy);
+            
+            let cosTheta = dotProduct / (magU * magV);
+            cosTheta = Math.max(-1, Math.min(1, cosTheta)); 
+            const computedAngleDeg = Math.acos(cosTheta) * 180 / Math.PI;
+
+            // Update live metrics values
+            readoutVNorm.textContent = `||v|| = ${magV.toFixed(1)} (Magnitude)`;
+            readoutAngle.textContent = `Angle θ = ${computedAngleDeg.toFixed(1)}°`;
+            
+            // Render interactive mathematical feature locks (Orthogonality at 90 deg)
+            if (Math.abs(computedAngleDeg - 90.0) < 0.8) { 
+                readoutDot.textContent = `u · v = 0.00 (Orthogonal / Perpendicular)`;
+                readoutDot.setAttribute('fill', 'var(--accent-amber)');
+                orthoBox.style.visibility = "visible";
+                
+                // Construct a perfect right-angle indicator box dynamically
+                const boxSize = 12;
+                const uUnitX = ux / magU;
+                const uUnitY = uy / magU;
+                const vUnitX = vx / magV;
+                const vUnitY = vy / magV;
+                
+                const p1x = vUnitX * boxSize;
+                const p1y = vUnitY * boxSize;
+                const p2x = (vUnitX + uUnitX) * boxSize;
+                const p2y = (vUnitY + uUnitY) * boxSize;
+                const p3x = uUnitX * boxSize;
+                const p3y = uUnitY * boxSize;
+                
+                orthoBox.setAttribute('d', `M ${p1x} ${p1y} L ${p2x} ${p2y} L ${p3x} ${p3y}`);
+                projLine.setAttribute('x2', 0);
+                projLine.setAttribute('y2', 0);
+            } else {
+                readoutDot.textContent = `u · v = ${dotProduct.toFixed(0)}`;
+                readoutDot.setAttribute('fill', 'var(--accent-blue)');
+                orthoBox.style.visibility = "hidden";
+
+                // Standard Dot Product projection line calculation: projects v onto u
+                const projScalar = dotProduct / (magU * magU);
+                const projX = ux * projScalar;
+                const projY = uy * projScalar;
+                
+                projLine.setAttribute('x1', vx);
+                projLine.setAttribute('y1', vy);
+                projLine.setAttribute('x2', projX);
+                projLine.setAttribute('y2', projY);
+            }
+
+            // Angular arc adjustments
+            const arcRadius = 35;
+            const uAngleRad = Math.atan2(realUy, ux);
+            const vAngleRad = Math.atan2(realVy, vx);
+            
+            const ax1 = arcRadius * Math.cos(uAngleRad);
+            const ay1 = -arcRadius * Math.sin(uAngleRad);
+            const ax2 = arcRadius * Math.cos(vAngleRad);
+            const ay2 = -arcRadius * Math.sin(vAngleRad);
+            
+            const largeArcFlag = computedAngleDeg > 180 ? 1 : 0;
+            const sweepFlag = vAngleRad < uAngleRad ? 1 : 0;
+
+            angleArc.setAttribute('d', `M ${ax1} ${ay1} A ${arcRadius} ${arcRadius} 0 ${largeArcFlag} ${sweepFlag} ${ax2} ${ay2}`);
+        }
+
+        paramAngle.addEventListener('input', updateEuclideanView);
+        updateEuclideanView();
+    </script>
+</body>
+</html>

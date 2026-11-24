@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrics & Norms in ML/AI - Self Assessment</title>
+    <!-- KaTeX for rendering math formulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body);"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --correct: #16a34a;
+            --correct-bg: #f0fdf4;
+            --incorrect: #dc2626;
+            --incorrect-bg: #fef2f2;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 30px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        header h1 { font-size: 1.8rem; margin-bottom: 8px; }
+        header p { color: #94a3b8; font-size: 0.95rem; }
+
+        .progress-bar-container {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .q-number {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .q-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #ffffff;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            color: var(--text);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary);
+            background: #dbeafe;
+        }
+
+        .option-btn.correct {
+            border-color: var(--correct);
+            background: var(--correct-bg);
+            color: #14532d;
+            font-weight: 600;
+        }
+
+        .option-btn.incorrect {
+            border-color: var(--incorrect);
+            background: var(--incorrect-bg);
+            color: #7f1d1d;
+        }
+
+        .explanation {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .explanation.show { display: block; }
+        .explanation.correct-exp { background: var(--correct-bg); border: 1px solid #bbf7d0; color: #166534; }
+        .explanation.incorrect-exp { background: var(--incorrect-bg); border: 1px solid #fecaca; color: #991b1b; }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: var(--primary-hover); }
+        .btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .score-board {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+
+        .score-board h2 { font-size: 2rem; margin-bottom: 10px; }
+        .score-board p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Metrics & Norms in ML / AI</h1>
+        <p>Interactive Self-Assessment Quiz for AI Freshers & Students</p>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+    </header>
+
+    <div id="quiz-container"></div>
+
+    <div class="card score-board" id="score-board">
+        <h2>Quiz Completed! 🎉</h2>
+        <p id="score-text"></p>
+        <button class="btn" onclick="restartQuiz()">Retake Quiz</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+  {
+    "id": 1,
+    "question": "In a machine learning regression task where dataset features contain occasional severe outlier errors, why might L1 distance (Manhattan) be preferred over L2 distance (Euclidean) when computing loss or distance?",
+    "options": [
+      "L2 distance squares coordinate differences, causing single large errors to heavily dominate the overall loss compared to L1 distance.",
+      "L1 distance squares differences, preventing small background noise from altering model weights.",
+      "L2 distance treats all coordinate differences equally, whereas L1 distance scales errors exponentially.",
+      "L1 distance involves taking square roots across all dimensions, reducing computation time."
+    ],
+    "answer": 0,
+    "explanation": "Because L2 distance squares individual residual differences, large outliers create disproportionately high loss contributions, whereas L1 sums absolute differences linearly."
+  },
+  {
+    "id": 2,
+    "question": "Given a sample feature vector v = [-3, 4], what are its L1, L2, and L_infinity norms respectively?",
+    "options": [
+      "L1 = 7, L2 = 5, L_infinity = 4",
+      "L1 = 1, L2 = 5, L_infinity = -3",
+      "L1 = 7, L2 = 25, L_infinity = 3",
+      "L1 = 5, L2 = 7, L_infinity = 4"
+    ],
+    "answer": 0,
+    "explanation": "L1 is |-3| + |4| = 7; L2 is sqrt((-3)^2 + 4^2) = 5; L_infinity is max(|-3|, |4|) = 4."
+  },
+  {
+    "id": 3,
+    "question": "As p -> \u221e in the general Lp norm formula ||v||_p = (|v1|^p + |v2|^p + ... + |vn|^p)^(1/p), how does the norm behave for a feature vector with multiple components?",
+    "options": [
+      "The single component with the largest absolute value dominates and determines the norm value.",
+      "The sum of all components approaches infinity regardless of individual component magnitudes.",
+      "The norm converges to the arithmetic mean of all components.",
+      "All components contribute equally to the final norm value."
+    ],
+    "answer": 0,
+    "explanation": "As p increases, larger components grow exponentially faster than smaller ones, making the maximum component entirely dominate in the limit."
+  },
+  {
+    "id": 4,
+    "question": "In vector embeddings, the Triangle Inequality for norms states that ||u + v|| <= ||u|| + ||v||. What is the geometric interpretation of this rule in AI?",
+    "options": [
+      "The direct combined path of two vectors is never longer than taking the sum of their individual magnitudes.",
+      "Combining two embedding vectors always doubles their overall magnitude.",
+      "The distance between two vectors equals the scalar difference of their norms.",
+      "Scaling a vector by a scalar constant changes its norm proportionally."
+    ],
+    "answer": 0,
+    "explanation": "The direct shortcut path formed by vector addition cannot exceed the combined lengths of traveling along each vector sequentially."
+  },
+  {
+    "id": 5,
+    "question": "If a scaling operation in a data preprocessing pipeline multiplies an input vector v by a constant scalar c = -3, how does its norm change according to the scaling rule of norms?",
+    "options": [
+      "The norm scales by the absolute value |c|, making the new norm 3||v||.",
+      "The norm becomes negative, resulting in -3||v||.",
+      "The norm remains completely unchanged because negative signs are ignored.",
+      "The norm scales quadratically to 9||v||."
+    ],
+    "answer": 0,
+    "explanation": "Norms satisfy non-negativity, so scaling by c multiplies the norm magnitude by |c| = |-3| = 3."
+  },
+  {
+    "id": 6,
+    "question": "Which statement accurately distinguishes a norm from a metric in machine learning algorithms?",
+    "options": [
+      "A norm measures the magnitude of a single vector, whereas a metric measures the distance between two vectors.",
+      "A metric measures the magnitude of a single vector, whereas a norm measures the separation between two points.",
+      "Every valid metric can be derived directly from a corresponding vector norm.",
+      "Norms apply only to 2D space, while metrics apply to high-dimensional embedding spaces."
+    ],
+    "answer": 0,
+    "explanation": "A norm operates on one vector to measure size, while a metric operates on a pair of vectors to measure separation."
+  },
+  {
+    "id": 7,
+    "question": "In NLP and categorical data processing, Hamming distance counts the number of positions at which corresponding elements differ. Why is Hamming distance classified as a metric, but NOT induced by a vector norm?",
+    "options": [
+      "It obeys all four metric axioms, but cannot be expressed as d(u, v) = ||u - v|| for a norm satisfying absolute homogeneity under scalar multiplication.",
+      "It violates the symmetry axiom because switching the order of strings changes the count.",
+      "It yields negative values when comparing binary feature vectors.",
+      "It requires taking square roots of categorical label differences."
+    ],
+    "answer": 0,
+    "explanation": "Hamming distance satisfies non-negativity, identity, symmetry, and triangle inequality, but fails the scalar scaling property required of norms."
+  },
+  {
+    "id": 8,
+    "question": "If a distance metric d(u, v) evaluated on two feature representation vectors returns 0, what is guaranteed by the metric axioms?",
+    "options": [
+      "The two vectors are identical (u = v).",
+      "At least one of the vectors must be the zero vector 0.",
+      "The two vectors are orthogonal in vector space.",
+      "The vectors points in opposite directions with equal magnitudes."
+    ],
+    "answer": 0,
+    "explanation": "The Identity property of metrics guarantees that d(u, v) = 0 if and only if u = v."
+  },
+  {
+    "id": 9,
+    "question": "A grid-based pathfinding agent in AI moves strictly along cardinal grid lines (no diagonal movement). Which distance metric correctly calculates the travel distance between positions u = (2, 5) and v = (6, 1)?",
+    "options": [
+      "Manhattan distance: |2-6| + |5-1| = 8",
+      "Euclidean distance: sqrt((2-6)^2 + (5-1)^2) = 5.66",
+      "Max norm distance: max(|2-6|, |5-1|) = 4",
+      "Hamming distance: 2 + 5 = 7"
+    ],
+    "answer": 0,
+    "explanation": "Grid movement restricts pathing to axis-aligned steps, which corresponds exactly to Manhattan distance: sum of absolute coordinate differences."
+  },
+  {
+    "id": 10,
+    "question": "What is the Euclidean distance (L2 metric) between two sample feature vectors u = [1, 3, 4] and v = [4, 3, 0]?",
+    "options": [
+      "5",
+      "7",
+      "25",
+      "4"
+    ],
+    "answer": 0,
+    "explanation": "d(u, v) = sqrt((1-4)^2 + (3-3)^2 + (4-0)^2) = sqrt((-3)^2 + 0^2 + 4^2) = sqrt(9 + 0 + 16) = sqrt(25) = 5."
+  }
+];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let userAnswers = {};
+
+    function renderQuestion() {
+        const q = quizData[currentQuestion];
+        const container = document.getElementById("quiz-container");
+        
+        let optionsHTML = q.options.map((opt, idx) => `
+            <button class="option-btn" id="opt-${idx}" onclick="selectOption(${idx})">
+                <span style="font-weight:bold; margin-right:8px;">${String.fromCharCode(65 + idx)}.</span>
+                <span>${opt}</span>
+            </button>
+        `).join("");
+
+        container.innerHTML = `
+            <div class="card">
+                <div class="q-number">Question ${currentQuestion + 1} of ${quizData.length}</div>
+                <div class="q-title">${q.question}</div>
+                <div class="options">${optionsHTML}</div>
+                <div id="exp-box" class="explanation"></div>
+                <div class="actions">
+                    <button class="btn" id="prev-btn" onclick="prevQuestion()" ${currentQuestion === 0 ? 'disabled' : ''}>Previous</button>
+                    <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Next Question</button>
+                </div>
+            </div>
+        `;
+
+        // Update Progress Bar
+        document.getElementById("progress").style.width = `${((currentQuestion) / quizData.length) * 100}%`;
+
+        // Re-render MathJax/KaTeX
+        if (window.renderMathInElement) {
+            renderMathInElement(document.getElementById("quiz-container"));
+        }
+
+        // Restore previous answer if already answered
+        if (userAnswers[currentQuestion] !== undefined) {
+            selectOption(userAnswers[currentQuestion], true);
+        }
+    }
+
+    function selectOption(optIdx, isRestoring = false) {
+        const q = quizData[currentQuestion];
+        const isCorrect = (optIdx === q.answer);
+        
+        if (!isRestoring) {
+            userAnswers[currentQuestion] = optIdx;
+        }
+
+        // Disable options
+        for (let i = 0; i < q.options.length; i++) {
+            const btn = document.getElementById(`opt-${i}`);
+            btn.disabled = true;
+            if (i === q.answer) {
+                btn.classList.add("correct");
+            } else if (i === optIdx && !isCorrect) {
+                btn.classList.add("incorrect");
+            }
+        }
+
+        // Show Explanation
+        const expBox = document.getElementById("exp-box");
+        expBox.classList.add("show", isCorrect ? "correct-exp" : "incorrect-exp");
+        expBox.innerHTML = `<strong>${isCorrect ? '✅ Correct!' : '❌ Incorrect'}</strong><br>${q.explanation}`;
+
+        document.getElementById("next-btn").disabled = false;
+    }
+
+    function nextQuestion() {
+        if (currentQuestion < quizData.length - 1) {
+            currentQuestion++;
+            renderQuestion();
+        } else {
+            showScore();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestion > 0) {
+            currentQuestion--;
+            renderQuestion();
+        }
+    }
+
+    function showScore() {
+        document.getElementById("quiz-container").style.display = "none";
+        const scoreBoard = document.getElementById("score-board");
+        scoreBoard.style.display = "block";
+        
+        let totalScore = 0;
+        quizData.forEach((q, idx) => {
+            if (userAnswers[idx] === q.answer) totalScore++;
+        });
+
+        document.getElementById("score-text").innerHTML = `You scored <strong>${totalScore}</strong> out of <strong>${quizData.length}</strong> (${Math.round((totalScore/quizData.length)*100)}%)`;
+        document.getElementById("progress").style.width = "100%";
+    }
+
+    function restartQuiz() {
+        currentQuestion = 0;
+        userAnswers = {};
+        document.getElementById("score-board").style.display = "none";
+        document.getElementById("quiz-container").style.display = "block";
+        renderQuestion();
+    }
+
+    // Initialize Quiz
+    renderQuestion();
+</script>
+</body>
+</html>

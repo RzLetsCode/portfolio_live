@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Dimensional Embedding Visualizer & Analogy Explorer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <header class="bg-slate-800 border-b border-slate-700 p-4 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                    Embedding Space Explorer
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Simulating 3D PCA Projections & Vector Arithmetic</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Architecture</label>
+                    <select id="modelSelect" class="bg-slate-700 text-white text-sm rounded border border-slate-600 px-3 py-1.5 focus:outline-none focus:border-cyan-500 transition">
+                        <option value="word2vec">Word2Vec (Static / Directional Bias)</option>
+                        <option value="transformer">Transformer (Contextual / High Clusters)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Preset Dataset</label>
+                    <select id="datasetSelect" class="bg-slate-700 text-white text-sm rounded border border-slate-600 px-3 py-1.5 focus:outline-none focus:border-cyan-500 transition">
+                        <option value="gender">Gender Relations</option>
+                        <option value="geography">Geography & Capitals</option>
+                        <option value="occupation">Occupational Biases</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-4 gap-4 overflow-hidden">
+        
+        <div class="lg:col-span-1 flex flex-col gap-4">
+            
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
+                <h2 class="text-sm font-bold tracking-wider uppercase text-cyan-400 mb-3 flex items-center gap-2">
+                    <span>🧮</span> Vector Analogy Playground
+                </h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Base Word (A)</label>
+                        <input id="wordA" type="text" value="king" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div class="flex items-center justify-between gap-2 text-slate-500 my-1">
+                        <span class="text-xs font-mono font-bold">- MINUS</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Subtract Attribute (B)</label>
+                        <input id="wordB" type="text" value="man" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div class="flex items-center justify-between gap-2 text-slate-500 my-1">
+                        <span class="text-xs font-mono font-bold">+ PLUS</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Add Attribute (C)</label>
+                        <input id="wordC" type="text" value="woman" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div class="pt-2">
+                        <button id="calcBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white text-sm font-semibold py-2 px-4 rounded transition shadow-md">
+                            Compute Vector (A - B + C)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm flex-1 flex flex-col min-h-[250px]">
+                <h2 class="text-sm font-bold tracking-wider uppercase text-purple-400 mb-3 flex items-center gap-2">
+                    <span>📊</span> Cosine Proximity Matches
+                </h2>
+                <div class="text-xs text-slate-400 mb-2 font-mono" id="equationPreview">
+                    Result Vec = king - man + woman
+                </div>
+                <div class="flex-1 overflow-y-auto pr-1" id="distanceList">
+                    </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 flex flex-col bg-slate-800 rounded-xl border border-slate-700 shadow-sm relative overflow-hidden min-h-[500px]">
+            <div class="absolute top-3 left-4 z-10 pointer-events-none">
+                <span class="bg-slate-900/80 border border-slate-700 px-3 py-1 text-xs rounded-full font-mono text-slate-300 backdrop-blur-sm">
+                    3D PCA Projection Space
+                </span>
+            </div>
+            <div class="absolute top-3 right-4 z-10 text-right hidden sm:block pointer-events-none">
+                <span class="text-[10px] text-slate-500 block">Left-Click + Drag to Rotate</span>
+                <span class="text-[10px] text-slate-500 block">Scroll to Zoom | Right-Click to Pan</span>
+            </div>
+            <div id="plotContainer" class="w-full h-full flex-1"></div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 px-4 py-2.5 text-xs text-slate-500 text-center">
+        Interactive Simulated Word Embeddings Dashboard • Powered by JS Matrix-PCA Engine & Plotly 3D GL
+    </footer>
+
+    <script>
+        // High-dimensional vector space simulation data (Simulating 50 dimensions)
+        // We use stable, mathematically verifiable bases for specific concepts so PCA captures distinct directions.
+        const DIM = 40; 
+        
+        // Helper to generate seedable random normal arrays to guarantee predictable clusters
+        function createSeededVector(seedString, modelType, category) {
+            let hash = 0;
+            for (let i = 0; i < seedString.length; i++) {
+                hash = seedString.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            let vec = new Array(DIM).fill(0);
+            
+            // Establish semantic global coordinate axes in high-D space
+            // Axis 0: Gender vector alignment
+            // Axis 1: Capital city/Geography alignment
+            // Axis 2: STEM/Creative or Professional rank alignment
+            
+            // Apply standard baseline noise
+            for(let i=0; i<DIM; i++) {
+                let pseudoRand = Math.sin(hash + i) * 1000;
+                vec[i] = (pseudoRand - Math.floor(pseudoRand)) * 0.4 - 0.2; 
+            }
+
+            // Inject structural geometric biases based on meaning
+            const s = seedString.toLowerCase();
+            
+            // Gender sub-space structures
+            if (s === 'man' || s === 'boy' || s === 'brother' || s === 'king' || s === 'uncle' || s === 'programmer' || s === 'doctor') {
+                vec[0] += 0.90; // Male bias direction
+            }
+            if (s === 'woman' || s === 'girl' || s === 'sister' || s === 'queen' || s === 'aunt' || s === 'teacher' || s === 'nurse') {
+                vec[0] -= 0.90; // Female bias direction
+            }
+            
+            // Royalty / Status structural axis
+            if (s === 'king' || s === 'queen' || s === 'emperor' || s === 'royalty') {
+                vec[3] += 0.85;
+            }
+
+            // Geography sub-space structures
+            if (s === 'paris' || s === 'rome' || s === 'london' || s === 'tokyo' || s === 'berlin') {
+                vec[1] += 0.95; // Capital City direction
+                vec[4] += (s === 'paris' || s === 'london' || s === 'rome' ? 0.4 : -0.4); // Euro-clustering
+            }
+            if (s === 'france' || s === 'italy' || s === 'uk' || s === 'japan' || s === 'germany') {
+                vec[1] -= 0.95; // Country landmass direction
+                vec[4] += (s === 'france' || s === 'uk' || s === 'italy' ? 0.4 : -0.4);
+            }
+            
+            // Specific Country Pairings alignments
+            if (s==='paris' || s==='france') vec[5] += 0.7;
+            if (s==='rome' || s==='italy') vec[5] -= 0.7;
+
+            // Occupational sub-space structures
+            if (s === 'doctor' || s === 'programmer' || s === 'scientist' || s === 'engineer') {
+                vec[2] += 0.75; // Technical status
+            }
+            if (s === 'nurse' || s === 'teacher' || s === 'artist' || s === 'writer') {
+                vec[2] -= 0.75; // Care/Creative status
+            }
+
+            // Architecturally differentiate Word2Vec vs Transformers
+            if (modelType === 'transformer') {
+                // Transformers feature high spatial anisotropy (cluster together in tight cones, high base cosine similarity)
+                for(let i=0; i<DIM; i++) {
+                    vec[i] = vec[i] * 0.5 + 0.6; 
+                }
+            } else {
+                // Word2Vec spans globally centered direction vectors
+                for(let i=0; i<DIM; i++) {
+                    vec[i] = vec[i] * 1.2;
+                }
+            }
+
+            // Normalize vector to unit sphere
+            let norm = Math.sqrt(vec.reduce((sum, v) => sum + v*v, 0));
+            return vec.map(v => v / (norm || 1));
+        }
+
+        // Available vocabulary groups per preset
+        const datasets = {
+            gender: ['king', 'queen', 'man', 'woman', 'boy', 'girl', 'brother', 'sister', 'uncle', 'aunt', 'royalty', 'human'],
+            geography: ['paris', 'france', 'rome', 'italy', 'london', 'uk', 'tokyo', 'japan', 'berlin', 'germany', 'europe', 'asia'],
+            occupation: ['doctor', 'nurse', 'programmer', 'teacher', 'scientist', 'artist', 'engineer', 'writer', 'man', 'woman']
+        };
+
+        // UI State management
+        let currentModel = 'word2vec';
+        let currentDatasetKey = 'gender';
+        let customAnalogyVector = null;
+        let customLabel = null;
+
+        // Compute Cosine Similarity between two vectors
+        function cosineSimilarity(vecA, vecB) {
+            let dotProduct = 0;
+            let normA = 0;
+            let normB = 0;
+            for (let i = 0; i < vecA.length; i++) {
+                dotProduct += vecA[i] * vecB[i];
+                normA += vecA[i] * vecA[i];
+                normB += vecB[i] * vecB[i];
+            }
+            return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB) || 1);
+        }
+
+        // Basic Covariance & Power Iteration Matrix PCA Engine for JavaScript Client
+        function computePCA3D(matrix) {
+            const numSamples = matrix.length;
+            const numFeatures = matrix[0].length;
+
+            // 1. Center the matrix columns (Mean subtraction)
+            let mean = new Array(numFeatures).fill(0);
+            for (let j = 0; j < numFeatures; j++) {
+                let sum = 0;
+                for (let i = 0; i < numSamples; i++) sum += matrix[i][j];
+                mean[j] = sum / numSamples;
+            }
+
+            let centered = [];
+            for (let i = 0; i < numSamples; i++) {
+                centered.push(matrix[i].map((v, j) => v - mean[j]));
+            }
+
+            // 2. Build Covariance Matrix
+            let cov = [];
+            for (let i = 0; i < numFeatures; i++) {
+                cov[i] = new Array(numFeatures).fill(0);
+                for (let j = 0; j < numFeatures; j++) {
+                    let sum = 0;
+                    for (let k = 0; k < numSamples; k++) {
+                        sum += centered[k][i] * centered[k][j];
+                    }
+                    cov[i][j] = sum / (numSamples - 1 || 1);
+                }
+            }
+
+            // 3. Power Iteration method to approximate Top 3 Principal Components
+            function getTopEigenvector(matrixData, deficit = null) {
+                let size = matrixData.length;
+                let vec = new Array(size).fill(0).map(() => Math.random() - 0.5);
+                
+                // Max iterations for power convergence
+                for (let iter = 0; iter < 60; iter++) {
+                    let nextVec = new Array(size).fill(0);
+                    for (let i = 0; i < size; i++) {
+                        for (let j = 0; j < size; j++) {
+                            nextVec[i] += matrixData[i][j] * vec[j];
+                        }
+                    }
+                    
+                    // Orthogonalize against prior components if applicable (Gram-Schmidt deflation)
+                    if (deficit) {
+                        for (let d of deficit) {
+                            let dot = nextVec.reduce((s, v, idx) => s + v * d[idx], 0);
+                            for (let idx = 0; idx < size; idx++) {
+                                nextVec[idx] -= dot * d[idx];
+                            }
+                        }
+                    }
+
+                    // Normalize
+                    let mag = Math.sqrt(nextVec.reduce((s, v) => s + v*v, 0));
+                    vec = nextVec.map(v => v / (mag || 1));
+                }
+                return vec;
+            }
+
+            let pc1 = getTopEigenvector(cov);
+            let pc2 = getTopEigenvector(cov, [pc1]);
+            let pc3 = getTopEigenvector(cov, [pc1, pc2]);
+
+            // 4. Project input data onto PC1, PC2, PC3 coordinates
+            return matrix.map(row => {
+                let x = row.reduce((sum, v, idx) => sum + v * pc1[idx], 0);
+                let y = row.reduce((sum, v, idx) => sum + v * pc2[idx], 0);
+                let z = row.reduce((sum, v, idx) => sum + v * pc3[idx], 0);
+                return [x, y, z];
+            });
+        }
+
+        // Main rendering and tracking lifecycle pipeline
+        function updateDashboard() {
+            const vocab = datasets[currentDatasetKey];
+            
+            // Build absolute high-D word space array vectors
+            let rawVectors = vocab.map(word => createSeededVector(word, currentModel, currentDatasetKey));
+            let displayLabels = [...vocab];
+
+            // If an explicit vector operation was solved, insert it into calculations
+            if (customAnalogyVector) {
+                rawVectors.push(customAnalogyVector);
+                displayLabels.push(customLabel);
+            }
+
+            // Calculate projections
+            const projected3D = computePCA3D(rawVectors);
+
+            // Separate normal points vs computed vector coordinates
+            let normalX = [], normalY = [], normalZ = [], normalText = [];
+            let resultX = null, resultY = null, resultZ = null;
+
+            for (let i = 0; i < projected3D.length; i++) {
+                if (displayLabels[i] === customLabel) {
+                    resultX = [projected3D[i][0]];
+                    resultY = [projected3D[i][1]];
+                    resultZ = [projected3D[i][2]];
+                } else {
+                    normalX.push(projected3D[i][0]);
+                    normalY.push(projected3D[i][1]);
+                    normalZ.push(projected3D[i][2]);
+                    normalText.push(displayLabels[i]);
+                }
+            }
+
+            // Build Plotly Datasets
+            let traces = [];
+
+            // Standard Vocabulary Plot Scatter Layer
+            traces.push({
+                x: normalX, y: normalY, z: normalZ,
+                mode: 'markers+text',
+                type: 'scatter3d',
+                name: 'Dataset Vector Space',
+                text: normalText,
+                textposition: 'top center',
+                marker: {
+                    size: 7,
+                    color: currentModel === 'word2vec' ? '#06b6d4' : '#a855f7',
+                    opacity: 0.85,
+                    line: { color: '#1e293b', width: 1 }
+                },
+                textfont: {
+                    family: 'sans-serif',
+                    size: 11,
+                    color: '#e2e8f0'
+                }
+            });
+
+            // Action vector arithmetic trajectory target marker
+            if (resultX !== null) {
+                traces.push({
+                    x: resultX, y: resultY, z: resultZ,
+                    mode: 'markers+text',
+                    type: 'scatter3d',
+                    name: 'Result Vector',
+                    text: ['🎯 [RESULT]'],
+                    textposition: 'bottom center',
+                    marker: {
+                        size: 10,
+                        color: '#f43f5e',
+                        symbol: 'diamond',
+                        line: { color: '#ffffff', width: 2 }
+                    },
+                    textfont: {
+                        family: 'monospace',
+                        size: 13,
+                        color: '#f43f5e',
+                        weight: 'bold'
+                    }
+                });
+
+                // Add an elegant directional vector reference pointer line from base word A to result
+                const wordA = document.getElementById('wordA').value.trim().toLowerCase();
+                const wordAIdx = vocab.indexOf(wordA);
+                if (wordAIdx !== -1) {
+                    traces.push({
+                        x: [projected3D[wordAIdx][0], resultX[0]],
+                        y: [projected3D[wordAIdx][1], resultY[0]],
+                        z: [projected3D[wordAIdx][2], resultZ[0]],
+                        type: 'scatter3d',
+                        mode: 'lines',
+                        name: 'Transformation Path',
+                        line: {
+                            color: '#f43f5e',
+                            width: 3,
+                            dash: 'dashdot'
+                        }
+                    });
+                }
+            }
+
+            const layout = {
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                scene: {
+                    xaxis: { title: 'PC 1', backgroundcolor: '#111827', gridcolor: '#334155', showbackground: true, zerolinecolor: '#475569', tickfont: {color: '#64748b'} },
+                    yaxis: { title: 'PC 2', backgroundcolor: '#111827', gridcolor: '#334155', showbackground: true, zerolinecolor: '#475569', tickfont: {color: '#64748b'} },
+                    zaxis: { title: 'PC 3', backgroundcolor: '#111827', gridcolor: '#334155', showbackground: true, zerolinecolor: '#475569', tickfont: {color: '#64748b'} }
+                },
+                paper_bgcolor: '#1e293b',
+                plot_bgcolor: '#1e293b',
+                showlegend: false,
+                legend: { font: { color: '#cbd5e1' } }
+            };
+
+            const config = { responsive: true, displayModeBar: false };
+            Plotly.newPlot('plotContainer', traces, layout, config);
+
+            // Compute proximity updates across available dataset terms
+            if (customAnalogyVector) {
+                let matches = [];
+                for(let i=0; i < vocab.length; i++) {
+                    let score = cosineSimilarity(customAnalogyVector, rawVectors[i]);
+                    matches.push({ word: vocab[i], similarity: score });
+                }
+                
+                // Sort ascending closeness
+                matches.sort((a,b) => b.similarity - a.similarity);
+
+                // Populate side card display list
+                const listEl = document.getElementById('distanceList');
+                listEl.innerHTML = '';
+                matches.forEach(m => {
+                    const row = document.createElement('div');
+                    row.className = "flex justify-between items-center py-2 border-b border-slate-700 text-sm";
+                    
+                    // Emphasize targets like queen/italy/nurse based on prompt target vectors
+                    const isHighMatch = m.similarity > 0.65;
+                    row.innerHTML = `
+                        <span class="font-medium ${isHighMatch ? 'text-yellow-400 font-bold' : 'text-slate-200'}">${m.word}</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full" style="width: ${Math.max(0, m.similarity * 100)}%"></div>
+                            </div>
+                            <span class="font-mono text-xs text-emerald-400 font-semibold">${m.similarity.toFixed(4)}</span>
+                        </div>
+                    `;
+                    listEl.appendChild(row);
+                });
+            }
+        }
+
+        // Mathematical Evaluation Formulation for Analogies
+        function executeAnalogyCalculation() {
+            const wA = document.getElementById('wordA').value.trim().toLowerCase();
+            const wB = document.getElementById('wordB').value.trim().toLowerCase();
+            const wC = document.getElementById('wordC').value.trim().toLowerCase();
+
+            document.getElementById('equationPreview').innerText = `Result Vec = ${wA} - ${wB} + ${wC}`;
+
+            // Build base structural coordinates
+            const vecA = createSeededVector(wA, currentModel, currentDatasetKey);
+            const vecB = createSeededVector(wB, currentModel, currentDatasetKey);
+            const vecC = createSeededVector(wC, currentModel, currentDatasetKey);
+
+            // Apply Vector Arithmetic formula: Result = A - B + C
+            let result = new Array(DIM).fill(0);
+            for(let i=0; i<DIM; i++) {
+                result[i] = vecA[i] - vecB[i] + vecC[i];
+            }
+
+            // Standardize normalization constraints
+            let norm = Math.sqrt(result.reduce((sum, v) => sum + v*v, 0));
+            customAnalogyVector = result.map(v => v / (norm || 1));
+            customLabel = `(${wA}-${wB}+${wC})`;
+
+            updateDashboard();
+        }
+
+        // Synchronize setup configurations when preset changes
+        function handlePresetPresetSync() {
+            currentDatasetKey = document.getElementById('datasetSelect').value;
+            
+            // Set rational default inputs inside playground dynamically matching selected focus topic
+            if (currentDatasetKey === 'gender') {
+                document.getElementById('wordA').value = 'king';
+                document.getElementById('wordB').value = 'man';
+                document.getElementById('wordC').value = 'woman';
+            } else if (currentDatasetKey === 'geography') {
+                document.getElementById('wordA').value = 'rome';
+                document.getElementById('wordB').value = 'italy';
+                document.getElementById('wordC').value = 'france';
+            } else if (currentDatasetKey === 'occupation') {
+                document.getElementById('wordA').value = 'doctor';
+                document.getElementById('wordB').value = 'man';
+                document.getElementById('wordC').value = 'woman';
+            }
+            executeAnalogyCalculation();
+        }
+
+        // Attach event listeners
+        document.getElementById('datasetSelect').addEventListener('change', handlePresetPresetSync);
+        document.getElementById('modelSelect').addEventListener('change', (e) => {
+            currentModel = e.target.value;
+            executeAnalogyCalculation();
+        });
+        document.getElementById('calcBtn').addEventListener('click', executeAnalogyCalculation);
+
+        // Initial launch configuration on execution finish
+        window.addEventListener('load', () => {
+            executeAnalogyCalculation();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Dimensional Embedding Visualizer & Analogy Explorer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <header class="bg-slate-800 border-b border-slate-700 p-4 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                    Embedding Space Explorer
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Dense Cluster Engine & Vector Arithmetic Projections</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Architecture</label>
+                    <select id="modelSelect" class="bg-slate-700 text-white text-sm rounded border border-slate-600 px-3 py-1.5 focus:outline-none focus:border-cyan-500 transition">
+                        <option value="word2vec">Word2Vec (Static / Directional Bias)</option>
+                        <option value="transformer">Transformer (Contextual / High Density Cones)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Dense Preset Dataset</label>
+                    <select id="datasetSelect" class="bg-slate-700 text-white text-sm rounded border border-slate-600 px-3 py-1.5 focus:outline-none focus:border-cyan-500 transition">
+                        <option value="gender">Royalty & Family (Dense)</option>
+                        <option value="geography">Global Geography (Dense)</option>
+                        <option value="occupation">STEM vs Humanities (Dense)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-4 gap-4 overflow-hidden">
+        
+        <div class="lg:col-span-1 flex flex-col gap-4">
+            
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
+                <h2 class="text-sm font-bold tracking-wider uppercase text-cyan-400 mb-3 flex items-center gap-2">
+                    <span>🧮</span> Vector Analogy Playground
+                </h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Base Word (A)</label>
+                        <input id="wordA" type="text" value="king" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div class="flex items-center justify-between gap-2 text-slate-500 my-1">
+                        <span class="text-xs font-mono font-bold">- MINUS</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Subtract Attribute (B)</label>
+                        <input id="wordB" type="text" value="man" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div class="flex items-center justify-between gap-2 text-slate-500 my-1">
+                        <span class="text-xs font-mono font-bold">+ PLUS</span>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Add Attribute (C)</label>
+                        <input id="wordC" type="text" value="woman" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div class="pt-2">
+                        <button id="calcBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white text-sm font-semibold py-2 px-4 rounded transition shadow-md">
+                            Compute Vector (A - B + C)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm">
+                <h2 class="text-sm font-bold tracking-wider uppercase text-emerald-400 mb-3 flex items-center gap-2">
+                    <span>➕</span> Inject Related Words
+                </h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Add cluster tokens (comma or space separated)</label>
+                        <div class="flex gap-2">
+                            <input id="customWordInput" type="text" placeholder="e.g. prince, princess, monarch" class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-emerald-500">
+                            <button id="addWordBtn" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-sm font-semibold rounded text-white transition">
+                                Inject
+                            </button>
+                        </div>
+                    </div>
+                    <div id="customBadgeContainer" class="flex flex-wrap gap-1.5 mt-2 max-h-[90px] overflow-y-auto">
+                        </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm flex-1 flex flex-col min-h-[200px]">
+                <h2 class="text-sm font-bold tracking-wider uppercase text-purple-400 mb-3 flex items-center gap-2">
+                    <span>📊</span> Cosine Proximity Matches
+                </h2>
+                <div class="text-xs text-slate-400 mb-2 font-mono" id="equationPreview">
+                    Result Vec = king - man + woman
+                </div>
+                <div class="flex-1 overflow-y-auto pr-1" id="distanceList">
+                    </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-3 flex flex-col bg-slate-800 rounded-xl border border-slate-700 shadow-sm relative overflow-hidden min-h-[520px]">
+            <div class="absolute top-3 left-4 z-10 pointer-events-none">
+                <span class="bg-slate-900/80 border border-slate-700 px-3 py-1 text-xs rounded-full font-mono text-slate-300 backdrop-blur-sm">
+                    3D PCA Projection Space (Recalculated)
+                </span>
+            </div>
+            <div class="absolute top-3 right-4 z-10 text-right hidden sm:block pointer-events-none">
+                <span class="text-[10px] text-slate-500 block">Left-Click + Drag to Rotate</span>
+                <span class="text-[10px] text-slate-500 block">Scroll to Zoom</span>
+            </div>
+            <div id="plotContainer" class="w-full h-full flex-1"></div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-800 px-4 py-2.5 text-xs text-slate-500 text-center">
+        Dense Semantic Clustering Matrix Projections • Interlinked Vector Space Engine
+    </footer>
+
+    <script>
+        const DIM = 45; 
+        
+        // Expanded dense baseline presets
+        const datasets = {
+            gender: ['king', 'queen', 'prince', 'princess', 'monarch', 'emperor', 'empress', 'regent', 'man', 'woman', 'boy', 'girl', 'brother', 'sister', 'uncle', 'aunt', 'father', 'mother', 'son', 'daughter', 'royalty', 'human', 'lord', 'lady'],
+            geography: ['paris', 'france', 'rome', 'italy', 'london', 'uk', 'tokyo', 'japan', 'berlin', 'germany', 'madrid', 'spain', 'lisbon', 'portugal', 'vienna', 'austria', 'europe', 'asia', 'country', 'capital', 'city'],
+            occupation: ['doctor', 'nurse', 'surgeon', 'physician', 'programmer', 'developer', 'engineer', 'coder', 'scientist', 'researcher', 'professor', 'teacher', 'instructor', 'artist', 'painter', 'writer', 'author', 'man', 'woman']
+        };
+
+        let currentModel = 'word2vec';
+        let currentDatasetKey = 'gender';
+        let customAnalogyVector = null;
+        let customLabel = null;
+        let userInjectedWords = [];
+
+        // Dense Vector Engine: Builds an intersection signature from character n-grams
+        // so that related structural and semantic names naturally attract in high-D space.
+        function createSeededVector(seedString, modelType, category) {
+            let word = seedString.toLowerCase().trim();
+            
+            // Seed base generation
+            let hash = 0;
+            for (let i = 0; i < word.length; i++) {
+                hash = word.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            let vec = new Array(DIM).fill(0);
+            for(let i=0; i<DIM; i++) {
+                let pseudoRand = Math.sin(hash + i) * 1000;
+                vec[i] = (pseudoRand - Math.floor(pseudoRand)) * 0.3 - 0.15; 
+            }
+
+            // Semantic vector anchor mappings
+            const structuralAnchors = {
+                // Gender Subspace Dimension
+                male: ['man', 'boy', 'brother', 'uncle', 'father', 'son', 'king', 'prince', 'emperor', 'lord', 'doctor', 'programmer', 'developer', 'surgeon', 'coder'],
+                female: ['woman', 'girl', 'sister', 'aunt', 'mother', 'daughter', 'queen', 'princess', 'empress', 'lady', 'nurse', 'teacher', 'instructor', 'actress'],
+                
+                // Royalty Subspace Dimension
+                royalty: ['king', 'queen', 'prince', 'princess', 'monarch', 'emperor', 'empress', 'regent', 'royalty', 'lord', 'lady'],
+                
+                // Geography Clusters
+                capital: ['paris', 'rome', 'london', 'tokyo', 'berlin', 'madrid', 'lisbon', 'vienna', 'capital', 'city'],
+                country: ['france', 'italy', 'uk', 'japan', 'germany', 'spain', 'portugal', 'austria', 'country'],
+                euro: ['paris', 'france', 'rome', 'italy', 'london', 'uk', 'berlin', 'germany', 'madrid', 'spain', 'lisbon', 'portugal', 'vienna', 'austria', 'europe'],
+                
+                // Domain Occupations
+                techSTEM: ['programmer', 'developer', 'engineer', 'coder', 'scientist', 'researcher', 'surgeon', 'doctor', 'physician'],
+                humanities: ['teacher', 'instructor', 'artist', 'painter', 'writer', 'author', 'professor']
+            };
+
+            // Calculate anchor score mappings based on substring matching and shared tokens
+            if (structuralAnchors.male.some(a => word.includes(a) || a.includes(word))) vec[0] += 0.85;
+            if (structuralAnchors.female.some(a => word.includes(a) || a.includes(word))) vec[0] -= 0.85;
+            if (structuralAnchors.royalty.some(a => word.includes(a) || a.includes(word))) vec[3] += 0.90;
+            
+            if (structuralAnchors.capital.some(a => word.includes(a) || a.includes(word))) vec[1] += 0.95;
+            if (structuralAnchors.country.some(a => word.includes(a) || a.includes(word))) vec[1] -= 0.95;
+            if (structuralAnchors.euro.some(a => word.includes(a) || a.includes(word))) vec[4] += 0.50;
+
+            if (structuralAnchors.techSTEM.some(a => word.includes(a) || a.includes(word))) vec[2] += 0.80;
+            if (structuralAnchors.humanities.some(a => word.includes(a) || a.includes(word))) vec[2] -= 0.80;
+
+            // Model adjustments
+            if (modelType === 'transformer') {
+                // High density anisotropic cone setting (vectors pack closely together)
+                for(let i=0; i<DIM; i++) { vec[i] = vec[i] * 0.4 + 0.7; }
+            } else {
+                for(let i=0; i<DIM; i++) { vec[i] = vec[i] * 1.3; }
+            }
+
+            let norm = Math.sqrt(vec.reduce((sum, v) => sum + v*v, 0));
+            return vec.map(v => v / (norm || 1));
+        }
+
+        function cosineSimilarity(vecA, vecB) {
+            let dotProduct = 0, normA = 0, normB = 0;
+            for (let i = 0; i < vecA.length; i++) {
+                dotProduct += vecA[i] * vecB[i];
+                normA += vecA[i] * vecA[i];
+                normB += vecB[i] * vecB[i];
+            }
+            return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB) || 1);
+        }
+
+        // PCA Covariance Engine
+        function computePCA3D(matrix) {
+            const numSamples = matrix.length;
+            const numFeatures = matrix[0].length;
+
+            let mean = new Array(numFeatures).fill(0);
+            for (let j = 0; j < numFeatures; j++) {
+                let sum = 0;
+                for (let i = 0; i < numSamples; i++) sum += matrix[i][j];
+                mean[j] = sum / numSamples;
+            }
+
+            let centered = matrix.map(row => row.map((v, j) => v - mean[j]));
+
+            let cov = [];
+            for (let i = 0; i < numFeatures; i++) {
+                cov[i] = new Array(numFeatures).fill(0);
+                for (let j = 0; j < numFeatures; j++) {
+                    let sum = 0;
+                    for (let k = 0; k < numSamples; k++) sum += centered[k][i] * centered[k][j];
+                    cov[i][j] = sum / (numSamples - 1 || 1);
+                }
+            }
+
+            function getTopEigenvector(matrixData, deficit = null) {
+                let size = matrixData.length;
+                let vec = new Array(size).fill(0).map(() => Math.random() - 0.5);
+                for (let iter = 0; iter < 75; iter++) {
+                    let nextVec = new Array(size).fill(0);
+                    for (let i = 0; i < size; i++) {
+                        for (let j = 0; j < size; j++) nextVec[i] += matrixData[i][j] * vec[j];
+                    }
+                    if (deficit) {
+                        for (let d of deficit) {
+                            let dot = nextVec.reduce((s, v, idx) => s + v * d[idx], 0);
+                            for (let idx = 0; idx < size; idx++) nextVec[idx] -= dot * d[idx];
+                        }
+                    }
+                    let mag = Math.sqrt(nextVec.reduce((s, v) => s + v*v, 0));
+                    vec = nextVec.map(v => v / (mag || 1));
+                }
+                return vec;
+            }
+
+            let pc1 = getTopEigenvector(cov);
+            let pc2 = getTopEigenvector(cov, [pc1]);
+            let pc3 = getTopEigenvector(cov, [pc1, pc2]);
+
+            return matrix.map(row => [
+                row.reduce((sum, v, idx) => sum + v * pc1[idx], 0),
+                row.reduce((sum, v, idx) => sum + v * pc2[idx], 0),
+                row.reduce((sum, v, idx) => sum + v * pc3[idx], 0)
+            ]);
+        }
+
+        function updateDashboard() {
+            const vocab = [...datasets[currentDatasetKey], ...userInjectedWords];
+            let rawVectors = vocab.map(word => createSeededVector(word, currentModel, currentDatasetKey));
+            let displayLabels = [...vocab];
+
+            if (customAnalogyVector) {
+                rawVectors.push(customAnalogyVector);
+                displayLabels.push(customLabel);
+            }
+
+            const projected3D = computePCA3D(rawVectors);
+
+            let normalX = [], normalY = [], normalZ = [], normalText = [], normalColors = [];
+            let resultX = null, resultY = null, resultZ = null;
+
+            for (let i = 0; i < projected3D.length; i++) {
+                if (displayLabels[i] === customLabel) {
+                    resultX = [projected3D[i][0]];
+                    resultY = [projected3D[i][1]];
+                    resultZ = [projected3D[i][2]];
+                } else {
+                    normalX.push(projected3D[i][0]);
+                    normalY.push(projected3D[i][1]);
+                    normalZ.push(projected3D[i][2]);
+                    normalText.push(displayLabels[i]);
+                    
+                    if (userInjectedWords.includes(displayLabels[i])) {
+                        normalColors.push('#10b981'); 
+                    } else {
+                        normalColors.push(currentModel === 'word2vec' ? '#06b6d4' : '#a855f7');
+                    }
+                }
+            }
+
+            let traces = [{
+                x: normalX, y: normalY, z: normalZ,
+                mode: 'markers+text',
+                type: 'scatter3d',
+                name: 'Cluster Space',
+                text: normalText,
+                textposition: 'top center',
+                marker: {
+                    size: 6,
+                    color: normalColors,
+                    opacity: 0.8,
+                    line: { color: '#1e293b', width: 0.5 }
+                },
+                textfont: { family: 'sans-serif', size: 10, color: '#e2e8f0' }
+            }];
+
+            if (resultX !== null) {
+                traces.push({
+                    x: resultX, y: resultY, z: resultZ,
+                    mode: 'markers+text',
+                    type: 'scatter3d',
+                    name: 'Target Vector',
+                    text: ['🎯 [RESULT]'],
+                    textposition: 'bottom center',
+                    marker: { size: 9, color: '#f43f5e', symbol: 'diamond' },
+                    textfont: { family: 'monospace', size: 12, color: '#f43f5e', weight: 'bold' }
+                });
+
+                const wordA = document.getElementById('wordA').value.trim().toLowerCase();
+                const wordAIdx = vocab.indexOf(wordA);
+                if (wordAIdx !== -1) {
+                    traces.push({
+                        x: [projected3D[wordAIdx][0], resultX[0]],
+                        y: [projected3D[wordAIdx][1], resultY[0]],
+                        z: [projected3D[wordAIdx][2], resultZ[0]],
+                        type: 'scatter3d', mode: 'lines',
+                        line: { color: '#f43f5e', width: 2.5, dash: 'dashdot' }
+                    });
+                }
+            }
+
+            const layout = {
+                margin: { l: 0, r: 0, b: 0, t: 0 },
+                scene: {
+                    xaxis: { backgroundcolor: '#111827', gridcolor: '#334155', showbackground: true, tickfont: {color: '#64748b'} },
+                    yaxis: { backgroundcolor: '#111827', gridcolor: '#334155', showbackground: true, tickfont: {color: '#64748b'} },
+                    zaxis: { backgroundcolor: '#111827', gridcolor: '#334155', showbackground: true, tickfont: {color: '#64748b'} }
+                },
+                paper_bgcolor: '#1e293b', plot_bgcolor: '#1e293b', showlegend: false
+            };
+
+            Plotly.newPlot('plotContainer', traces, layout, { responsive: true, displayModeBar: false });
+
+            // Distance Listing
+            if (customAnalogyVector) {
+                let matches = vocab.map((w, idx) => ({ word: w, similarity: cosineSimilarity(customAnalogyVector, rawVectors[idx]) }));
+                matches.sort((a,b) => b.similarity - a.similarity);
+
+                const listEl = document.getElementById('distanceList');
+                listEl.innerHTML = '';
+                // Limit list to top 12 elements to stay clean in dense environments
+                matches.slice(0, 12).forEach(m => {
+                    const row = document.createElement('div');
+                    row.className = "flex justify-between items-center py-1.5 border-b border-slate-700 text-xs";
+                    row.innerHTML = `
+                        <span class="font-medium ${m.similarity > 0.7 ? 'text-yellow-400 font-bold' : 'text-slate-300'}">${m.word}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono text-emerald-400 font-semibold">${m.similarity.toFixed(4)}</span>
+                        </div>
+                    `;
+                    listEl.appendChild(row);
+                });
+            }
+        }
+
+        function executeAnalogyCalculation() {
+            const wA = document.getElementById('wordA').value.trim().toLowerCase();
+            const wB = document.getElementById('wordB').value.trim().toLowerCase();
+            const wC = document.getElementById('wordC').value.trim().toLowerCase();
+
+            document.getElementById('equationPreview').innerText = `Result Vec = ${wA} - ${wB} + ${wC}`;
+
+            const vecA = createSeededVector(wA, currentModel, currentDatasetKey);
+            const vecB = createSeededVector(wB, currentModel, currentDatasetKey);
+            const vecC = createSeededVector(wC, currentModel, currentDatasetKey);
+
+            let result = new Array(DIM).fill(0);
+            for(let i=0; i<DIM; i++) result[i] = vecA[i] - vecB[i] + vecC[i];
+
+            let norm = Math.sqrt(result.reduce((sum, v) => sum + v*v, 0));
+            customAnalogyVector = result.map(v => v / (norm || 1));
+            customLabel = `(${wA}-${wB}+${wC})`;
+
+            updateDashboard();
+        }
+
+        function handlePresetPresetSync() {
+            currentDatasetKey = document.getElementById('datasetSelect').value;
+            userInjectedWords = []; 
+            document.getElementById('customBadgeContainer').innerHTML = '';
+            
+            if (currentDatasetKey === 'gender') {
+                document.getElementById('wordA').value = 'king'; document.getElementById('wordB').value = 'man'; document.getElementById('wordC').value = 'woman';
+            } else if (currentDatasetKey === 'geography') {
+                document.getElementById('wordA').value = 'rome'; document.getElementById('wordB').value = 'italy'; document.getElementById('wordC').value = 'france';
+            } else if (currentDatasetKey === 'occupation') {
+                document.getElementById('wordA').value = 'doctor'; document.getElementById('wordB').value = 'man'; document.getElementById('wordC').value = 'woman';
+            }
+            executeAnalogyCalculation();
+        }
+
+        function handleCustomWordInjection() {
+            const inputEl = document.getElementById('customWordInput');
+            // Support comma or space splits for multi-word rapid additions
+            const tokens = inputEl.value.split(/[\s,]+/).map(t => t.trim().toLowerCase()).filter(t => t.length > 0);
+            
+            tokens.forEach(token => {
+                const vocab = [...datasets[currentDatasetKey], ...userInjectedWords];
+                if(vocab.includes(token)) return;
+
+                userInjectedWords.push(token);
+                
+                const container = document.getElementById('customBadgeContainer');
+                const badge = document.createElement('span');
+                badge.className = "bg-emerald-950 border border-emerald-700 text-emerald-300 text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1";
+                badge.innerHTML = `
+                    <span>${token}</span>
+                    <button class="text-emerald-500 hover:text-emerald-300 ml-1 font-bold" onclick="removeToken('${token}', this)">✕</button>
+                `;
+                container.appendChild(badge);
+            });
+            
+            inputEl.value = '';
+            executeAnalogyCalculation();
+        }
+
+        window.removeToken = function(token, element) {
+            userInjectedWords = userInjectedWords.filter(w => w !== token);
+            element.parentElement.remove();
+            executeAnalogyCalculation();
+        };
+
+        document.getElementById('datasetSelect').addEventListener('change', handlePresetPresetSync);
+        document.getElementById('modelSelect').addEventListener('change', (e) => {
+            currentModel = e.target.value;
+            executeAnalogyCalculation();
+        });
+        document.getElementById('calcBtn').addEventListener('click', executeAnalogyCalculation);
+        document.getElementById('addWordBtn').addEventListener('click', handleCustomWordInjection);
+        document.getElementById('customWordInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleCustomWordInjection(); });
+
+        window.addEventListener('load', () => { executeAnalogyCalculation(); });
+    </script>
+</body>
+</html>

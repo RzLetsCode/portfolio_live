@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Dimensional Feature Vectors (ℝ⁵) | code2career_ai</title>
+    <style>
+        :root {
+            --bg-deep: #0a0e17;
+            --panel-bg: #111827;
+            --border-glow: #1f2937;
+            --accent-blue: #38bdf8;
+            --accent-red: #ef4444;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --axis-color: rgba(255, 255, 255, 0.2);
+            --grid-line: rgba(255, 255, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p { color: var(--text-secondary); font-size: 1.05rem; }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #ffffff;
+        }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            max-width: 800px;
+        }
+
+        .canvas-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #070b12;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            position: relative;
+            overflow: hidden;
+        }
+
+        svg { width: 100%; height: 100%; }
+
+        /* Controls Section */
+        .controls {
+            width: 100%;
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .subject-group {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1.25rem;
+            border-radius: 10px;
+            border: 1px solid #1f2937;
+        }
+
+        .subject-group h4 { font-size: 1rem; margin-bottom: 1rem; text-align: center; }
+        #group-alice h4 { color: var(--accent-blue); }
+        #group-bob h4 { color: var(--accent-red); }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        .control-item:last-child { margin-bottom: 0; }
+
+        label { font-size: 0.85rem; color: var(--text-secondary); font-family: monospace; width: 120px;}
+        .value-display { font-size: 0.9rem; color: #ffffff; font-weight: bold; width: 60px; text-align: right; font-family: monospace;}
+
+        input[type="range"] {
+            flex-grow: 1;
+            margin: 0 10px;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #group-alice input[type="range"] { accent-color: var(--accent-blue); background: rgba(56, 189, 248, 0.1); }
+        #group-bob input[type="range"] { accent-color: var(--accent-red); background: rgba(239, 68, 68, 0.1); }
+
+        /* Typographic Metrics Inside SVGs */
+        .svg-text { font-family: 'Courier New', Courier, monospace; font-size: 12px; fill: var(--text-secondary); }
+        .math-bold { font-weight: bold; font-size: 15px; fill: #ffffff; }
+        .feature-label { font-size: 13px; font-weight: bold; fill: #c9d1d9; text-anchor: middle; }
+        .tick-label { font-size: 10px; fill: rgba(255,255,255,0.4); text-anchor: middle; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>code2career_ai • Representing 5D Data</h1>
+        <p>Axiom Lab: Demonstrating "Feature Vectors" by mapping 5 unique metrics for human comparison.</p>
+    </header>
+
+    <div class="dashboard">
+
+        <div class="card">
+            <div class="card-title">Parallel Coordinates Plot in ℝ⁵</div>
+            <div class="card-desc">Visualizing high-dimensional vectors by plotting dimensions on parallel axes. Each data point (human) becomes a unique path through the featurespace. Similarity is shown by how closely paths follow each other across axes.</div>
+            
+            <div class="canvas-container">
+                <svg viewBox="0 0 1000 562.5" id="featureSvg">
+                    <text x="30" y="40" class="svg-text math-bold" fill="var(--accent-blue)">Semantic Comparison:</text>
+                    <text id="dist-readout" x="30" y="65" class="svg-text" fill="var(--text-secondary)">Euclidean Distance (ℝ⁵): [Computing Closeness]</text>
+
+                    <g transform="translate(0, 150)">
+                        <line x1="80" y1="0" x2="920" y2="0" stroke="var(--grid-line)"/>
+                        <line x1="80" y1="100" x2="920" y2="100" stroke="var(--grid-line)"/>
+                        <line x1="80" y1="200" x2="920" y2="200" stroke="var(--grid-line)"/>
+                        <line x1="80" y1="300" x2="920" y2="300" stroke="var(--grid-line)"/>
+
+                        <g id="axis-group">
+                            <line x1="100" y1="-30" x2="100" y2="330" stroke="var(--axis-color)" stroke-width="2"/>
+                            <text x="100" y="-50" class="svg-text feature-label">h₁: Height (cm)</text>
+                            <text x="100" y="350" class="svg-text tick-label">150 - 210</text>
+                            
+                            <line x1="300" y1="-30" x2="300" y2="330" stroke="var(--axis-color)" stroke-width="2"/>
+                            <text x="300" y="-50" class="svg-text feature-label">h₂: Weight (kg)</text>
+                            <text x="300" y="350" class="svg-text tick-label">50 - 120</text>
+
+                            <line x1="500" y1="-30" x2="500" y2="330" stroke="var(--axis-color)" stroke-width="2"/>
+                            <text x="500" y="-50" class="svg-text feature-label">h₃: Age (yrs)</text>
+                            <text x="500" y="350" class="svg-text tick-label">10 - 80</text>
+
+                            <line x1="700" y1="-30" x2="700" y2="330" stroke="var(--axis-color)" stroke-width="2"/>
+                            <text x="700" y="-50" class="svg-text feature-label">h₄: Educ (yrs)</text>
+                            <text x="700" y="350" class="svg-text tick-label">8 - 22</text>
+
+                            <line x1="900" y1="-30" x2="900" y2="330" stroke="var(--axis-color)" stroke-width="2"/>
+                            <text x="900" y="-50" class="svg-text feature-label">h₅: Income ($k)</text>
+                            <text x="900" y="350" class="svg-text tick-label">20 - 250</text>
+                        </g>
+
+                        <path id="vec-trace-alice" d="M100,0 L300,0 L500,0 L700,0 L900,0" fill="none" stroke="var(--accent-blue)" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+                        <circle id="node-alice-h1" cx="100" cy="0" r="7" fill="var(--accent-blue)"/>
+                        <circle id="node-alice-h2" cx="300" cy="0" r="7" fill="var(--accent-blue)"/>
+                        <circle id="node-alice-h3" cx="500" cy="0" r="7" fill="var(--accent-blue)"/>
+                        <circle id="node-alice-h4" cx="700" cy="0" r="7" fill="var(--accent-blue)"/>
+                        <circle id="node-alice-h5" cx="900" cy="0" r="7" fill="var(--accent-blue)"/>
+
+                        <path id="vec-trace-bob" d="M100,0 L300,0 L500,0 L700,0 L900,0" fill="none" stroke="var(--accent-red)" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+                        <circle id="node-bob-h1" cx="100" cy="0" r="7" fill="var(--accent-red)"/>
+                        <circle id="node-bob-h2" cx="300" cy="0" r="7" fill="var(--accent-red)"/>
+                        <circle id="node-bob-h3" cx="500" cy="0" r="7" fill="var(--accent-red)"/>
+                        <circle id="node-bob-h4" cx="700" cy="0" r="7" fill="var(--accent-red)"/>
+                        <circle id="node-bob-h5" cx="900" cy="0" r="7" fill="var(--accent-red)"/>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="controls">
+                <div class="subject-group" id="group-alice">
+                    <h4>Vector A: Alice (Data Point 1)</h4>
+                    <div class="control-item">
+                        <label>Height (cm)</label>
+                        <input type="range" id="alice-h1" min="150" max="210" value="185">
+                        <span class="value-display" id="val-alice-h1">185</span>
+                    </div>
+                    <div class="control-item">
+                        <label>Weight (kg)</label>
+                        <input type="range" id="alice-h2" min="50" max="120" value="75">
+                        <span class="value-display" id="val-alice-h2">75</span>
+                    </div>
+                    <div class="control-item">
+                        <label>Age (yrs)</label>
+                        <input type="range" id="alice-h3" min="10" max="80" value="30">
+                        <span class="value-display" id="val-alice-h3">30</span>
+                    </div>
+                    <div class="control-item">
+                        <label>Educ (yrs)</label>
+                        <input type="range" id="alice-h4" min="8" max="22" value="16">
+                        <span class="value-display" id="val-alice-h4">16</span>
+                    </div>
+                    <div class="control-item">
+                        <label>Income ($k)</label>
+                        <input type="range" id="alice-h5" min="20" max="250" step="5" value="85">
+                        <span class="value-display" id="val-alice-h5">85k</span>
+                    </div>
+                </div>
+
+                <div class="subject-group" id="group-bob">
+                    <h4>Vector B: Bob (Data Point 2)</h4>
+                    <div class="control-item">
+                        <label>Height (cm)</label>
+                        <input type="range" id="bob-h1" min="150" max="210" value="168">
+                        <span class="value-display" id="val-bob-h1">168</span>
+                    </div>
+                    <div class="control-item">
+                        <label>Weight (kg)</label>
+                        <input type="range" id="bob-h2" min="50" max="120" value="95">
+                        <span class="value-display" id="val-bob-h2">95</span>
+                    </div>
+                    <div class="control-item">
+                        <label>Age (yrs)</label>
+                        <input type="range" id="bob-h3" min="10" max="80" value="55">
+                        <span class="value-display" id="val-bob-h3">55</span>
+                    </div>
+                    <div class="control-item">
+                        <label>Educ (yrs)</label>
+                        <input type="range" id="bob-h4" min="8" max="22" value="12">
+                        <span class="value-display" id="val-bob-h4">12</span>
+                    </div>
+                    <div class="control-item">
+                        <label>Income ($k)</label>
+                        <input type="range" id="bob-h5" min="20" max="250" step="5" value="45">
+                        <span class="value-display" id="val-bob-h5">45k</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- High-Dimensional mapping parameters for 5 features ---
+        // Norms raw units -> [300, 0] screen pixels (inverted Y axis).
+        // (Educ and Income added for 5D analysis)
+        const featureDefs = {
+            h1: { min: 150, max: 210 }, // Height (cm)
+            h2: { min: 50,  max: 120 }, // Weight (kg)
+            h3: { min: 10,  max: 80  }, // Age (yrs)
+            h4: { min: 8,   max: 22  }, // Education (yrs)
+            h5: { min: 20,  max: 250 }  // Annual Income ($k)
+        };
+
+        const plotHeight = 300; // Total vertical pixel range for plotting
+
+        // Geometric scaling function execution
+        function mapValueToY(val, rangeDef) {
+            const normalized = (val - rangeDef.min) / (rangeDef.max - rangeDef.min);
+            // Clamp value to ensure it stays inside viewport boundaries
+            const clamped = Math.max(0, Math.min(1, normalized));
+            return plotHeight - (clamped * plotHeight); // Inverted axis logic
+        }
+
+        // Feature Keys loop helper
+        const featureKeys = ['h1', 'h2', 'h3', 'h4', 'h5'];
+
+        // DOM Handles Interface Matrix updated to high-dim
+        const inputs = { alice: {}, bob: {} };
+        const displayVals = { alice: {}, bob: {} };
+        const nodes = { alice: {}, bob: {} };
+        const traces = { alice: document.getElementById('vec-trace-alice'), bob: document.getElementById('vec-trace-bob') };
+        const distReadout = document.getElementById('dist-readout');
+
+        // Initialize DOM handles
+        featureKeys.forEach(f => {
+            inputs.alice[f] = document.getElementById(`alice-${f}`);
+            inputs.bob[f]   = document.getElementById(`bob-${f}`);
+            displayVals.alice[f] = document.getElementById(`val-alice-${f}`);
+            displayVals.bob[f]   = document.getElementById(`val-bob-${f}`);
+            nodes.alice[f] = document.getElementById(`node-alice-${f}`);
+            nodes.bob[f]   = document.getElementById(`node-bob-${f}`);
+        });
+
+
+        // Main geometric execution matrix: Updates both traces instantly across all 5 dimensions
+        function updateFeatureVectors() {
+            // Read technical integer state
+            const a = {}; const b = {};
+            featureKeys.forEach(f => {
+                a[f] = parseInt(inputs.alice[f].value);
+                b[f] = parseInt(inputs.bob[f].value);
+            });
+
+            // Update numerical text readouts cleanly (handle income separately for 'k')
+            featureKeys.forEach(f => {
+                displayVals.alice[f].textContent = f === 'h5' ? `${a[f]}k` : a[f];
+                displayVals.bob[f].textContent   = f === 'h5' ? `${b[f]}k` : b[f];
+            });
+
+            // Map real units to geometric pixel coordinates securely boundary safe
+            const pyA = {}; const pyB = {};
+            featureKeys.forEach(f => {
+                pyA[f] = mapValueToY(a[f], featureDefs[f]);
+                pyB[f] = mapValueToY(b[f], featureDefs[f]);
+            });
+
+            // Construct new SVG trace path descriptions (N nodes = N parallel axes)
+            // L-commands connect x=100, 300, 500, 700, 900
+            const pathA = `M100,${pyA.h1} L300,${pyA.h2} L500,${pyA.h3} L700,${pyA.h4} L900,${pyA.h5}`;
+            const pathB = `M100,${pyB.h1} L300,${pyB.h2} L500,${pyB.h3} L700,${pyB.h4} L900,${pyB.h5}`;
+
+            traces.alice.setAttribute('d', pathA);
+            traces.bob.setAttribute('d', pathB);
+
+            // Update node positions seamlessly
+            featureKeys.forEach(f => {
+                nodes.alice[f].setAttribute('cy', pyA[f]);
+                nodes.bob[f].setAttribute('cy', pyB[f]);
+            });
+
+
+            // COMPUTE SEMANTIC CLOSENESS: EUCLIDEAN DISTANCE IN ℝ⁵
+            // d(A,B) = sqrt((a1-b1)² + (a2-b2)² + (a3-b3)² + (a4-b4)² + (a5-b5)²)
+            // Note for lectures: Raw units skew distance computation significantly.
+            // Example: Income variance ($20k) dwarfs Age variance (30yrs).
+            // Normalization/Standardization must be taught as a standard step after feature creation.
+            const distSquared = 
+                Math.pow(a.h1 - b.h1, 2) + // Height variance
+                Math.pow(a.h2 - b.h2, 2) + // Weight variance
+                Math.pow(a.h3 - b.h3, 2) + // Age variance
+                Math.pow(a.h4 - b.h4, 2) + // Education variance
+                Math.pow(a.h5 - b.h5, 2);  // Income variance
+
+            const euclideanDistance = Math.sqrt(distSquared);
+
+            // Update live metadata label
+            const description = euclideanDistance < 50 ? "(High Similarity)" : (euclideanDistance > 110 ? "(Dissimilar Subjects)" : "(Moderate Closeness)");
+            distReadout.textContent = `d(A,B) = ${euclideanDistance.toFixed(2)} semantic units ${description}`;
+        }
+
+        // Input Listener Matrix updated Loop
+        featureKeys.forEach(f => {
+            inputs.alice[f].addEventListener('input', updateFeatureVectors);
+            inputs.bob[f].addEventListener('input', updateFeatureVectors);
+        });
+
+        // Initial Geometry State execution
+        updateFeatureVectors();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tricky Matrix Inverses (2x2 and 3x3)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .intro {
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            color: #555;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        .problem-box {
+            border: 1px solid #e1e8ed;
+            border-left: 5px solid #8e44ad;
+            padding: 25px;
+            margin-bottom: 30px;
+            background-color: #fafbfc;
+            border-radius: 6px;
+        }
+        .problem-title {
+            font-size: 1.25em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .btn-toggle {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        .btn-toggle:hover {
+            background-color: #2980b9;
+        }
+        .solution {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #ddd;
+        }
+        .step {
+            margin-bottom: 15px;
+        }
+        .trick-highlight {
+            background-color: #f4ecf7;
+            color: #512e5f;
+            padding: 12px;
+            border-left: 4px solid #d7bde2;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        .final-answer {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border: 1px solid #bce8f1;
+            font-size: 1.1em;
+        }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        function toggleSolution(id) {
+            const solutionDiv = document.getElementById('solution-' + id);
+            const btn = document.getElementById('btn-' + id);
+            if (solutionDiv.style.display === 'none' || solutionDiv.style.display === '') {
+                solutionDiv.style.display = 'block';
+                btn.textContent = 'Hide Solution';
+            } else {
+                solutionDiv.style.display = 'none';
+                btn.textContent = 'Show Solution';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Advanced & Tricky Matrix Inverses</h1>
+    <p class="intro">Conceptual challenges focusing on symmetry, algebraic shortcuts, and structural traps.</p>
+    
+    <div class="container">
+        
+        <!-- Question 1 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 1: The Self-Inverse Reflection Matrix</div>
+            <p>Find the inverse of matrix \( A \).</p>
+            <p>$$ A = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix} $$</p>
+            <button id="btn-1" class="btn-toggle" onclick="toggleSolution(1)">Show Solution</button>
+            <div id="solution-1" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> This represents a reflection across the x-axis. Applying it twice brings you right back to where you started ($A^2 = I$).
+                </div>
+                <div class="step">
+                    <strong>Step 1: Determinant</strong><br>
+                    \( (1 \cdot -1) - (0 \cdot 0) = -1 \)
+                </div>
+                <div class="step">
+                    <strong>Step 2: Adjugate & Scale</strong><br>
+                    Swap main diagonal elements, negate off-diagonals, and divide by determinant \(-1\).
+                </div>
+                <div class="final-answer">
+                    <strong>Final Inverse:</strong>
+                    $$ A^{-1} = \begin{bmatrix} 1 & 0 \\ 0 & -1 \end{bmatrix} $$
+                    <em>Fun Fact: Any involution matrix is its own inverse ($A^{-1} = A$).</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 2: The 90-Degree Rotation Matrix</div>
+            <p>Find the inverse of matrix \( B \).</p>
+            <p>$$ B = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix} $$</p>
+            <button id="btn-2" class="btn-toggle" onclick="toggleSolution(2)">Show Solution</button>
+            <div id="solution-2" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> This matrix rotates vectors counter-clockwise by \(90^\circ\). To undo it, you must rotate clockwise by \(90^\circ\).
+                </div>
+                <div class="step">
+                    <strong>Step 1: Determinant</strong><br>
+                    \( (0 \cdot 0) - (-1 \cdot 1) = 0 - (-1) = 1 \)
+                </div>
+                <div class="step">
+                    <strong>Step 2: Apply Formula</strong><br>
+                    Since det is 1, swap main diagonal (\(0\) and \(0\)) and negate off-diagonals (\(-1 \to 1\), \(1 \to -1\)).
+                </div>
+                <div class="final-answer">
+                    <strong>Final Inverse:</strong>
+                    $$ B^{-1} = \begin{bmatrix} 0 & 1 \\ -1 & 0 \end{bmatrix} $$
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 3: The Scaled Identity Matrix</div>
+            <p>Find the inverse of matrix \( C \).</p>
+            <p>$$ C = \begin{bmatrix} 4 & 0 & 0 \\ 0 & 4 & 0 \\ 0 & 0 & 4 \end{bmatrix} $$</p>
+            <button id="btn-3" class="btn-toggle" onclick="toggleSolution(3)">Show Solution</button>
+            <div id="solution-3" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> This is a scalar multiple of the identity matrix (\(4I\)). You don't need cofactors; just invert the scalar multiplier!
+                </div>
+                <div class="step">
+                    <strong>The Shortcut:</strong><br>
+                    For any scalar \(k\) multiplied by an identity matrix of size \(n\), the inverse is simply \(\frac{1}{k}I\).
+                </div>
+                <div class="final-answer">
+                    <strong>Final Inverse:</strong>
+                    $$ C^{-1} = \begin{bmatrix} \frac{1}{4} & 0 & 0 \\ 0 & \frac{1}{4} & 0 \\ 0 & 0 & \frac{1}{4} \end{bmatrix} $$
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 4: The Proportional Rows Trap</div>
+            <p>Find the inverse of matrix \( D \).</p>
+            <p>$$ D = \begin{bmatrix} 3 & 6 \\ 2 & 4 \end{bmatrix} $$</p>
+            <button id="btn-4" class="btn-toggle" onclick="toggleSolution(4)">Show Solution</button>
+            <div id="solution-4" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> Look closely at the rows. Row 2 is exactly \(\frac{2}{3}\) of Row 1. Linearly dependent rows mean the matrix collapses dimensions.
+                </div>
+                <div class="step">
+                    <strong>Step 1: Determinant</strong><br>
+                    \( (3 \cdot 4) - (6 \cdot 2) = 12 - 12 = 0 \)
+                </div>
+                <div class="final-answer">
+                    <strong>Final Answer:</strong><br>
+                    Because the determinant is \(0\), Matrix \(D\) is <strong>singular</strong> and has <strong>no inverse</strong>.
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 5: The Unipotent Upper Triangular 3x3</div>
+            <p>Find the inverse of matrix \( E \).</p>
+            <p>$$ E = \begin{bmatrix} 1 & 2 & 3 \\ 0 & 1 & 4 \\ 0 & 0 & 1 \end{bmatrix} $$</p>
+            <button id="btn-5" class="btn-toggle" onclick="toggleSolution(5)">Show Solution</button>
+            <div id="solution-5" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> A matrix with ones on the main diagonal and zeros below it has a determinant of exactly \(1\). Its inverse maintains the upper-triangular pattern with negated shift values.
+                </div>
+                <div class="step">
+                    <strong>Step 1: Determinant</strong><br>
+                    Product of main diagonal = \(1 \times 1 \times 1 = 1\).
+                </div>
+                <div class="step">
+                    <strong>Step 2: Elimination / Formula</strong><br>
+                    Applying row operations or cofactor expansion yields the clean upper-triangular inverse.
+                </div>
+                <div class="final-answer">
+                    <strong>Final Inverse:</strong>
+                    $$ E^{-1} = \begin{bmatrix} 1 & -2 & 5 \\ 0 & 1 & -4 \\ 0 & 0 & 1 \end{bmatrix} $$
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 6: The Determinant-1 Integer Matrix</div>
+            <p>Find the inverse of matrix \( F \).</p>
+            <p>$$ F = \begin{bmatrix} 5 & 3 \\ 3 & 2 \end{bmatrix} $$</p>
+            <button id="btn-6" class="btn-toggle" onclick="toggleSolution(6)">Show Solution</button>
+            <div id="solution-6" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> When the determinant of a 2x2 integer matrix equals \(1\), the inverse is literally just the adjugate matrix with no fractional scalar division!
+                </div>
+                <div class="step">
+                    <strong>Step 1: Determinant</strong><br>
+                    \( (5 \cdot 2) - (3 \cdot 3) = 10 - 9 = 1 \)
+                </div>
+                <div class="step">
+                    <strong>Step 2: Rearrange</strong><br>
+                    Swap main diagonal (\(5 \leftrightarrow 2\)), negate off-diagonals (\(3 \to -3\)).
+                </div>
+                <div class="final-answer">
+                    <strong>Final Inverse:</strong>
+                    $$ F^{-1} = \begin{bmatrix} 2 & -3 \\ -3 & 5 \end{bmatrix} $$
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 7: The Anti-Diagonal Exchange Matrix</div>
+            <p>Find the inverse of matrix \( G \).</p>
+            <p>$$ G = \begin{bmatrix} 0 & 0 & 1 \\ 0 & 1 & 0 \\ 1 & 0 & 0 \end{bmatrix} $$</p>
+            <button id="btn-7" class="btn-toggle" onclick="toggleSolution(7)">Show Solution</button>
+            <div id="solution-7" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> This matrix reverses the order of vector components. Applying it twice returns the original vector (\(G^2 = I\)).
+                </div>
+                <div class="step">
+                    <strong>The Shortcut:</strong><br>
+                    Because swapping the first and last row/column twice gets you back to identity, the matrix is its own inverse: \(G^{-1} = G\).
+                </div>
+                <div class="final-answer">
+                    <strong>Final Inverse:</strong>
+                    $$ G^{-1} = \begin{bmatrix} 0 & 0 & 1 \\ 0 & 1 & 0 \\ 1 & 0 & 0 \end{bmatrix} $$
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 8: The Lower Triangular 3x3</div>
+            <p>Find the inverse of matrix \( H \).</p>
+            <p>$$ H = \begin{bmatrix} 2 & 0 & 0 \\ 1 & 4 & 0 \\ 3 & 2 & 1 \end{bmatrix} $$</p>
+            <button id="btn-8" class="btn-toggle" onclick="toggleSolution(8)">Show Solution</button>
+            <div id="solution-8" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> The inverse of a lower triangular matrix is always lower triangular. Use forward substitution or cofactor evaluation.
+                </div>
+                <div class="step">
+                    <strong>Step 1: Determinant</strong><br>
+                    Product of diagonal: \(2 \times 4 \times 1 = 8\) (Invertible).
+                </div>
+                <div class="step">
+                    <strong>Step 2: Cofactors / Inversion</strong><br>
+                    Computing minors and dividing by \(\det(H) = 8\).
+                </div>
+                <div class="final-answer">
+                    <strong>Final Inverse:</strong>
+                    $$ H^{-1} = \begin{bmatrix} \frac{1}{2} & 0 & 0 \\ -\frac{1}{8} & \frac{1}{4} & 0 \\ \frac{1}{4} & -\frac{1}{2} & 1 \end{bmatrix} $$
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 9: The Duplicate Rows Trap</div>
+            <p>Find the inverse of matrix \( J \).</p>
+            <p>$$ J = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \\ 1 & 2 & 3 \end{bmatrix} $$</p>
+            <button id="btn-9" class="btn-toggle" onclick="toggleSolution(9)">Show Solution</button>
+            <div id="solution-9" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> Notice that Row 1 and Row 3 are identical. Whenever two rows or columns in a matrix match completely, the determinant is zero.
+                </div>
+                <div class="step">
+                    <strong>Step 1: Determinant Check</strong><br>
+                    Evaluating along any expansion or recognizing linear dependence yields \(\det(J) = 0\).
+                </div>
+                <div class="final-answer">
+                    <strong>Final Answer:</strong><br>
+                    Because the determinant is \(0\), Matrix \(J\) is <strong>singular</strong> and has <strong>no inverse</strong>.
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="problem-box">
+            <div class="problem-title">Question 10: The Fractional Diagonal 3x3</div>
+            <p>Find the inverse of matrix \( K \).</p>
+            <p>$$ K = \begin{bmatrix} -\frac{1}{2} & 0 & 0 \\ 0 & \frac{1}{3} & 0 \\ 0 & 0 & -4 \end{bmatrix} $$</p>
+            <button id="btn-10" class="btn-toggle" onclick="toggleSolution(10)">Show Solution</button>
+            <div id="solution-10" class="solution">
+                <div class="trick-highlight">
+                    <strong>The Trick:</strong> Applying the diagonal matrix shortcut with fractions and negative signs—just take the reciprocal of each diagonal entry (\(\frac{1}{x}\)).
+                </div>
+                <div class="step">
+                    <strong>The Shortcut:</strong><br>
+                    <ul>
+                        <li>Reciprocal of \(-\frac{1}{2}\) is \(-2\)</li>
+                        <li>Reciprocal of \(\frac{1}{3}\) is \(3\)</li>
+                        <li>Reciprocal of \(-4\) is \(-\frac{1}{4}\)</li>
+                    </ul>
+                </div>
+                <div class="final-answer">
+                    <strong>Final Inverse:</strong>
+                    $$ K^{-1} = \begin{bmatrix} -2 & 0 & 0 \\ 0 & 3 & 0 \\ 0 & 0 & -\frac{1}{4} \end{bmatrix} $$
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
